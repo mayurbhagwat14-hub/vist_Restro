@@ -1,0 +1,119 @@
+# ==============================================================================
+# ZIN ZOO Master .gitignore
+# ==============================================================================
+
+# ── Environment Variables (NEVER commit) ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+*/.env
+*/.env.*
+!*/.env.example
+
+# ── Node.js ───────────────────────────────────────────────────────────────────
+node_modules/
+*/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── Logs & Debugging ──────────────────────────────────────────────────────────
+logs/
+*.log
+*/logs/
+
+# ── Scratch & Script Files (Testing/Hardcoded data) ───────────────────────────
+scratch/
+scripts/
+scratch_files/
+*/scratch/
+Backend/scratch/
+*/scripts/
+*/scratch_files/
+
+# ── Testing & Jest Files ──────────────────────────────────────────────────────
+*.test.js
+*.test.jsx
+*.test.ts
+*.test.tsx
+*.test.mjs
+*.spec.js
+*.spec.jsx
+*.spec.ts
+*.spec.tsx
+*.spec.mjs
+test_*.js
+test_*.jsx
+test_*.mjs
+test_*.ps1
+test_*.sh
+test_*.bat
+check_*.mjs
+find_*.mjs
+test/
+tests/
+__tests__/
+__mocks__/
+*.jest.*
+jest.config.*
+.jest/
+test-results/
+
+# Specific Test Files
+Frontend/src/modules/Food/utils/backendConnectionTest.js
+Backend/src/api/v1/test
+
+
+
+
+
+
+
+# ── Build Outputs ─────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+coverage/
+*/dist/
+*/dist-ssr/
+*/coverage/
+
+# ── Vite ──────────────────────────────────────────────────────────────────────
+*.timestamp-*
+*.local
+
+# ── Uploads & User Generated Content ──────────────────────────────────────────
+uploads/
+*/uploads/
+
+# ── Editor Directories and Files ──────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# ── Temporary & Backup Files ──────────────────────────────────────────────────
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+*~
+
+# ── Custom / Temporary Build & Deploy Scripts ─────────────────────────────────
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+
+# ── Agent System Files ────────────────────────────────────────────────────────
+.agents/
+
+# ── Markdown files (as requested) ─────────────────────────────────────────────
+*.md

@@ -1,0 +1,331 @@
+import mongoose from 'mongoose';
+
+const orderItemSchema = new mongoose.Schema(
+    {   // NEW
+        restaurantId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodRestaurant',
+            required: false
+        },
+
+        // NEW (Snapshot)
+        restaurantName: {
+            type: String,
+            default: '',
+            trim: true
+        },
+
+        itemId: { type: String, required: true, trim: true },
+        name: { type: String, required: true, trim: true },
+        variantId: { type: String, trim: true, default: '' },
+        variantName: { type: String, trim: true, default: '' },
+        variantPrice: { type: Number, min: 0, default: 0 },
+        price: { type: Number, required: true, min: 0 },
+        quantity: { type: Number, required: true, min: 1 },
+        isVeg: { type: Boolean, default: true },
+        image: { type: String, default: '' },
+        notes: { type: String, default: '' }
+    },
+    { _id: false }
+);
+
+const deliveryAddressSchema = new mongoose.Schema(
+    {
+        label: { type: String, enum: ['Home', 'Office', 'Other'], default: 'Home' },
+        name: { type: String, default: '', trim: true },
+        fullName: { type: String, default: '', trim: true },
+        street: { type: String, required: true, trim: true },
+        additionalDetails: { type: String, default: '', trim: true },
+        city: { type: String, required: true, trim: true },
+        state: { type: String, required: true, trim: true },
+        zipCode: { type: String, default: '', trim: true },
+        phone: { type: String, default: '', trim: true },
+        location: {
+            type: { type: String, enum: ['Point'], default: 'Point' },
+            coordinates: { type: [Number], default: undefined }
+        }
+    },
+    { _id: false }
+);
+
+const pricingSchema = new mongoose.Schema(
+    {
+        subtotal: { type: Number, required: true, min: 0 },
+        tax: { type: Number, default: 0, min: 0 },
+        packagingFee: { type: Number, default: 0, min: 0 },
+        deliveryFee: { type: Number, default: 0, min: 0 },
+        platformFee: { type: Number, default: 0, min: 0 },
+        restaurantCommission: { type: Number, default: 0, min: 0 },
+        discount: { type: Number, default: 0, min: 0 },
+        couponCode: { type: String, default: null, trim: true, uppercase: true },
+        platformGstNumber: { type: String, default: null, trim: true },
+        total: { type: Number, required: true, min: 0 },
+        currency: { type: String, default: 'INR' }
+    },
+    { _id: false }
+);
+
+const paymentSchema = new mongoose.Schema(
+    {
+        method: {
+            type: String,
+            enum: ['cash', 'razorpay', 'razorpay_qr', 'wallet'],
+            required: true
+        },
+        status: {
+            type: String,
+            enum: [
+                'cod_pending',
+                'created',
+                'authorized',
+                'paid',
+                'failed',
+                'refunded',
+                'pending_qr'
+            ],
+            default: 'cod_pending'
+        },
+        amountDue: { type: Number, min: 0 },
+        razorpay: {
+            orderId: { type: String },
+            paymentId: { type: String },
+            signature: { type: String }
+        },
+        qr: {
+            qrId: { type: String },
+            imageUrl: { type: String },
+            paymentLinkId: { type: String },
+            shortUrl: { type: String },
+            status: { type: String },
+            expiresAt: { type: Date }
+        },
+        // ✅ NEW: Added refund object to track refund status without breaking existing flow
+        refund: {
+            status: { 
+                type: String, 
+                enum: ['none', 'pending', 'processed', 'failed'], 
+                default: 'none' 
+            },
+            amount: { type: Number, default: 0 },
+            refundId: { type: String, default: '' },
+            processedAt: { type: Date }
+        }
+    },
+    { _id: false }
+);
+
+const dispatchSchema = new mongoose.Schema(
+    {
+        deliveryPartnerId: { type: mongoose.Schema.Types.ObjectId, default: null }
+    },
+    { _id: false }
+);
+
+const deliveryStateSchema = new mongoose.Schema(
+    {
+        status: { type: String, default: '' }
+    },
+    { _id: false }
+);
+
+const statusHistorySchema = new mongoose.Schema(
+    {
+        at: { type: Date, default: Date.now },
+        byRole: { type: String, enum: ['USER', 'RESTAURANT', 'ADMIN', 'SYSTEM'] },
+        byId: { type: mongoose.Schema.Types.ObjectId },
+        from: { type: String },
+        to: { type: String },
+        note: { type: String, default: '' }
+    },
+    { _id: false }
+);
+
+const orderEntityRatingSchema = new mongoose.Schema(
+    {
+        rating: { type: Number, min: 1, max: 5 },
+        comment: { type: String, default: '', trim: true },
+        ratedAt: { type: Date, default: Date.now }
+    },
+    { _id: false }
+);
+
+const orderRatingsSchema = new mongoose.Schema(
+    {
+        restaurant: { type: orderEntityRatingSchema, default: undefined },
+        deliveryPartner: { type: orderEntityRatingSchema, default: undefined },
+        restaurants: [
+            {
+                restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: 'FoodRestaurant', required: true },
+                rating: { type: Number, min: 1, max: 5, required: true },
+                comment: { type: String, default: '', trim: true },
+                ratedAt: { type: Date, default: Date.now }
+            }
+        ]
+    },
+    { _id: false }
+);
+
+const orderSchema = new mongoose.Schema(
+    {
+        order_id: {
+            type: String,
+            unique: true,
+            sparse: true,
+            index: true
+        },
+        /** Compatibility alias: satisfies rogue unique index 'orderId_1' found in legacy deployments. */
+        orderId: {
+            type: String,
+            unique: true,
+            sparse: true,
+            index: true
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodUser',
+            required: true
+        },
+
+        restaurantIds: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'FoodRestaurant'
+            }
+        ],
+
+        restaurantId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodRestaurant',
+            required: false
+        },
+
+        moduleType: {
+            type: String,
+            enum: ['food', 'grocery', 'accessories'],
+            default: 'food'
+        },
+        zoneId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodZone',
+            index: true
+        },
+        transactionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodTransaction',
+            index: true
+        },
+        items: {
+            type: [orderItemSchema],
+            required: true,
+            validate: (v) => Array.isArray(v) && v.length > 0
+        },
+        deliveryAddress: {
+            type: deliveryAddressSchema,
+            required: true
+        },
+        deliveryDistance: { type: Number },
+        deliveryLatitude: { type: Number },
+        deliveryLongitude: { type: Number },
+        originLatitude: { type: Number },
+        originLongitude: { type: Number },
+        originAddress: { type: String, trim: true },
+        customerName: { type: String, default: '', trim: true },
+        customerPhone: { type: String, default: '', trim: true },
+        pricing: {
+            type: pricingSchema,
+            required: false
+        },
+        /**
+         * Denormalized payment snapshot for fast reads & legacy clients.
+         * Authoritative audit trail: collection `food_order_payments` (FoodOrderPayment model).
+         */
+        payment: {
+            type: paymentSchema,
+            required: false
+        },
+        orderStatus: {
+            type: String,
+            enum: [
+                'pending_payment',
+                'created',
+                'confirmed',
+                'preparing',
+                'ready_for_pickup',
+                'delivered',
+                'cancelled_by_user',
+                'cancelled_by_restaurant',
+                'cancelled_by_admin'
+            ],
+            default: 'created'
+        },
+        dispatch: {
+            type: dispatchSchema,
+            default: () => ({})
+        },
+        deliveryState: {
+            type: deliveryStateSchema,
+            default: () => ({})
+        },
+        statusHistory: {
+            type: [statusHistorySchema],
+            default: []
+        },
+        ratings: {
+            type: orderRatingsSchema,
+            default: () => ({})
+        },
+        note: { type: String, default: '', trim: true },
+        acceptanceWindowSeconds: { type: Number, default: 240, min: 1 },
+        acceptanceDeadlineAt: { type: Date, default: null },
+        sendCutlery: { type: Boolean, default: true },
+        deliveryFleet: { type: String, default: 'standard', trim: true },
+        scheduledAt: { type: Date, default: null },
+        coinsEarned: { type: Number, default: 0 },
+        checkoutGroupId: { type: String, default: '', index: true }
+    },
+    {
+        collection: 'food_orders',
+        timestamps: true
+    }
+);
+
+orderSchema.index({ 'deliveryAddress.location': '2dsphere' });
+orderSchema.index({ userId: 1, createdAt: -1 });
+// orderSchema.index({ restaurantId: 1, orderStatus: 1, createdAt: -1 });
+orderSchema.index({
+    restaurantIds: 1,
+    orderStatus: 1,
+    createdAt: -1
+});
+orderSchema.index({ 'payment.status': 1, createdAt: -1 });
+orderSchema.index({ 'payment.method': 1, createdAt: -1 });
+
+orderSchema.pre('save', async function (next) {
+    if (!this.order_id) {
+        const timestamp = Date.now().toString().slice(-4);
+        const random = Math.floor(100 + Math.random() * 900);
+        this.order_id = `FOD-${timestamp}${random}`;
+    }
+    // Synchronize camelCase alias to satisfy unique index 'orderId_1'
+    if (this.order_id) {
+        this.orderId = this.order_id;
+    }
+    next();
+});
+
+export const FoodOrder = mongoose.model('FoodOrder', orderSchema);
+
+const settingsSchema = new mongoose.Schema(
+    {
+        key: { type: String, required: true, unique: true, trim: true },
+        dispatchMode: { type: String, enum: ['auto'], default: 'auto' },
+        updatedBy: {
+            role: { type: String },
+            adminId: { type: mongoose.Schema.Types.ObjectId },
+            at: { type: Date }
+        }
+    },
+    { collection: 'food_settings', timestamps: true }
+);
+
+export const FoodSettings = mongoose.model('FoodSettings', settingsSchema);

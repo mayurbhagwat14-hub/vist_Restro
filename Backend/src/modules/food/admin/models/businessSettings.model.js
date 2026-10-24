@@ -1,0 +1,75 @@
+import mongoose from 'mongoose';
+
+const businessSettingsSchema = new mongoose.Schema(
+    {
+        companyName: { type: String, required: true, default: 'Zinzoox' },
+        email: { type: String, required: true, default: 'admin@zinzoox.com' },
+        phone: {
+            countryCode: { type: String, default: '+91' },
+            number: { type: String, default: '' }
+        },
+        address: { type: String, default: '' },
+        state: { type: String, default: '' },
+        pincode: { type: String, default: '' },
+        region: { type: String, default: 'India' },
+        logo: {
+            url: { type: String, default: '' },
+            publicId: { type: String, default: '' }
+        },
+        favicon: {
+            url: { type: String, default: '' },
+            publicId: { type: String, default: '' }
+        },
+        restaurantLogo: {
+            url: { type: String, default: '' },
+            publicId: { type: String, default: '' }
+        },
+        restaurantFavicon: {
+            url: { type: String, default: '' },
+            publicId: { type: String, default: '' }
+        },
+        deliveryLogo: {
+            url: { type: String, default: '' },
+            publicId: { type: String, default: '' }
+        },
+        deliveryFavicon: {
+            url: { type: String, default: '' },
+            publicId: { type: String, default: '' }
+        },
+        powerScanning: {
+            user: {
+                themeColor: { type: String, default: '#F84E04' },
+                fontFamily: { type: String, default: 'Poppins' }
+            },
+            restaurant: {
+                themeColor: { type: String, default: '#2563EB' },
+                fontFamily: { type: String, default: 'Poppins' }
+            },
+            delivery: {
+                themeColor: { type: String, default: '#00B761' },
+                fontFamily: { type: String, default: 'Poppins' }
+            }
+        },
+        orderAcceptanceTimeMinutes: { type: Number, default: 4, min: 1, max: 20 },
+        coinSettings: {
+            isActive: { type: Boolean, default: true },
+            minCoinsPerOrder: { type: Number, default: 1 },
+            maxCoinsPerOrder: { type: Number, default: 3 },
+            coinExpiryDays: { type: Number, default: 30 },
+            coinToWalletValue: { type: Number, default: 10, min: 0 },
+            reviewUrl: { type: String, default: '' },
+        },
+        restaurantTdsPercentage: { type: Number, default: 0, min: 0, max: 100 },
+        deliveryBoyTdsPercentage: { type: Number, default: 0, min: 0, max: 100 },
+        /**
+         * Platform-level global food service toggle.
+         * When true  → /zones/detect returns IN_SERVICE for ALL users (bypasses polygon checks).
+         * When false → existing polygon-based detection applies (default, backward-compatible).
+         */
+        globalFoodServiceEnabled: { type: Boolean, default: false }
+    },
+    { timestamps: true }
+);
+
+export const FoodBusinessSettings = mongoose.model('FoodBusinessSettings', businessSettingsSchema);
+

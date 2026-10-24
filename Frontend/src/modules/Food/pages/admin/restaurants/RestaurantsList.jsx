@@ -1,0 +1,1460 @@
+import { useState, useMemo, useEffect, useCallback, useRef } from "react"
+import { Loader } from '@googlemaps/js-api-loader'
+import { getGoogleMapsApiKey } from "@food/utils/googleMapsApiKey"
+import { Search, Trash2, Loader2, Eye, Pencil, Plus, ChevronLeft, ChevronRight, Check, X, Building2, MapPin, Phone, Mail, Clock, Star, AlertTriangle, ShieldCheck, ShieldX, Save } from "lucide-react"
+import { adminAPI, uploadAPI } from "@food/api"
+import { toast } from "sonner"
+import { usePublicSocket } from "@food/hooks/usePublicSocket"
+import ImageUploadField from "../../../components/admin/ImageUploadField"
+import { canCurrentAdminAction } from "@food/utils/adminRbac"
+
+const geocodeAddressHelper = (address) => {
+  return new Promise((resolve) => {
+    if (!address || !window.google || !window.google.maps) return resolve(null);
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address }, (results, status) => {
+      if (status === "OK" && results[0] && results[0].geometry) {
+        resolve({
+          lat: results[0].geometry.location.lat(),
+          lng: results[0].geometry.location.lng()
+        });
+      } else {
+        resolve(null);
+      }
+    });
+  });
+};
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@food/components/ui/dialog"
+
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+      <rect width="80" height="80" rx="12" fill="#F1F5F9"/>
+      <rect x="18" y="22" width="44" height="36" rx="6" fill="#CBD5E1"/>
+      <rect x="26" y="30" width="28" height="4" rx="2" fill="#94A3B8"/>
+      <rect x="26" y="38" width="20" height="4" rx="2" fill="#94A3B8"/>
+      <rect x="26" y="46" width="14" height="4" rx="2" fill="#94A3B8"/>
+    </svg>`
+  )
+
+const STATUS_STYLES = {
+  approved: {
+    bg: "bg-emerald-50 dark:bg-emerald-900/30",
+    text: "text-emerald-700 dark:text-emerald-300",
+    border: "border-emerald-200 dark:border-emerald-700",
+    dot: "bg-emerald-500",
+    label: "Approved",
+  },
+  pending: {
+    bg: "bg-amber-50 dark:bg-amber-900/30",
+    text: "text-amber-700 dark:text-amber-300",
+    border: "border-amber-200 dark:border-amber-700",
+    dot: "bg-amber-500",
+    label: "Pending",
+  },
+  rejected: {
+    bg: "bg-red-50 dark:bg-red-900/30",
+    text: "text-red-700 dark:text-red-300",
+    border: "border-red-200 dark:border-red-700",
+    dot: "bg-red-500",
+    label: "Rejected",
+  },
+}
+
+const STATUS_FILTERS = ["all", "approved", "pending", "rejected"]
+
+function StatusBadge({ status }) {
+  const style = STATUS_STYLES[status] || STATUS_STYLES.pending
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full border ${style.bg} ${style.text} ${style.border}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+      {style.label}
+    </span>
+  )
+}
+
+const createEmptyForm = () => ({
+  restaurantName: "",
+  ownerName: "",
+  ownerPhone: "",
+  primaryContactNumber: "",
+  ownerEmail: "",
+  address: "",
+  area: "",
+  city: "",
+  state: "",
+  pincode: "",
+  cuisines: "",
+  openingTime: "09:00",
+  closingTime: "22:00",
+  openDays: [],
+  pureVegRestaurant: false,
+  restaurantType: "Both",
+  zoneId: "",
+  profileImage: "",
+  isAcceptingOrders: true,
+  latitude: "",
+  longitude: "",
+  locationMode: "map",
+})
+
+export default function RestaurantsList() {
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  const [totalRestaurants, setTotalRestaurants] = useState(0)
+
+  // Zones for display
+  const [zones, setZones] = useState([])
+
+  // Detail modal
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null)
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [loadingDetail, setLoadingDetail] = useState(false)
+
+  // Edit modal
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editForm, setEditForm] = useState(createEmptyForm())
+  const [editTarget, setEditTarget] = useState(null)
+  const [saving, setSaving] = useState(false)
+
+  // Create modal
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createForm, setCreateForm] = useState(createEmptyForm())
+  const [creating, setCreating] = useState(false)
+
+  // Image Upload States
+  const [selectedImageFile, setSelectedImageFile] = useState(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("")
+
+  // Approve/Reject
+  const [showApproveDialog, setShowApproveDialog] = useState(false)
+  const [showRejectDialog, setShowRejectDialog] = useState(false)
+  const [actionTarget, setActionTarget] = useState(null)
+  const [rejectReason, setRejectReason] = useState("")
+  const [actionLoading, setActionLoading] = useState(false)
+
+  // Delete
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+
+  // Debounce search
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim())
+    }, 300)
+    return () => window.clearTimeout(timeout)
+  }, [searchQuery])
+
+  // Reset page on filter/search change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearch, statusFilter, pageSize])
+
+  // Fetch zones on mount for name display
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const res = await adminAPI.getZones({ limit: 1000 })
+        const list = res?.data?.data?.zones || res?.data?.data?.data?.zones || res?.data?.data || []
+        setZones(Array.isArray(list) ? list : [])
+      } catch (err) {
+        console.error("Error loading zones:", err)
+        setZones([])
+      }
+    }
+    fetchZones()
+  }, [])
+
+  // Zone lookup helper
+  const getZoneName = useCallback(
+    (restaurant) => {
+      const zoneId = restaurant.zoneId
+      if (!zoneId) return "Global Zone"
+      // If populated as object
+      if (typeof zoneId === "object" && zoneId !== null) {
+        return zoneId.name || zoneId.zoneName || "Global Zone"
+      }
+      // Lookup from fetched zones
+      const zoneIdStr = String(zoneId)
+      const zone = zones.find((z) => String(z._id || z.id) === zoneIdStr)
+      if (zone) return zone.name || zone.zoneName || "Global Zone"
+      return "Global Zone"
+    },
+    [zones]
+  )
+
+  // Get raw zone ID for forms
+  const getZoneId = (restaurant) => {
+    const zoneId = restaurant.zoneId
+    if (!zoneId) return ""
+    if (typeof zoneId === "object" && zoneId !== null) return String(zoneId._id || zoneId.id || "")
+    return String(zoneId)
+  }
+
+  const fetchRestaurants = useCallback(async () => {
+    try {
+      setLoading(true)
+      const params = { page: currentPage, limit: pageSize }
+      if (statusFilter !== "all") params.status = statusFilter
+      const res = await adminAPI.getRestaurants(params)
+      const data = res?.data?.data || res?.data || {}
+      const list = Array.isArray(data.restaurants) ? data.restaurants : []
+      const total = Number(data.total ?? 0)
+      setRestaurants(list)
+      setTotalRestaurants(total)
+    } catch (error) {
+      console.error("Error fetching restaurants:", error)
+      toast.error("Failed to load restaurants")
+      setRestaurants([])
+      setTotalRestaurants(0)
+    } finally {
+      setLoading(false)
+    }
+  }, [currentPage, pageSize, statusFilter])
+
+  useEffect(() => {
+    fetchRestaurants()
+  }, [fetchRestaurants])
+
+  // Client-side search filter
+  const filteredRestaurants = useMemo(() => {
+    if (!debouncedSearch) return restaurants
+    const q = debouncedSearch.toLowerCase()
+    return restaurants.filter((r) => {
+      const name = String(r.restaurantName || "").toLowerCase()
+      const owner = String(r.ownerName || "").toLowerCase()
+      const city = String(r.city || "").toLowerCase()
+      const area = String(r.area || "").toLowerCase()
+      return name.includes(q) || owner.includes(q) || city.includes(q) || area.includes(q)
+    })
+  }, [restaurants, debouncedSearch])
+
+  const totalPages = useMemo(() => {
+    if (totalRestaurants === 0) return 1
+    return Math.ceil(totalRestaurants / pageSize)
+  }, [totalRestaurants, pageSize])
+
+  const getRestaurantImage = (r) => {
+    if (r.profileImage) return r.profileImage
+    if (Array.isArray(r.coverImages) && r.coverImages.length > 0) return r.coverImages[0]
+    return FALLBACK_IMAGE
+  }
+
+  // View detail
+  const handleViewDetail = async (restaurant) => {
+    try {
+      setLoadingDetail(true)
+      setShowDetailModal(true)
+      const id = restaurant._id || restaurant.id
+      const res = await adminAPI.getRestaurantById(id)
+      setSelectedRestaurant(res?.data?.data || res?.data || restaurant)
+    } catch (error) {
+      console.error("Error fetching restaurant details:", error)
+      setSelectedRestaurant(restaurant)
+    } finally {
+      setLoadingDetail(false)
+    }
+  }
+
+  // Edit
+  const handleEditClick = async (restaurant) => {
+    try {
+      setSaving(true)
+      const id = restaurant._id || restaurant.id
+      const res = await adminAPI.getRestaurantById(id)
+      const fullRes = res?.data?.data || res?.data || restaurant
+
+      setEditTarget(fullRes)
+      setEditForm({
+        restaurantName: fullRes.restaurantName || "",
+        ownerName: fullRes.ownerName || "",
+        ownerPhone: fullRes.ownerPhone || fullRes.primaryContactNumber || "",
+        primaryContactNumber: fullRes.primaryContactNumber || "",
+        ownerEmail: fullRes.ownerEmail || "",
+        address: fullRes.address || fullRes.location?.address || fullRes.location?.formattedAddress || "",
+        area: fullRes.area || fullRes.location?.area || "",
+        city: fullRes.city || fullRes.location?.city || "",
+        state: fullRes.state || fullRes.location?.state || "",
+        pincode: fullRes.pincode || fullRes.location?.pincode || "",
+        cuisines: Array.isArray(fullRes.cuisines) ? fullRes.cuisines.join(", ") : "",
+        openingTime: fullRes.openingTime || "09:00",
+        closingTime: fullRes.closingTime || "22:00",
+        openDays: Array.isArray(fullRes.openDays) ? fullRes.openDays : [],
+        pureVegRestaurant: fullRes.pureVegRestaurant || false,
+        restaurantType: fullRes.restaurantType || (fullRes.pureVegRestaurant ? "Veg" : "Both"),
+        zoneId: getZoneId(fullRes),
+        profileImage: fullRes.profileImage || "",
+        isAcceptingOrders: fullRes.isAcceptingOrders !== false,
+        latitude: fullRes.latitude || fullRes.location?.latitude || (fullRes.location?.coordinates ? fullRes.location.coordinates[1] : ""),
+        longitude: fullRes.longitude || fullRes.location?.longitude || (fullRes.location?.coordinates ? fullRes.location.coordinates[0] : ""),
+        locationMode: "map",
+      })
+      setSelectedImageFile(null)
+      setImagePreviewUrl(fullRes.profileImage || "")
+      setShowEditModal(true)
+    } catch (error) {
+      console.error("Error loading restaurant for edit:", error)
+      toast.error("Failed to load restaurant details")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleEditSave = async () => {
+    if (!editTarget) return
+    if (!editForm.restaurantName || !editForm.ownerName) {
+      toast.error("Restaurant name and owner name are required");
+      return;
+    }
+    if (!editForm.address || !editForm.city || !editForm.state) {
+      toast.error("Address, City, and State are required");
+      return;
+    }
+
+    const pinRegex = /^\d{6}$/;
+    if (editForm.pincode && !pinRegex.test(editForm.pincode)) {
+      toast.error("Pincode must be a valid 6-digit number");
+      return;
+    }
+
+    let latNum = parseFloat(editForm.latitude);
+    let lngNum = parseFloat(editForm.longitude);
+
+    if ((isNaN(latNum) || isNaN(lngNum) || (latNum === 0 && lngNum === 0)) && editForm.address) {
+      const coords = await geocodeAddressHelper(editForm.address);
+      if (coords) {
+        latNum = coords.lat;
+        lngNum = coords.lng;
+        setEditForm(prev => ({ ...prev, latitude: latNum, longitude: lngNum }));
+      }
+    }
+
+    if (latNum === 0 && lngNum === 0) {
+      toast.error("Could not resolve location coordinates for the given address. Please select on map or enter manually.");
+      return;
+    }
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      toast.error("Valid Latitude and Longitude are required");
+      return;
+    }
+    if (latNum < -90 || latNum > 90) {
+      toast.error("Latitude must be between -90 and 90 degrees");
+      return;
+    }
+    if (lngNum < -180 || lngNum > 180) {
+      toast.error("Longitude must be between -180 and 180 degrees");
+      return;
+    }
+    try {
+      setSaving(true)
+      const id = editTarget._id || editTarget.id
+
+      let profileImageUrl = editForm.profileImage || ""
+      if (selectedImageFile) {
+        const uploadResponse = await uploadAPI.uploadMedia(selectedImageFile, {
+          folder: "restaurants",
+        })
+        profileImageUrl =
+          uploadResponse?.data?.data?.url ||
+          uploadResponse?.data?.url ||
+          profileImageUrl
+      }
+
+      const body = {
+        ...editForm,
+        profileImage: profileImageUrl,
+        openDays: editForm.openDays || [],
+        cuisines: editForm.cuisines
+          ? editForm.cuisines.split(",").map((c) => c.trim()).filter(Boolean)
+          : [],
+        pureVegRestaurant: editForm.restaurantType === "Veg",
+        zoneId: editForm.zoneId || "",
+      }
+      await adminAPI.updateRestaurant(id, body)
+      await adminAPI.updateRestaurantLocation(id, {
+        address: editForm.address,
+        city: editForm.city,
+        state: editForm.state,
+        pincode: editForm.pincode,
+        latitude: latNum,
+        longitude: lngNum
+      })
+      toast.success(`"${editForm.restaurantName}" updated successfully`)
+      setShowEditModal(false)
+      setEditTarget(null)
+      fetchRestaurants()
+    } catch (error) {
+      console.error("Error updating restaurant:", error)
+      toast.error("Failed to update restaurant")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Create
+  const handleCreateOpen = () => {
+    setCreateForm(createEmptyForm())
+    setSelectedImageFile(null)
+    setImagePreviewUrl("")
+    setShowCreateModal(true)
+  }
+
+  const handleCreateSave = async () => {
+    if (!createForm.restaurantName || !createForm.ownerName) {
+      toast.error("Restaurant name and owner name are required")
+      return
+    }
+
+    const alphaSpaceRegex = /^[a-zA-Z\s]+$/;
+    const phoneRegex = /^[6-9]\d{9}$/;
+    const pinRegex = /^\d{6}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!createForm.address || !createForm.city || !createForm.state) {
+      toast.error("Address, City, and State are required");
+      return;
+    }
+    const latNum = parseFloat(createForm.latitude);
+    const lngNum = parseFloat(createForm.longitude);
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      toast.error("Valid Latitude and Longitude are required");
+      return;
+    }
+    if (latNum < -90 || latNum > 90) {
+      toast.error("Latitude must be between -90 and 90 degrees");
+      return;
+    }
+    if (lngNum < -180 || lngNum > 180) {
+      toast.error("Longitude must be between -180 and 180 degrees");
+      return;
+    }
+
+    if (!alphaSpaceRegex.test(createForm.ownerName)) {
+      toast.error("Owner Name can only contain alphabets and spaces");
+      return;
+    }
+    if (createForm.city && !alphaSpaceRegex.test(createForm.city)) {
+      toast.error("City can only contain alphabets and spaces");
+      return;
+    }
+    if (createForm.state && !alphaSpaceRegex.test(createForm.state)) {
+      toast.error("State can only contain alphabets and spaces");
+      return;
+    }
+    if (createForm.ownerPhone && !phoneRegex.test(createForm.ownerPhone)) {
+      toast.error("Owner Phone must be a valid 10-digit number starting with 6-9");
+      return;
+    }
+    if (createForm.primaryContactNumber && !phoneRegex.test(createForm.primaryContactNumber)) {
+      toast.error("Primary Contact Number must be a valid 10-digit number starting with 6-9");
+      return;
+    }
+    if (createForm.pincode && !pinRegex.test(createForm.pincode)) {
+      toast.error("PIN Code must be exactly 6 digits");
+      return;
+    }
+    if (createForm.ownerEmail && !emailRegex.test(createForm.ownerEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    try {
+      setCreating(true)
+
+      let profileImageUrl = ""
+      if (selectedImageFile) {
+        const uploadResponse = await uploadAPI.uploadMedia(selectedImageFile, {
+          folder: "restaurants",
+        })
+        profileImageUrl =
+          uploadResponse?.data?.data?.url ||
+          uploadResponse?.data?.url ||
+          ""
+      }
+
+      const body = {
+        ...createForm,
+        profileImage: profileImageUrl,
+        openDays: createForm.openDays || [],
+        cuisines: createForm.cuisines
+          ? createForm.cuisines.split(",").map((c) => c.trim()).filter(Boolean)
+          : [],
+        pureVegRestaurant: createForm.restaurantType === "Veg",
+        zoneId: createForm.zoneId || "",
+      }
+      const createResponse = await adminAPI.createRestaurant(body)
+      const newRestId = createResponse?.data?.data?.restaurant?._id || createResponse?.data?.restaurant?._id
+      if (newRestId) {
+        await adminAPI.updateRestaurantLocation(newRestId, {
+          address: createForm.address,
+          city: createForm.city,
+          state: createForm.state,
+          pincode: createForm.pincode,
+          latitude: latNum,
+          longitude: lngNum
+        })
+      }
+      toast.success(`"${createForm.restaurantName}" created successfully`)
+      setShowCreateModal(false)
+      fetchRestaurants()
+    } catch (error) {
+      console.error("Error creating restaurant:", error)
+      toast.error(error?.response?.data?.message || "Failed to create restaurant")
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  // Approve
+  const handleApproveClick = (restaurant) => {
+    setActionTarget(restaurant)
+    setShowApproveDialog(true)
+  }
+
+  const confirmApprove = async () => {
+    if (!actionTarget) return
+    try {
+      setActionLoading(true)
+      const id = actionTarget._id || actionTarget.id
+      await adminAPI.approveRestaurant(id)
+      toast.success(`"${actionTarget.restaurantName}" approved successfully`)
+      setShowApproveDialog(false)
+      setActionTarget(null)
+      fetchRestaurants()
+    } catch (error) {
+      console.error("Error approving restaurant:", error)
+      toast.error("Failed to approve restaurant")
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  // Reject
+  const handleRejectClick = (restaurant) => {
+    setActionTarget(restaurant)
+    setRejectReason("")
+    setShowRejectDialog(true)
+  }
+
+  const confirmReject = async () => {
+    if (!actionTarget) return
+    try {
+      setActionLoading(true)
+      const id = actionTarget._id || actionTarget.id
+      await adminAPI.rejectRestaurant(id, rejectReason || "Rejected by admin")
+      toast.success(`"${actionTarget.restaurantName}" rejected`)
+      setShowRejectDialog(false)
+      setActionTarget(null)
+      setRejectReason("")
+      fetchRestaurants()
+    } catch (error) {
+      console.error("Error rejecting restaurant:", error)
+      toast.error("Failed to reject restaurant")
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  // Delete
+  const handleDeleteClick = (restaurant) => {
+    setDeleteTarget(restaurant)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      setDeleting(true)
+      const id = deleteTarget._id || deleteTarget.id
+      await adminAPI.deleteRestaurant(id)
+      toast.success(`"${deleteTarget.restaurantName}" deleted permanently`)
+      setShowDeleteDialog(false)
+      setDeleteTarget(null)
+      fetchRestaurants()
+    } catch (error) {
+      console.error("Error deleting restaurant:", error)
+      toast.error("Failed to delete restaurant")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+        <div className="flex flex-col gap-6">
+          {/* Top Row: Title & Add Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-[#F84E04] flex items-center justify-center shadow-lg shadow-orange-500/20">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Restaurant Management</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                  {totalRestaurants} total restaurant{totalRestaurants !== 1 ? "s" : ""}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleCreateOpen}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#F84E04] hover:bg-[#d84303] text-white text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-orange-500/20 active:scale-[0.98]"
+            >
+              <Plus className="w-4 h-4" />
+              Add Restaurant
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-slate-200 dark:bg-slate-800 w-full" />
+
+          {/* Bottom Row: Filters & Search */}
+          <div className="flex flex-col md:flex-row md:items-center justify-end gap-4">
+
+
+            {/* Search Input */}
+            <div className="relative w-full md:max-w-md">
+              <input
+                type="text"
+                placeholder="Search restaurants by name, city, owner..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2.5 w-full text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04] transition-all"
+              />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">SL</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Restaurant</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Owner</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Zone</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Rating</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-center text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#F84E04] mb-2" />
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Loading restaurants...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredRestaurants.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+                      <p className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-1">No Restaurants Found</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {debouncedSearch
+                          ? "No restaurants match your search query"
+                          : statusFilter !== "all"
+                            ? `No ${statusFilter} restaurants`
+                            : "No restaurants registered yet"}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredRestaurants.map((restaurant, index) => {
+                  const status = String(restaurant.status || "pending").toLowerCase()
+                  const isPending = status === "pending"
+                  return (
+                    <tr key={restaurant._id || index} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{(currentPage - 1) * pageSize + index + 1}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0 border border-slate-200 dark:border-slate-700">
+                            <img src={getRestaurantImage(restaurant)} alt={restaurant.restaurantName} className="w-full h-full object-cover" loading="lazy"
+                              onError={(e) => { e.target.src = typeof ADMIN_FALLBACK_IMAGE !== "undefined" ? ADMIN_FALLBACK_IMAGE : (typeof FOOD_FALLBACK_IMAGE !== "undefined" ? FOOD_FALLBACK_IMAGE : typeof FALLBACK_IMAGE !== "undefined" ? FALLBACK_IMAGE : "") }} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px]">{restaurant.restaurantName || "Unnamed"}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]" title={restaurant.location?.address || restaurant.address || restaurant.area}>
+                              {restaurant.location?.address || restaurant.address || [restaurant.area || restaurant.location?.area, restaurant.city || restaurant.location?.city].filter(Boolean).join(", ") || "—"}
+                            </p>
+                            {/* <p className="text-[10px] font-mono text-slate-400 dark:text-slate-500 mt-0.5 select-all">
+                              ID: {restaurant._id || restaurant.id}
+                            </p> */}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{restaurant.ownerName || "—"}</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">{restaurant.ownerPhone || restaurant.primaryContactNumber || "—"}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
+                          {getZoneName(restaurant)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${restaurant.restaurantType === 'Veg'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800'
+                          : restaurant.restaurantType === 'Non-Veg'
+                            ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800'
+                            : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
+                          }`}>
+                          {restaurant.restaurantType || (restaurant.pureVegRestaurant ? "Veg" : "Both")}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{Number(restaurant.rating || 0).toFixed(1)}</span>
+                          <span className="text-xs text-slate-400">({restaurant.totalRatings || 0})</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <StatusBadge status={status} />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button onClick={() => handleViewDetail(restaurant)} className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="View Details">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleEditClick(restaurant)} className="p-1.5 rounded-md text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors" title="Edit">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          {isPending && (
+                            <>
+                              <button onClick={() => handleApproveClick(restaurant)} className="p-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Approve">
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => handleRejectClick(restaurant)} className="p-1.5 rounded-md text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors" title="Reject">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          <button onClick={() => handleDeleteClick(restaurant)} className="p-1.5 rounded-md text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors" title="Delete">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {!loading && totalRestaurants > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <div className="text-sm text-slate-600 dark:text-slate-400">
+              Showing <span className="font-semibold text-slate-800 dark:text-slate-200">{(currentPage - 1) * pageSize + 1}</span>
+              {" "}to <span className="font-semibold text-slate-800 dark:text-slate-200">{Math.min((currentPage - 1) * pageSize + filteredRestaurants.length, totalRestaurants)}</span>
+              {" "}of <span className="font-semibold text-slate-800 dark:text-slate-200">{totalRestaurants}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}
+                className="px-2.5 py-1.5 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20">
+                <option value={10}>10 / page</option>
+                <option value={20}>20 / page</option>
+                <option value={50}>50 / page</option>
+              </select>
+              <button type="button" onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))} disabled={currentPage === 1}
+                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                <ChevronLeft className="w-4 h-4" /> Prev
+              </button>
+              <span className="px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">{currentPage} / {totalPages}</span>
+              <button type="button" onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))} disabled={currentPage >= totalPages}
+                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ====== DETAIL MODAL ====== */}
+      <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+          <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white">Restaurant Details</DialogTitle>
+          </DialogHeader>
+          {selectedRestaurant ? (
+            <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+              <div className="flex items-start gap-4">
+                <img src={getRestaurantImage(selectedRestaurant)} alt={selectedRestaurant.restaurantName}
+                  className="w-20 h-20 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0"
+                  onError={(e) => { e.target.src = typeof ADMIN_FALLBACK_IMAGE !== "undefined" ? ADMIN_FALLBACK_IMAGE : (typeof FOOD_FALLBACK_IMAGE !== "undefined" ? FOOD_FALLBACK_IMAGE : typeof FALLBACK_IMAGE !== "undefined" ? FALLBACK_IMAGE : "") }} />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">{selectedRestaurant.restaurantName}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    {[selectedRestaurant.area, selectedRestaurant.city, selectedRestaurant.state].filter(Boolean).join(", ") || "No location set"}
+                  </p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <StatusBadge status={String(selectedRestaurant.status || "pending").toLowerCase()} />
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{Number(selectedRestaurant.rating || 0).toFixed(1)}</span>
+                      <span className="text-xs text-slate-400">({selectedRestaurant.totalRatings || 0} reviews)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4">
+                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Owner Information</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/30 flex items-center justify-center flex-shrink-0"><Building2 className="w-3.5 h-3.5 text-[#F84E04] dark:text-orange-400" /></div>
+                    <div><p className="text-xs text-slate-500 dark:text-slate-400">Owner Name</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.ownerName || "—"}</p></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0"><Phone className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /></div>
+                    <div><p className="text-xs text-slate-500 dark:text-slate-400">Phone</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.ownerPhone || selectedRestaurant.primaryContactNumber || "—"}</p></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0"><Mail className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /></div>
+                    <div><p className="text-xs text-slate-500 dark:text-slate-400">Email</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.ownerEmail || "—"}</p></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0"><MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /></div>
+                    <div><p className="text-xs text-slate-500 dark:text-slate-400">Zone</p><p className="font-medium text-slate-900 dark:text-white">{getZoneName(selectedRestaurant)}</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4">
+                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Business Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  {selectedRestaurant.cuisines?.length > 0 && (
+                    <div className="sm:col-span-2">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Cuisines</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedRestaurant.cuisines.map((c, i) => (
+                          <span key={i} className="px-2 py-0.5 text-xs font-medium bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-full text-slate-700 dark:text-slate-300">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <div><p className="text-xs text-slate-500 dark:text-slate-400">Operating Hours</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.openingTime || "09:00"} — {selectedRestaurant.closingTime || "22:00"}</p></div>
+                  </div>
+                  {selectedRestaurant.fssaiNumber && <div><p className="text-xs text-slate-500 dark:text-slate-400">FSSAI Number</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.fssaiNumber}</p></div>}
+                  {selectedRestaurant.gstNumber && <div><p className="text-xs text-slate-500 dark:text-slate-400">GST Number</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.gstNumber}</p></div>}
+                  {selectedRestaurant.panNumber && <div><p className="text-xs text-slate-500 dark:text-slate-400">PAN Number</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.panNumber}</p></div>}
+                  <div><p className="text-xs text-slate-500 dark:text-slate-400">Restaurant Type</p><p className="font-medium text-slate-900 dark:text-white">{selectedRestaurant.restaurantType || (selectedRestaurant.pureVegRestaurant ? "Veg" : "Both")}</p></div>
+                </div>
+              </div>
+
+              {selectedRestaurant.status === "rejected" && selectedRestaurant.rejectionReason && (
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4">
+                  <div className="flex items-center gap-2 mb-2"><AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" /><h4 className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">Rejection Reason</h4></div>
+                  <p className="text-sm text-red-800 dark:text-red-300">{selectedRestaurant.rejectionReason}</p>
+                </div>
+              )}
+
+              {String(selectedRestaurant.status || "").toLowerCase() === "pending" && (
+                <div className="flex items-center gap-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+                  <button onClick={() => { setShowDetailModal(false); handleApproveClick(selectedRestaurant) }}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm">
+                    <ShieldCheck className="w-4 h-4" /> Approve
+                  </button>
+                  <button onClick={() => { setShowDetailModal(false); handleRejectClick(selectedRestaurant) }}
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors shadow-sm">
+                    <ShieldX className="w-4 h-4" /> Reject
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      {/* ====== EDIT MODAL ====== */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+          <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white">Edit Restaurant</DialogTitle>
+          </DialogHeader>
+          <div className="p-6 max-h-[75vh] overflow-y-auto">
+            <RestaurantFormFields form={editForm} setForm={setEditForm} zones={zones} setSelectedImageFile={setSelectedImageFile} imagePreviewUrl={imagePreviewUrl} setImagePreviewUrl={setImagePreviewUrl} />
+            <div className="flex items-center gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <button onClick={() => setShowEditModal(false)} disabled={saving}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+              <button onClick={handleEditSave} disabled={saving}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-[#F84E04] text-white hover:bg-[#d84303] transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ====== CREATE MODAL ====== */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+          <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+            <DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white">Add New Restaurant</DialogTitle>
+          </DialogHeader>
+          <div className="p-6 max-h-[75vh] overflow-y-auto">
+            <RestaurantFormFields form={createForm} setForm={setCreateForm} zones={zones} setSelectedImageFile={setSelectedImageFile} imagePreviewUrl={imagePreviewUrl} setImagePreviewUrl={setImagePreviewUrl} />
+            <div className="flex items-center gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <button onClick={() => setShowCreateModal(false)} disabled={creating}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+              <button onClick={handleCreateSave} disabled={creating}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-[#F84E04] text-white hover:bg-[#d84303] transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+                {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                Create Restaurant
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ====== APPROVE DIALOG ====== */}
+      <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <DialogContent className="max-w-md dark:bg-slate-900 dark:border-slate-800">
+          <DialogHeader><DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white">Approve Restaurant</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl mb-4">
+              <ShieldCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">Confirm Approval</p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">This will approve <strong>{actionTarget?.restaurantName}</strong> and they will start appearing on the user app.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setShowApproveDialog(false)} disabled={actionLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">Cancel</button>
+              <button onClick={confirmApprove} disabled={actionLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Approve
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ====== REJECT DIALOG ====== */}
+      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <DialogContent className="max-w-md dark:bg-slate-900 dark:border-slate-800">
+          <DialogHeader><DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white">Reject Restaurant</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl mb-4">
+              <ShieldX className="w-8 h-8 text-red-600 dark:text-red-400 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-red-800 dark:text-red-200">Rejecting "{actionTarget?.restaurantName}"</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">This restaurant will not appear on the user app.</p>
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Rejection Reason</label>
+              <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Provide a reason for rejection..." rows={3}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 resize-none" />
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setShowRejectDialog(false)} disabled={actionLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">Cancel</button>
+              <button onClick={confirmReject} disabled={actionLoading}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />} Reject
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ====== DELETE DIALOG ====== */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md dark:bg-slate-900 dark:border-slate-800">
+          <DialogHeader><DialogTitle className="text-lg font-semibold text-slate-900 dark:text-white">Delete Restaurant</DialogTitle></DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl mb-4">
+              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-red-800 dark:text-red-200">Permanent Deletion</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">This will permanently delete <strong>{deleteTarget?.restaurantName}</strong> and all associated data. This action cannot be undone.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setShowDeleteDialog(false)} disabled={deleting}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">Cancel</button>
+              <button onClick={confirmDelete} disabled={deleting}
+                className="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Delete Permanently
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
+// Reusable form fields component defined outside the parent to avoid focus loss on every keystroke
+const MapPicker = ({ form, setForm }) => {
+  const mapContainerRef = useRef(null)
+  const autocompleteInputRef = useRef(null)
+  const [mapLoading, setMapLoading] = useState(false)
+  const mapRef = useRef(null)
+  const markerRef = useRef(null)
+  const autocompleteRef = useRef(null)
+  const [apiKey, setApiKey] = useState("")
+
+  useEffect(() => {
+    getGoogleMapsApiKey().then((key) => {
+      setApiKey(key || "")
+    })
+  }, [])
+
+  useEffect(() => {
+    if (autocompleteInputRef.current && form.address) {
+      autocompleteInputRef.current.value = form.address;
+    }
+  }, [form.address]);
+
+  useEffect(() => {
+    if (!apiKey || !mapContainerRef.current) return
+    let isMounted = true
+    setMapLoading(true)
+
+    const initializeMap = async () => {
+      try {
+        const loader = new Loader({
+          apiKey: apiKey,
+          version: "weekly",
+          libraries: ["places"],
+        })
+        const google = await loader.load()
+        if (!isMounted || !mapContainerRef.current) {
+          return
+        }
+
+        const initialLat = parseFloat(form.latitude)
+        const initialLng = parseFloat(form.longitude)
+        const hasCoords = !isNaN(initialLat) && !isNaN(initialLng) && (initialLat !== 0 || initialLng !== 0)
+        const initialPos = hasCoords ? { lat: initialLat, lng: initialLng } : { lat: 28.6139, lng: 77.2090 }
+
+        const map = new google.maps.Map(mapContainerRef.current, {
+          center: initialPos,
+          zoom: hasCoords ? 16 : 5,
+          zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+        })
+        mapRef.current = map
+
+        const marker = new google.maps.Marker({
+          position: initialPos,
+          map: map,
+          draggable: true,
+          animation: google.maps.Animation.DROP,
+        })
+        markerRef.current = marker
+
+        // Prevent Geocoding Fallback from overwriting user interactions
+        let userInteracted = false;
+
+        // Geocoding Fallback if coordinates are 0,0 or missing but address is present
+        if (!hasCoords && form.address) {
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ address: form.address }, (results, status) => {
+            if (status === "OK" && results[0] && results[0].geometry && !userInteracted) {
+              const pos = results[0].geometry.location;
+              map.setCenter(pos);
+              map.setZoom(16);
+              marker.setPosition(pos);
+              setForm(prev => ({
+                ...prev,
+                latitude: pos.lat(),
+                longitude: pos.lng()
+              }));
+            }
+          });
+        }
+
+        if (autocompleteInputRef.current) {
+          const autocomplete = new google.maps.places.Autocomplete(autocompleteInputRef.current, {
+            types: ["geocode", "establishment"],
+            fields: ["address_components", "geometry", "formatted_address", "name"]
+          })
+          autocompleteRef.current = autocomplete
+
+          autocomplete.addListener("place_changed", () => {
+            userInteracted = true;
+            const place = autocomplete.getPlace()
+            if (!place.geometry || !place.geometry.location) return
+
+            const lat = place.geometry.location.lat()
+            const lng = place.geometry.location.lng()
+            const pos = { lat, lng }
+
+            map.setCenter(pos)
+            map.setZoom(16)
+            marker.setPosition(pos)
+
+            let streetAddress = place.formatted_address || place.name || autocompleteInputRef.current.value || ""
+            let city = ""
+            let state = ""
+            let pincode = ""
+
+            if (place.address_components) {
+              for (const component of place.address_components) {
+                const types = component.types
+                if (types.includes("locality")) city = component.long_name
+                if (types.includes("administrative_area_level_1")) state = component.long_name
+                if (types.includes("postal_code")) pincode = component.long_name
+              }
+            }
+
+            setForm(prev => ({
+              ...prev,
+              address: streetAddress,
+              city,
+              state,
+              pincode,
+              latitude: lat,
+              longitude: lng
+            }))
+          })
+        }
+
+        marker.addListener("dragend", () => {
+          userInteracted = true;
+          const pos = marker.getPosition()
+          const lat = pos.lat()
+          const lng = pos.lng()
+
+          const geocoder = new google.maps.Geocoder()
+          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === "OK" && results[0]) {
+              const place = results[0]
+              let streetAddress = place.formatted_address || ""
+              let city = ""
+              let state = ""
+              let pincode = ""
+
+              if (place.address_components) {
+                for (const component of place.address_components) {
+                  const types = component.types
+                  if (types.includes("locality")) city = component.long_name
+                  if (types.includes("administrative_area_level_1")) state = component.long_name
+                  if (types.includes("postal_code")) pincode = component.long_name
+                }
+              }
+
+              setForm(prev => ({
+                ...prev,
+                address: streetAddress,
+                city,
+                state,
+                pincode,
+                latitude: lat,
+                longitude: lng
+              }))
+            } else {
+              setForm(prev => ({
+                ...prev,
+                latitude: lat,
+                longitude: lng
+              }))
+            }
+          })
+        })
+
+        setMapLoading(false)
+      } catch (err) {
+        setMapLoading(false)
+      }
+    }
+
+    initializeMap()
+    return () => {
+      isMounted = false
+    }
+  }, [apiKey])
+
+  return (
+    <div className="space-y-3 col-span-1 sm:col-span-2">
+      <div className="relative w-full h-64 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50">
+        <div ref={mapContainerRef} className="w-full h-full" />
+        {mapLoading && (
+          <div className="absolute inset-0 bg-white/70 dark:bg-slate-900/70 flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+              <span className="text-xs text-slate-600">Loading map...</span>
+            </div>
+          </div>
+        )}
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Search Address on Map</label>
+        <input
+          ref={autocompleteInputRef}
+          type="text"
+          className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+          placeholder="Search location or establishment..."
+        />
+      </div>
+      <p className="text-xs text-slate-400 dark:text-slate-500">Drag the pin to refine the exact location coordinates.</p>
+    </div>
+  )
+}
+
+const RestaurantFormFields = ({ form, setForm, zones = [], setSelectedImageFile, imagePreviewUrl, setImagePreviewUrl }) => {
+  if (!form) return null;
+  return (
+    <div className="space-y-4">
+      {/* Restaurant Image Upload */}
+      <ImageUploadField
+        value={form.selectedImageFile || imagePreviewUrl || form.profileImage}
+        onChange={(file) => {
+          setSelectedImageFile?.(file)
+          if (file) {
+            setImagePreviewUrl?.(URL.createObjectURL(file))
+          } else {
+            setImagePreviewUrl?.(form.profileImage || "")
+          }
+        }}
+        onClear={() => {
+          setSelectedImageFile?.(null)
+          setImagePreviewUrl?.(form.profileImage || "")
+          setForm((p) => ({ ...p, profileImage: "" }))
+        }}
+        aspectRatio={1.7777777777777777}
+        label="Restaurant Image (16:9)"
+        helpText="Upload restaurant image (shown on user side)"
+      />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Restaurant Name *</label>
+          <input type="text" value={form.restaurantName} onChange={(e) => setForm((p) => ({ ...p, restaurantName: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+            placeholder="Enter restaurant name" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Owner Name *</label>
+          <input type="text" value={form.ownerName} onChange={(e) => setForm((p) => ({ ...p, ownerName: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+            placeholder="Enter owner name" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Owner Phone</label>
+          <input type="text" value={form.ownerPhone} onChange={(e) => setForm((p) => ({ ...p, ownerPhone: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+            placeholder="Enter phone number" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Primary Contact Number (App Call)</label>
+          <input type="text" value={form.primaryContactNumber} onChange={(e) => setForm((p) => ({ ...p, primaryContactNumber: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+            placeholder="Enter primary contact number" />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Owner Email</label>
+          <input type="email" value={form.ownerEmail} onChange={(e) => setForm((p) => ({ ...p, ownerEmail: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+            placeholder="Enter email" />
+        </div>
+
+        {/* LOCATION PICKER OPTIONS */}
+        <div className="col-span-1 sm:col-span-2 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+            <label className="text-sm font-semibold text-slate-900 dark:text-white">Restaurant Location Details *</label>
+            <div className="flex bg-slate-200 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setForm(p => ({ ...p, locationMode: 'map' }))}
+                className={`px-3 py-1 rounded-md transition-colors ${form.locationMode !== 'manual' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500'}`}
+              >
+                Option A: Map Picker
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm(p => ({ ...p, locationMode: 'manual' }))}
+                className={`px-3 py-1 rounded-md transition-colors ${form.locationMode === 'manual' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500'}`}
+              >
+                Option B: Manual Address
+              </button>
+            </div>
+          </div>
+
+          {form.locationMode !== 'manual' ? (
+            <MapPicker form={form} setForm={setForm} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Latitude *</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={form.latitude}
+                  onChange={(e) => setForm(p => ({ ...p, latitude: e.target.value }))}
+                  placeholder="e.g. 28.6139"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Longitude *</label>
+                <input
+                  type="number"
+                  step="any"
+                  value={form.longitude}
+                  onChange={(e) => setForm(p => ({ ...p, longitude: e.target.value }))}
+                  placeholder="e.g. 77.2090"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Address Text Fields (shared by both modes) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Street Address / Landmark *</label>
+              <input
+                type="text"
+                value={form.address}
+                onChange={(e) => setForm(p => ({ ...p, address: e.target.value }))}
+                placeholder="Shop No, Building, Area"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">City *</label>
+              <input
+                type="text"
+                value={form.city}
+                onChange={(e) => setForm(p => ({ ...p, city: e.target.value }))}
+                placeholder="City"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">State *</label>
+              <input
+                type="text"
+                value={form.state}
+                onChange={(e) => setForm(p => ({ ...p, state: e.target.value }))}
+                placeholder="State"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Pincode</label>
+              <input
+                type="text"
+                value={form.pincode}
+                onChange={(e) => setForm(p => ({ ...p, pincode: e.target.value }))}
+                placeholder="6-digit Pincode"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Zone</label>
+          <select value={form.zoneId} onChange={(e) => setForm((p) => ({ ...p, zoneId: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]">
+            <option value="">Global Zone</option>
+            {zones.map((z) => (
+              <option key={z._id || z.id} value={String(z._id || z.id)}>
+                {z.name || z.zoneName || "Unnamed Zone"}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Cuisines</label>
+          <input type="text" value={form.cuisines} onChange={(e) => setForm((p) => ({ ...p, cuisines: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+            placeholder="North Indian, Chinese, etc." />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Opening Time</label>
+          <input type="time" value={form.openingTime} onChange={(e) => setForm((p) => ({ ...p, openingTime: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Closing Time</label>
+          <input type="time" value={form.closingTime} onChange={(e) => setForm((p) => ({ ...p, closingTime: e.target.value }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]" />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Open Days</label>
+          <div className="flex flex-wrap gap-2">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+              <label key={day} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                <input type="checkbox"
+                  checked={(form.openDays || []).includes(day)}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setForm(p => ({
+                      ...p,
+                      openDays: checked
+                        ? [...(p.openDays || []), day]
+                        : (p.openDays || []).filter(d => d !== day)
+                    }));
+                  }}
+                  className="w-4 h-4 text-[#F84E04] rounded border-slate-300 focus:ring-[#F84E04]"
+                />
+                <span className="text-sm text-slate-700 dark:text-slate-300">{day}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Restaurant Type</label>
+          <select value={form.restaurantType} onChange={(e) => setForm((p) => ({ ...p, restaurantType: e.target.value, pureVegRestaurant: e.target.value === "Veg" }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]">
+            <option value="Veg">Veg</option>
+            <option value="Non-Veg">Non-Veg</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status (Accepting Orders)</label>
+          <select value={String(form.isAcceptingOrders)} onChange={(e) => setForm((p) => ({ ...p, isAcceptingOrders: e.target.value === "true" }))}
+            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]">
+            <option value="true">Active (Open)</option>
+            <option value="false">Inactive (Force Closed)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
