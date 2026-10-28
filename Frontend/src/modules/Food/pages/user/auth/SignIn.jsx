@@ -197,6 +197,13 @@ export default function SignIn() {
         html, body {
           background-color: #F6EBD7 !important;
         }
+        .welcome-back-heading {
+          font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
+          color: #3D210F !important;
+          font-weight: 600 !important;
+          font-style: normal !important;
+          letter-spacing: 0.01em !important;
+        }
       `}</style>
 
       {/* Main Container - Edge to Edge, No Side Gaps */}
@@ -230,14 +237,7 @@ export default function SignIn() {
 
           {/* Welcome Back Heading — Upright Serif, matching reference media_1793177007444.png */}
           <h1
-            style={{
-              fontFamily: "'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif",
-              color: "#3D210F",
-              fontWeight: 600,
-              fontStyle: "normal",
-              letterSpacing: "0.01em",
-            }}
-            className="text-[28px] sm:text-[30px] leading-tight mb-2 text-left select-none relative z-10"
+            className="welcome-back-heading font-serif-editorial text-[28px] sm:text-[30px] leading-tight mb-2 text-left select-none relative z-10"
           >
             Welcome Back
           </h1>
