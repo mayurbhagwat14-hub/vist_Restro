@@ -8,22 +8,20 @@ export default function AnimatedPage({ children, className = "" }) {
     const container = containerRef.current
     if (!container) return
 
-    // Keep entrance animation lightweight and remove transform afterwards.
-    // Persistent transform breaks descendants that use position: fixed.
+    // Keep entrance animation lightweight with opacity fade.
+    // Avoid translateY transform which breaks descendants that use position: sticky / fixed
+    // and causes unwanted header sliding on page load.
     container.style.opacity = '0'
-    container.style.transition = 'opacity 220ms ease, transform 220ms ease'
-    container.style.transform = 'translateY(20px)'
+    container.style.transition = 'opacity 200ms ease'
 
     // Trigger animation on next frame
     requestAnimationFrame(() => {
       container.style.opacity = '1'
-      container.style.transform = 'translateY(0)'
     })
 
     const cleanupTimer = window.setTimeout(() => {
-      container.style.transform = ''
       container.style.transition = ''
-    }, 260)
+    }, 240)
 
     return () => {
       window.clearTimeout(cleanupTimer)

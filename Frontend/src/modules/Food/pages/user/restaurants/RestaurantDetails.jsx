@@ -127,12 +127,30 @@ function RestaurantDetailsContent() {
         const raw = sessionStorage.getItem(`food_restaurant_expanded_${slug}`)
         if (raw) {
           const parsed = JSON.parse(raw)
-          if (Array.isArray(parsed)) return new Set(parsed)
+          if (Array.isArray(parsed) && parsed.length > 0) return new Set([parsed[0]])
         }
       } catch (e) {}
     }
     return new Set([0])
-  }) // Default: Recommended section is expanded
+  }) // Default: First section is expanded
+
+  const toggleSection = (originalIndex) => {
+    setExpandedSections((prev) => {
+      if (prev.has(originalIndex)) {
+        return new Set()
+      }
+      return new Set([originalIndex])
+    })
+  }
+
+  const toggleSubsection = (originalIndex, subsectionKey) => {
+    setExpandedSections((prev) => {
+      if (prev.has(subsectionKey)) {
+        return new Set([originalIndex])
+      }
+      return new Set([originalIndex, subsectionKey])
+    })
+  }
   const [highlightedDishId, setHighlightedDishId] = useState(null)
   const [loadingMenuItems, setLoadingMenuItems] = useState(true)
   const [selectedMenuCategory, setSelectedMenuCategory] = useState(() => {
@@ -169,57 +187,12 @@ function RestaurantDetailsContent() {
     }
   }, [selectedMenuCategory, slug])
 
-  // Track scroll position
+  // Ensure fresh restaurant view starts at the top without unwanted scroll-sliding
   useEffect(() => {
-    if (typeof window === "undefined" || !slug) return
-    let timeoutId
-
-    const handleScroll = () => {
-      let currentPath = "";
-      try { currentPath = decodeURIComponent(window.location.pathname); } catch (e) { currentPath = window.location.pathname; }
-      if (!currentPath.includes(slug)) return;
-      if (timeoutId) clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        if (window.scrollY > 0 && currentPath.includes(slug)) {
-          sessionStorage.setItem(`food_restaurant_scroll_${slug}`, window.scrollY.toString())
-        }
-      }, 100)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-      if (timeoutId) clearTimeout(timeoutId)
+    if (typeof window !== "undefined" && slug) {
+      sessionStorage.removeItem(`food_restaurant_scroll_${slug}`)
     }
   }, [slug])
-
-  // Restore scroll position when menu finishes loading
-  useEffect(() => {
-    if (!loadingMenuItems && typeof window !== "undefined" && slug) {
-      const savedScroll = sessionStorage.getItem(`food_restaurant_scroll_${slug}`)
-      if (savedScroll && Number(savedScroll) > 0) {
-        const targetScroll = Number(savedScroll);
-        let attempts = 0;
-        
-        const tryScroll = () => {
-          if (attempts > 15) return; // give up after 1.5s
-          
-          if (document.documentElement.scrollHeight > targetScroll) {
-            window.scrollTo({ top: targetScroll, behavior: "instant" });
-            // Double check slightly after in case of images loading
-            setTimeout(() => {
-              window.scrollTo({ top: targetScroll, behavior: "instant" });
-            }, 50);
-          } else {
-            attempts++;
-            setTimeout(tryScroll, 100);
-          }
-        };
-        
-        tryScroll();
-      }
-    }
-  }, [loadingMenuItems, slug])
 
   const getDishQuantity = (item, preferredVariantId = "") => {
     const variant = getVariantForDish(item, preferredVariantId)
@@ -959,21 +932,23 @@ function RestaurantDetailsContent() {
                   menuSections: finalMenuSections,
                 }))
 
-                // Set first 3 sections as expanded by default only if we don't have a saved state
+                // Expand only the first section by default (one dropdown at a time)
                 let shouldSetDefault = true;
                 if (typeof window !== "undefined" && slug) {
                   try {
-                    if (sessionStorage.getItem(`food_restaurant_expanded_${slug}`)) {
-                      shouldSetDefault = false;
+                    const raw = sessionStorage.getItem(`food_restaurant_expanded_${slug}`);
+                    if (raw) {
+                      const parsed = JSON.parse(raw);
+                      if (Array.isArray(parsed) && parsed.length > 0) {
+                        shouldSetDefault = false;
+                        setExpandedSections(new Set([parsed[0]]));
+                      }
                     }
                   } catch (e) {}
                 }
                 
                 if (shouldSetDefault) {
-                  const defaultExpandedSections = new Set(
-                    Array.from({ length: Math.min(3, finalMenuSections.length) }, (_, idx) => idx)
-                  )
-                  setExpandedSections(defaultExpandedSections)
+                  setExpandedSections(new Set(finalMenuSections.length > 0 ? [0] : []));
                 }
 
                 debugLog('Fetched menu sections with recommended items:', finalMenuSections)
@@ -2001,11 +1976,7 @@ function RestaurantDetailsContent() {
 
     if (!matchedItem) return
 
-    setExpandedSections((prev) => {
-      const next = new Set(prev)
-      sectionKeysToExpand.forEach((key) => next.add(key))
-      return next
-    })
+    setExpandedSections(new Set(sectionKeysToExpand))
     setHighlightedDishId(targetDishId)
 
     const scrollTimer = window.setTimeout(() => {
@@ -2140,10 +2111,10 @@ function RestaurantDetailsContent() {
   return (
     <AnimatedPage
       id="scrollingelement"
-      className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col transition-all duration-300"
+      className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col overflow-x-hidden"
     >
-      {/* Header - Back, Search, Menu (like reference image) */}
-      <div className="px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pt-3 md:pt-4 lg:pt-5 pb-2 md:pb-3 bg-white dark:bg-[#1a1a1a]">
+      {/* Header - Back, Search (sticky to avoid sliding out of view) */}
+      <div className="sticky top-0 md:top-[128px] z-40 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pt-3 md:pt-4 lg:pt-5 pb-2 md:pb-3 border-b border-gray-100 dark:border-gray-800 shadow-xs transition-colors">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Back Button */}
           <Button
@@ -2365,7 +2336,10 @@ function RestaurantDetailsContent() {
                 <div className="flex items-center gap-2 w-max">
                   <button
                     type="button"
-                    onClick={() => setSelectedMenuCategory("all")}
+                    onClick={() => {
+                      setSelectedMenuCategory("all")
+                      setExpandedSections(new Set([0]))
+                    }}
                     className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${selectedMenuCategory === "all"
                       ? "border-[#5C381E] bg-[#FFF1E8] text-[#5C381E]"
                       : "border-gray-300 bg-white text-gray-700"
@@ -2379,11 +2353,7 @@ function RestaurantDetailsContent() {
                       type="button"
                       onClick={() => {
                         setSelectedMenuCategory(category.id)
-                        setExpandedSections(prev => {
-                          const newSet = new Set(prev)
-                          newSet.add(category.sectionIndex)
-                          return newSet
-                        })
+                        setExpandedSections(new Set([category.sectionIndex]))
                       }}
                       className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${selectedMenuCategory === category.id
                         ? "border-[#5C381E] bg-[#FFF1E8] text-[#5C381E]"
@@ -2442,22 +2412,12 @@ function RestaurantDetailsContent() {
               const isExpanded = expandedSections.has(originalIndex)
 
               return (
-                <div key={sectionIndex} id={sectionId} className="space-y-1 scroll-mt-20">
+                <div key={sectionIndex} id={sectionId} className="space-y-1 scroll-mt-24 md:scroll-mt-48">
                   {/* Section Header */}
                   {isRecommended && (
                     <div
-                      className="flex items-center justify-between cursor-pointer py-2"
-                      onClick={() => {
-                        setExpandedSections(prev => {
-                          const newSet = new Set(prev)
-                          if (newSet.has(originalIndex)) {
-                            newSet.delete(originalIndex)
-                          } else {
-                            newSet.add(originalIndex)
-                          }
-                          return newSet
-                        })
-                      }}
+                      className="flex items-center justify-between cursor-pointer py-2 select-none"
+                      onClick={() => toggleSection(originalIndex)}
                     >
                       <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                         Recommended for you
@@ -2472,18 +2432,8 @@ function RestaurantDetailsContent() {
                   )}
                   {!isRecommended && (
                     <div
-                      className="flex items-center justify-between cursor-pointer py-2"
-                      onClick={() => {
-                        setExpandedSections(prev => {
-                          const newSet = new Set(prev)
-                          if (newSet.has(originalIndex)) {
-                            newSet.delete(originalIndex)
-                          } else {
-                            newSet.add(originalIndex)
-                          }
-                          return newSet
-                        })
-                      }}
+                      className="flex items-center justify-between cursor-pointer py-2 select-none"
+                      onClick={() => toggleSection(originalIndex)}
                     >
                       <div className="space-y-1">
                         <h2 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -2745,18 +2695,8 @@ function RestaurantDetailsContent() {
                           <div key={subIndex} className="space-y-4">
                             {/* Subsection Header */}
                             <div
-                              className="flex items-center justify-between cursor-pointer py-1"
-                              onClick={() => {
-                                setExpandedSections(prev => {
-                                  const newSet = new Set(prev)
-                                  if (newSet.has(subsectionKey)) {
-                                    newSet.delete(subsectionKey)
-                                  } else {
-                                    newSet.add(subsectionKey)
-                                  }
-                                  return newSet
-                                })
-                              }}
+                              className="flex items-center justify-between cursor-pointer py-1 select-none"
+                              onClick={() => toggleSubsection(originalIndex, subsectionKey)}
                             >
                               <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                                 {subsection?.name || subsection?.title || "Subsection"}
@@ -3057,12 +2997,8 @@ function RestaurantDetailsContent() {
                             // Synchronize the selected category state with the top horizontal filter
                             setSelectedMenuCategory(category.id)
                             
-                            // Expand the selected category section automatically
-                            setExpandedSections(prev => {
-                              const newSet = new Set(prev)
-                              newSet.add(category.sectionIndex)
-                              return newSet
-                            })
+                            // Expand only the selected category section automatically (one dropdown at a time)
+                            setExpandedSections(new Set([category.sectionIndex]))
                             setShowMenuSheet(false)
                             // Scroll to category section
                             setTimeout(() => {

@@ -75,6 +75,22 @@ function CategoryChipRowSkeleton({ count = 8, className }) {
   )
 }
 
+function CategoryCircleRowSkeleton({ count = 8, className }) {
+  return (
+    <div className={cn("flex gap-2 sm:gap-3 overflow-hidden", className)}>
+      {Array.from({ length: count }, (_, index) => (
+        <div key={`circle-cat-${index}`} className="flex flex-col items-center gap-1 flex-shrink-0 w-[68px] sm:w-[76px] py-0.5">
+          <Skeleton className="w-10 h-10 sm:w-11 sm:h-11 rounded-full" />
+          <div className="h-7 sm:h-8 flex flex-col items-center justify-center gap-1 w-full px-0.5">
+            <Skeleton className="h-2.5 w-12 rounded-full" />
+            <Skeleton className="h-2 w-8 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function ExploreTileSkeleton({ index }) {
   return (
     <div
@@ -357,6 +373,7 @@ function AppShellSkeleton({ className }) {
 export {
   AppShellSkeleton,
   CategoryChipRowSkeleton,
+  CategoryCircleRowSkeleton,
   ContentPageSkeleton,
   ExploreGridSkeleton,
   HeroBannerSkeleton,

@@ -240,6 +240,8 @@ export default function UserLayout() {
     normalizedPath.startsWith("/user/wallet") ||
     normalizedPath.startsWith("/notifications") ||
     normalizedPath.startsWith("/user/notifications") ||
+    normalizedPath.startsWith("/notification") ||
+    normalizedPath.startsWith("/user/notification") ||
     normalizedPath.startsWith("/complaints") ||
     normalizedPath.startsWith("/user/complaints")
   const isOffersPage =

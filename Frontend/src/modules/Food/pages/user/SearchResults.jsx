@@ -882,15 +882,15 @@ export default function SearchResults() {
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.id)}
-                  className={`flex flex-col items-center gap-1.5 flex-shrink-0 pb-2 transition-all ${isSelected ? 'border-b-2 border-[#5C381E]' : ''
+                  className={`flex flex-col items-center gap-1.5 flex-shrink-0 w-[72px] sm:w-[80px] pb-2 transition-all cursor-pointer ${isSelected ? 'border-b-2 border-[#5C381E]' : ''
                     }`}
                 >
                   {isAllCategory ? (
-                    <div className={`w-16 h-16 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#222222]'}`}>
-                      <Grid2x2 className={`h-6 w-6 ${isSelected ? 'text-[#5C381E]' : 'text-gray-500 dark:text-gray-400'}`} />
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#222222]'}`}>
+                      <Grid2x2 className={`h-5 w-5 sm:h-6 sm:w-6 ${isSelected ? 'text-[#5C381E]' : 'text-gray-500 dark:text-gray-400'}`} />
                     </div>
                   ) : cat.image ? (
-                    <div className={`w-16 h-16 rounded-full overflow-hidden border-2 transition-all ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg' : 'border-transparent'
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 transition-all ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg' : 'border-transparent'
                       }`}>
                       <img
                         src={cat.image}
@@ -899,15 +899,17 @@ export default function SearchResults() {
                       />
                     </div>
                   ) : (
-                    <div className={`w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-transparent'
+                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-transparent'
                       }`}>
                       <span className="text-xl">???</span>
                     </div>
                   )}
-                  <span className={`text-xs font-medium whitespace-nowrap ${isSelected ? 'text-[#5C381E] dark:text-[#5C381E]' : 'text-gray-600 dark:text-gray-400'
-                    }`}>
-                    {cat.name}
-                  </span>
+                  <div className="h-7 sm:h-8 flex items-center justify-center w-full px-0.5">
+                    <span className={`text-[10px] sm:text-xs font-medium leading-tight line-clamp-2 text-center capitalize ${isSelected ? 'text-[#5C381E] dark:text-[#5C381E] font-bold' : 'text-gray-600 dark:text-gray-400'
+                      }`}>
+                      {cat.name?.toLowerCase?.() || cat.name}
+                    </span>
+                  </div>
                 </button>
               )
             })}

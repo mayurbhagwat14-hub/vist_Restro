@@ -8,6 +8,7 @@ import { Button } from "@food/components/ui/button"
 import { Input } from "@food/components/ui/input"
 import {
   CategoryChipRowSkeleton,
+  CategoryCircleRowSkeleton,
   LoadingSkeletonRegion,
   RestaurantGridSkeleton,
 } from "@food/components/ui/loading-skeletons"
@@ -740,6 +741,9 @@ export default function CategoryPage() {
       return false
     }
 
+    const isAll = String(categoryId || "").toLowerCase() === "all"
+    if (isAll) return true
+
     const keywords = getCategoryKeywords(categoryId)
     if (keywords.length === 0) {
       return false
@@ -797,8 +801,9 @@ export default function CategoryPage() {
       return []
     }
 
-    const keywords = getCategoryKeywords(categoryId)
-    if (keywords.length === 0) {
+    const isAll = String(categoryId || "").toLowerCase() === "all"
+    const keywords = !isAll ? getCategoryKeywords(categoryId) : []
+    if (!isAll && keywords.length === 0) {
       return []
     }
 
@@ -807,7 +812,7 @@ export default function CategoryPage() {
     for (const section of menu.sections) {
       if (!section) continue
       const sectionNameLower = (section?.name || "").toLowerCase()
-      const sectionMatches = matchesCategoryText(sectionNameLower, keywords)
+      const sectionMatches = isAll || matchesCategoryText(sectionNameLower, keywords)
 
       if (section.items && Array.isArray(section.items)) {
         for (const item of section.items) {
@@ -816,6 +821,7 @@ export default function CategoryPage() {
           const itemCategoryLower = (item.categoryName || item.category || '').toLowerCase()
 
           const itemMatches =
+            isAll ||
             matchesCategoryText(itemNameLower, keywords) ||
             matchesCategoryText(itemCategoryLower, keywords)
 
@@ -901,16 +907,8 @@ export default function CategoryPage() {
         setLoadingRestaurants(true)
       }
 
-      // Check if user is out of service
-      if (isOutOfService) {
-        if (!append) setRestaurantsData([])
-        setLoadingRestaurants(false)
-        setLoadingMoreRestaurants(false)
-        return
-      }
-
-      const params = { limit: 10, page: pageNum }
-      if (zoneId) {
+      const params = { limit: 12, page: pageNum }
+      if (zoneId && !isOutOfService) {
         params.zoneId = zoneId
       }
       const response = await restaurantAPI.getRestaurants(params)
@@ -1369,26 +1367,27 @@ export default function CategoryPage() {
       })
     }
 
-    // Strict zone filter: double check that restaurant belongs to current zone
+    // Zone filter: only filter when active in-service zone is present
     filtered = filtered.filter(row => {
       const restaurantZoneId = row.zoneId || null;
-      if (zoneId && restaurantZoneId && String(restaurantZoneId) !== String(zoneId)) {
+      if (!isOutOfService && zoneId && restaurantZoneId && String(restaurantZoneId) !== String(zoneId)) {
         return false;
       }
       return true;
     })
 
-    // Filter by availability
-    filtered = filtered.filter(row => {
-      const availability = getRestaurantAvailabilityStatus(row, new Date(availabilityTick));
-      return availability.isOpen;
+    // Availability: place open restaurants first rather than wiping closed ones
+    filtered.sort((a, b) => {
+      const aOpen = getRestaurantAvailabilityStatus(a, new Date(availabilityTick)).isOpen ? 1 : 0;
+      const bOpen = getRestaurantAvailabilityStatus(b, new Date(availabilityTick)).isOpen ? 1 : 0;
+      return bOpen - aOpen;
     })
 
     return applyFiltersAndSorting(filtered)
-  }, [selectedCategory, activeFilters, deferredSearchQuery, restaurantsData, categoryKeywords, vegMode, approvedFoodsData, sortBy, availabilityTick, zoneId])
+  }, [selectedCategory, activeFilters, deferredSearchQuery, restaurantsData, categoryKeywords, vegMode, approvedFoodsData, sortBy, availabilityTick, zoneId, isOutOfService])
 
   const categoryFoods = useMemo(() => {
-    if (!selectedCategory || selectedCategory === 'all') return []
+    if (!selectedCategory) return []
 
     const foods = []
     const seenFoodKeys = new Set()
@@ -1404,12 +1403,13 @@ export default function CategoryPage() {
     // Helper to test if a restaurant passes zone and operational filters
     const isRestaurantValid = (restObj) => {
       if (!restObj) return true
-      const rZoneId = restObj.zoneId || null
-      if (zoneId && rZoneId && String(rZoneId) !== String(zoneId)) {
-        return false
+      if (!isOutOfService && zoneId) {
+        const rZoneId = restObj.zoneId || null
+        if (rZoneId && String(rZoneId) !== String(zoneId)) {
+          return false
+        }
       }
-      const availability = getRestaurantAvailabilityStatus(restObj, new Date(availabilityTick))
-      return availability.isOpen
+      return true
     }
 
     // 1. First add matching foods from approvedFoodsData (direct from search API)
@@ -1558,39 +1558,46 @@ export default function CategoryPage() {
       )}
 
       {/* Sticky Header */}
-      <div className="sticky top-0 md:top-[128px] z-20 bg-[var(--module-theme-color,#5C381E)] md:bg-white md:dark:bg-[#1a1a1a] shadow-md md:shadow-sm">
+      <div className="sticky top-0 md:top-[128px] z-20 bg-[var(--module-theme-color,#5C381E)] md:bg-[#FAF5ED] md:dark:bg-[#120E0C] shadow-sm border-b border-[#EADBCE] dark:border-white/10 transition-colors">
         <div className="max-w-7xl mx-auto">
-          {/* Search Bar with Back Button */}
-          <div className="md:hidden flex items-center gap-2 px-3 md:px-6 py-3 border-b border-white/10">
+          {/* Compact Mobile Search Bar with Back Button */}
+          <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-white/15">
             <button
-              onClick={() => navigate('/user')}
-              className="w-9 h-9 flex items-center justify-center hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1)
+                } else {
+                  navigate('/food/user')
+                }
+              }}
+              className="w-8 h-8 flex items-center justify-center hover:bg-white/20 active:scale-95 rounded-full transition-all flex-shrink-0"
+              aria-label="Go back"
             >
-              <ArrowLeft className="h-5 w-5 text-white" />
+              <ArrowLeft className="h-4 w-4 text-white" />
             </button>
 
             <div className="flex-1 relative max-w-2xl">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/70" />
               <Input
-                placeholder="Restaurant name or a dish..."
+                placeholder="Search specialties, dishes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 h-11 md:h-12 rounded-lg border-white/20 bg-white/10 focus:bg-white/20 focus:border-white/40 text-sm md:text-base text-white placeholder:text-white/70 shadow-inner"
+                className="pl-9 pr-4 h-9 rounded-full border-white/20 bg-white/15 focus:bg-white/25 focus:border-white/40 text-xs text-white placeholder:text-white/70 shadow-inner"
               />
             </div>
           </div>
 
-          {/* Browse Category Section */}
+          {/* Compact Category Navigation Bar */}
           <div
             ref={categoryScrollRef}
-            className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide px-4 md:px-6 py-3 bg-white dark:bg-[#1a1a1a] border-b border-gray-100 dark:border-gray-800"
+            className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-3 sm:px-4 py-2 bg-[#FAF5ED]/95 dark:bg-[#120E0C]/95 backdrop-blur-md"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
             }}
           >
             {showCategorySkeleton ? (
-              <CategoryChipRowSkeleton className="py-3" />
+              <CategoryCircleRowSkeleton className="py-1" />
             ) : (
               categories && categories.length > 0 ? categories.map((cat) => {
                 const categorySlug = cat.slug || cat.id
@@ -1601,52 +1608,60 @@ export default function CategoryPage() {
                     key={cat.id}
                     onClick={() => handleCategorySelect(cat)}
                     data-category-selected={isSelected ? "true" : "false"}
-                    className={`flex flex-col items-center gap-1.5 flex-shrink-0 pb-2 transition-all ${isSelected ? 'border-b-2 border-[#5C381E]' : ''
-                      }`}
+                    className="group flex flex-col items-center gap-1 flex-shrink-0 w-[68px] sm:w-[76px] px-0.5 py-0.5 rounded-xl transition-all cursor-pointer text-center"
                   >
                     {isAllCategory ? (
-                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#222222]'}`}>
-                        <Grid2x2 className={`h-6 w-6 md:h-7 md:w-7 ${isSelected ? 'text-[#5C381E]' : 'text-gray-500 dark:text-gray-400'}`} />
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border transition-all flex items-center justify-center ${isSelected
+                          ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] bg-[#EDE4D8] dark:bg-[#5C381E]/30 scale-105 shadow-xs'
+                          : 'border-[#EADBCE] dark:border-neutral-700 bg-[#FFFDF9] dark:bg-[#1a1410] group-hover:border-[#C5A059]'
+                        }`}>
+                        <Grid2x2 className={`h-4 w-4 sm:h-5 sm:w-5 ${isSelected ? 'text-[#5C381E] dark:text-[#E6C687]' : 'text-[#7C6E65] dark:text-gray-400'}`} />
                       </div>
                     ) : cat.image ? (
-                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 transition-all ${isSelected ? 'border-[#5C381E] shadow-lg' : 'border-transparent'
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border transition-all ${isSelected
+                          ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] shadow-xs scale-105'
+                          : 'border-[#EADBCE] dark:border-neutral-700 group-hover:border-[#C5A059]'
                         }`}>
                         <img
                           src={cat.image}
                           alt={cat.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            // If the backend image is missing/broken, show initials instead of fake assets.
                             e.target.style.display = 'none'
                           }}
                         />
                       </div>
                     ) : (
                       <div
-                        className={`w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-transparent'
+                        className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border transition-all ${isSelected
+                            ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] bg-[#EDE4D8] dark:bg-[#5C381E]/30 scale-105 shadow-xs'
+                            : 'border-[#EADBCE] dark:border-neutral-700 bg-[#FFFDF9] dark:bg-[#1a1410] group-hover:border-[#C5A059]'
                           }`}
                         aria-label={`${cat.name} category`}
                       >
-                        <span className="text-sm md:text-base font-semibold text-gray-600 dark:text-gray-300">
+                        <span className={`text-[11px] font-bold ${isSelected ? 'text-[#5C381E] dark:text-[#E6C687]' : 'text-[#7C6E65] dark:text-gray-400'}`}>
                           {String(cat.name || "?").trim().slice(0, 2).toUpperCase()}
                         </span>
                       </div>
                     )}
-                    <span className={`text-xs md:text-sm font-medium whitespace-nowrap ${isSelected ? 'text-[#5C381E] dark:text-[#5C381E]' : 'text-gray-600 dark:text-gray-400'
-                      }`}>
-                      {cat.name}
-                    </span>
+                    <div className="h-7 sm:h-8 flex items-center justify-center w-full px-0.5">
+                      <span className={`text-[10px] sm:text-[11px] font-medium leading-tight line-clamp-2 w-full text-center capitalize transition-colors tracking-tight ${isSelected ? 'text-[#5C381E] dark:text-[#E6C687] font-bold' : 'text-[#7C6E65] dark:text-gray-400 group-hover:text-[#5C381E]'
+                        }`}>
+                        {cat.name?.toLowerCase?.() || cat.name}
+                      </span>
+                    </div>
+                    {/* Compact centered indicator pill */}
+                    <span className={`h-0.5 rounded-full transition-all duration-300 ${isSelected ? 'w-4 bg-[#5C381E] dark:bg-[#E6C687]' : 'w-0 bg-transparent'
+                      }`} />
                   </button>
                 )
               }) : (
-                <div className="flex items-center justify-center py-4">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">No categories available</span>
+                <div className="flex items-center justify-center py-2">
+                  <span className="text-xs text-gray-500">No categories available</span>
                 </div>
               )
             )}
           </div>
-
-
         </div>
       </div>
 
@@ -1669,7 +1684,7 @@ export default function CategoryPage() {
                   return (
                     <Link
                       key={restaurant.id}
-                      to={`/user/restaurants/${restaurant.name.toLowerCase().replace(/\s+/g, '-')}${restaurant.dishId ? `?dish=${restaurant.dishId}` : ''}`}
+                      to={`/food/user/restaurants/${restaurant.name.toLowerCase().replace(/\s+/g, '-')}${restaurant.dishId ? `?dish=${restaurant.dishId}` : ''}`}
                       className="block"
                     >
                       <div className="group">
@@ -1756,126 +1771,118 @@ export default function CategoryPage() {
               </div>
             </section>
           )}
-          {/* Empty State for specific category with no items */}
-          {selectedCategory === 'all' && filteredAllRestaurants.length === 0 && !showRestaurantSkeleton && !isSwitchingCategory && !loadingRestaurants && !isLoadingFilterResults && (
-            <div className="flex flex-col items-center justify-center py-16 text-center px-4 bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-              <div className="w-14 h-14 rounded-full bg-[#FFF2EB] dark:bg-[#5C381E]/10 flex items-center justify-center mb-4">
-                <UtensilsCrossed className="h-6 w-6 text-[#5C381E]" />
-              </div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1.5">
-                No Restaurants Found
-              </h3>
-              <p className="text-xs md:text-sm text-gray-550 dark:text-gray-400 max-w-sm leading-relaxed">
-                Currently, there are no restaurants available under this category. Please try exploring other categories!
-              </p>
-            </div>
-          )}
-
-          {/* DEDICATED FOODS VIEW */}
-          {selectedCategory !== 'all' && (
-            <section className="relative">
-              <h2 className="text-xs sm:text-sm md:text-base font-semibold text-gray-400 dark:text-gray-500 tracking-widest uppercase mb-4 md:mb-6">
-                Foods in {categories.find(c => c.id === selectedCategory || c.slug === selectedCategory)?.name || selectedCategory}
+          {/* FOODS VIEW - Primary catalog shown for all selections including 'All' */}
+          <section className="relative">
+            <div className="flex items-center justify-between mb-3 md:mb-4">
+              <h2 className="font-serif text-sm sm:text-base font-bold text-[#5C381E] dark:text-[#E6C687] tracking-wide capitalize">
+                {selectedCategory === 'all'
+                  ? 'All Dishes & Specialties'
+                  : `Foods in ${(categories.find(c => c.id === selectedCategory || c.slug === selectedCategory)?.name || selectedCategory)?.toLowerCase()}`}
               </h2>
+              {categoryFoods.length > 0 && (
+                <span className="text-xs font-semibold text-[#7C6E65] dark:text-gray-400">
+                  {categoryFoods.length} {categoryFoods.length === 1 ? 'dish' : 'dishes'}
+                </span>
+              )}
+            </div>
 
-              {/* Loading State, Empty State, or Foods Grid */}
-              {showRestaurantSkeleton ? (
-                <LoadingSkeletonRegion label="Loading foods" className="py-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-32 bg-slate-105 dark:bg-slate-800 rounded-2xl animate-pulse" />
-                    ))}
-                  </div>
-                </LoadingSkeletonRegion>
-              ) : categoryFoods.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center px-4 bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-                  <div className="w-14 h-14 rounded-full bg-[#FFF2EB] dark:bg-[#5C381E]/10 flex items-center justify-center mb-4">
-                    <UtensilsCrossed className="h-6 w-6 text-[#5C381E]" />
-                  </div>
-                  <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1.5">
-                    No Foods Found
-                  </h3>
-                  <p className="text-xs md:text-sm text-gray-550 dark:text-gray-455 max-w-sm leading-relaxed">
-                    Currently, there are no foods available under this category. Please try exploring other categories!
-                  </p>
+            {/* Loading State, Empty State, or Foods Grid */}
+            {showRestaurantSkeleton || loadingFoods ? (
+              <LoadingSkeletonRegion label="Loading foods" className="py-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-32 bg-slate-105 dark:bg-slate-800 rounded-2xl animate-pulse" />
+                  ))}
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  {categoryFoods.map((food) => {
-                    const isVeg = food.foodType === "Veg"
-                    return (
-                      <Link
-                        key={food.itemId || food.id || food._id}
-                        to={`/user/restaurants/${food.restaurantSlug}?dish=${food.itemId || ''}`}
-                        className="block bg-white dark:bg-[#151515] rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300"
-                      >
-                        <div className="flex justify-between items-start gap-4">
-                          {/* Left details */}
-                          <div className="flex-1 min-w-0">
-                            {/* Veg/Nonveg dot */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className={`inline-flex items-center justify-center w-4 h-4 border ${isVeg ? "border-green-600" : "border-red-600"} rounded-sm p-0.5 flex-shrink-0`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${isVeg ? "bg-green-600" : "bg-red-600"}`} />
-                              </span>
-                              {/* Restaurant Name Badge */}
-                              <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                                {food.restaurantName}
-                                {Number(food.restaurant?.rating) > 0 && (
-                                  <span className="inline-flex items-center gap-0.5 text-amber-500">
-                                    ★ {Number(food.restaurant?.rating).toFixed(1)}
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-
-                            {/* Food Name */}
-                            <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base mb-1 hover:text-[#5C381E] transition-colors line-clamp-1">
-                              {food.name}
-                            </h3>
-
-                            {/* Price & Delivery Time */}
-                            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-850 dark:text-gray-200 mb-1.5">
-                              <span>₹{food.price}</span>
-                              {food.originalPrice > food.price && (
-                                <span className="text-xs text-gray-400 line-through font-normal">₹{food.originalPrice}</span>
-                              )}
-                              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-                              {food.restaurant?.deliveryTime && (
-                                <span className="text-xs text-gray-500 dark:text-gray-400 font-normal inline-flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5" /> {food.restaurant.deliveryTime}
+              </LoadingSkeletonRegion>
+            ) : categoryFoods.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center px-4 bg-[#FFFDF9]/60 dark:bg-gray-900/10 rounded-2xl border border-dashed border-[#EADBCE] dark:border-gray-800">
+                <div className="w-14 h-14 rounded-full bg-[#EDE4D8] dark:bg-[#5C381E]/20 flex items-center justify-center mb-4">
+                  <UtensilsCrossed className="h-6 w-6 text-[#5C381E] dark:text-[#E6C687]" />
+                </div>
+                <h3 className="text-base font-bold text-[#2C1810] dark:text-white mb-1.5 font-serif">
+                  No Dishes Found
+                </h3>
+                <p className="text-xs md:text-sm text-[#7C6E65] dark:text-gray-400 max-w-sm leading-relaxed">
+                  Currently, there are no foods available under this selection. Please try selecting a different category.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 md:gap-6">
+                {categoryFoods.map((food) => {
+                  const isVeg = food.foodType === "Veg"
+                  return (
+                    <Link
+                      key={food.itemId || food.id || food._id}
+                      to={`/food/user/restaurants/${food.restaurantSlug}?dish=${food.itemId || ''}`}
+                      className="block bg-[#FFFDF9] dark:bg-[#1a1410] rounded-2xl p-3.5 sm:p-4 shadow-xs border border-[#EADBCE] dark:border-white/10 hover:shadow-md hover:border-[#C5A059]/40 transition-all duration-300"
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        {/* Left details */}
+                        <div className="flex-1 min-w-0">
+                          {/* Veg/Nonveg dot */}
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`inline-flex items-center justify-center w-4 h-4 border ${isVeg ? "border-green-600" : "border-red-600"} rounded-sm p-0.5 flex-shrink-0`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${isVeg ? "bg-green-600" : "bg-red-600"}`} />
+                            </span>
+                            {/* Restaurant Name Badge */}
+                            <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400 font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                              {food.restaurantName}
+                              {Number(food.restaurant?.rating) > 0 && (
+                                <span className="inline-flex items-center gap-0.5 text-amber-500">
+                                  ★ {Number(food.restaurant?.rating).toFixed(1)}
                                 </span>
                               )}
-                            </div>
-
-                            {/* Description */}
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-3">
-                              {food.description || "Fresh and delicious preparation using quality ingredients."}
-                            </p>
+                            </span>
                           </div>
 
-                          {/* Right image */}
-                          <div className="relative flex-shrink-0 flex flex-col items-center">
-                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
-                              <img
-                                src={food.image || ""}
-                                alt={food.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => { e.target.src = "" }}
-                              />
-                            </div>
+                          {/* Food Name */}
+                          <h3 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base mb-1 hover:text-[#5C381E] transition-colors line-clamp-1">
+                            {food.name}
+                          </h3>
+
+                          {/* Price & Delivery Time */}
+                          <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-850 dark:text-gray-200 mb-1.5">
+                            <span>₹{food.price}</span>
+                            {food.originalPrice > food.price && (
+                              <span className="text-xs text-gray-400 line-through font-normal">₹{food.originalPrice}</span>
+                            )}
+                            <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+                            {food.restaurant?.deliveryTime && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400 font-normal inline-flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5" /> {food.restaurant.deliveryTime}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Description */}
+                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-3">
+                            {food.description || "Fresh and delicious preparation using quality ingredients."}
+                          </p>
+                        </div>
+
+                        {/* Right image */}
+                        <div className="relative flex-shrink-0 flex flex-col items-center">
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
+                            <img
+                              src={food.image || ""}
+                              alt={food.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => { e.target.src = "" }}
+                            />
                           </div>
                         </div>
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </section>
-          )}
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </section>
 
-          {/* ALL RESTAURANTS Section */}
-          {selectedCategory === 'all' && (
-            <section className="relative">
+          {/* ALL RESTAURANTS Section - Only if restaurants exist */}
+          {selectedCategory === 'all' && filteredAllRestaurants.length > 0 && (
+            <section className="relative mt-8">
               <h2 className="text-xs sm:text-sm md:text-base font-semibold text-gray-400 dark:text-gray-500 tracking-widest uppercase mb-4 md:mb-6">
                 ALL RESTAURANTS
               </h2>
@@ -1896,7 +1903,7 @@ export default function CategoryPage() {
                   const isFavorite = favorites.has(restaurant.id)
 
                   return (
-                    <Link key={restaurant.id} to={`/user/restaurants/${restaurantSlug}${restaurant.dishId ? `?dish=${restaurant.dishId}` : ''}`} className="h-full flex">
+                    <Link key={restaurant.id} to={`/food/user/restaurants/${restaurantSlug}${restaurant.dishId ? `?dish=${restaurant.dishId}` : ''}`} className="h-full flex">
                       <Card className="overflow-hidden cursor-pointer gap-0 border-0 dark:border-gray-800 group bg-white dark:bg-[#1a1a1a] shadow-md hover:shadow-xl transition-all duration-300 py-0 rounded-md h-full flex flex-col w-full">
                         {/* Image Section */}
                         <div className="relative h-44 sm:h-52 md:h-60 lg:h-64 xl:h-72 w-full overflow-hidden rounded-t-md flex-shrink-0">
@@ -2048,35 +2055,6 @@ export default function CategoryPage() {
                       </p>
                     )
                   )}
-                </div>
-              )}
-
-              {/* Empty State */}
-              {filteredAllRestaurants.length === 0 && (
-                <div className="text-center py-12 md:py-16">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">
-                    {searchQuery
-                      ? `No restaurants found for "${searchQuery}"`
-                      : selectedCategory && selectedCategory !== 'all' && activeFilters.size === 0
-                        ? "No restaurants available in this category"
-                        : "No restaurants found with selected filters"}
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="mt-4 md:mt-6"
-                    onClick={() => {
-                      setIsLoadingFilterResults(true)
-                      setActiveFilters(new Set())
-                      setSearchQuery("")
-                      setSortBy(null)
-                      // Trigger a gentle refresh to ensure data freshness
-                      menuEnrichmentRequestRef.current += 1
-                      setIsEnrichingMenus(false)
-                      setTimeout(() => setIsLoadingFilterResults(false), 500)
-                    }}
-                  >
-                    Clear all filters
-                  </Button>
                 </div>
               )}
             </section>

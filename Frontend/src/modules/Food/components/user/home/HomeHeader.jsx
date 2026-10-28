@@ -70,23 +70,23 @@ export default function HomeHeader({
       {/* Concept 2 Row 1: Brand (Left) | Location (Center) | Actions (Right) */}
       <div className="flex items-center justify-between gap-2">
         {/* Left: Brand Crest & Wordmark */}
-        <Link to="/food" className="flex items-center gap-2 group shrink-0">
-          <div className="w-9 h-9 rounded-xl overflow-hidden border border-[#C5A059]/40 shadow-xs bg-white shrink-0 p-0.5">
+        <Link to="/food" className="flex items-center gap-3 group shrink-0">
+          <div className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-full overflow-hidden border-2 border-[#C5A059]/60 shadow-sm bg-[#FFFDF9] shrink-0 flex items-center justify-center ring-2 ring-[#C5A059]/15">
             <img
               src="/visit-crest-gold.jpg"
               alt="Visit Restaurant"
-              className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover rounded-full scale-[1.18] group-hover:scale-125 transition-transform duration-300"
               onError={(e) => {
-                // Fallback to logo clean if crest image fails
-                e.currentTarget.src = "/visit-logo-clean.png";
+                // Fallback to bronze logo if crest image fails
+                e.currentTarget.src = "/vist-logo-bronze.png";
               }}
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-serif text-[15px] sm:text-[16px] font-black tracking-wider text-[#2C1810] leading-none uppercase">
+            <span className="font-serif text-[19px] sm:text-[20px] font-black tracking-wider text-[#2C1810] leading-none uppercase">
               VISIT
             </span>
-            <span className="text-[9px] font-bold tracking-widest text-[#C5A059] uppercase leading-none mt-1">
+            <span className="text-[10.5px] sm:text-[11px] font-bold tracking-[0.2em] text-[#C5A059] uppercase leading-none mt-1">
               EST. 1996
             </span>
           </div>
@@ -97,11 +97,11 @@ export default function HomeHeader({
           <button
             type="button"
             onClick={handleLocationClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFFDF9] border border-[#EADBCE] shadow-xs active:scale-95 hover:border-[#C5A059]/60 transition-all max-w-[150px] sm:max-w-[190px] cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[#FFFDF9] border border-[#EADBCE] shadow-xs active:scale-95 hover:border-[#C5A059]/60 transition-all max-w-[130px] sm:max-w-[170px] cursor-pointer"
             title="Change Location"
           >
             <MapPin className="h-3.5 w-3.5 text-[#C5A059] shrink-0 fill-[#C5A059]/20" />
-            <span className="text-xs font-bold text-[#2C1810] truncate leading-none">
+            <span className="text-[11px] sm:text-xs font-bold text-[#2C1810] truncate leading-none">
               {displayLocation}
             </span>
             <ChevronDown className="h-3 w-3 text-[#7C6E65] shrink-0" />

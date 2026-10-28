@@ -168,6 +168,27 @@ export const markNotificationAsRead = async ({ notificationId, ownerType, ownerI
     return notification;
 };
 
+export const markAllNotificationsAsRead = async ({ ownerType, ownerId } = {}) => {
+    const result = await FoodNotification.updateMany(
+        {
+            ownerType: normalizeOwnerType(ownerType),
+            ownerId: ensureObjectId(ownerId, 'ownerId'),
+            isRead: false,
+            dismissedAt: null
+        },
+        {
+            $set: {
+                isRead: true,
+                readAt: new Date()
+            }
+        }
+    );
+
+    return {
+        modifiedCount: Number(result?.modifiedCount || 0)
+    };
+};
+
 export const dismissNotification = async ({ notificationId, ownerType, ownerId } = {}) => {
     const notification = await FoodNotification.findOneAndUpdate(
         {

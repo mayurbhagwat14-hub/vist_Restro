@@ -305,15 +305,9 @@ export default function UserRouter() {
           <Route path="help" element={<Help />} />
           <Route path="help/orders/:orderId" element={<OrderHelp />} />
 
-          {/* Notifications - Protected (user auth) */}
-          <Route
-            path="notifications"
-            element={
-              <ProtectedRoute requiredRole="user" loginPath="/food/user/auth/login">
-                <Notifications />
-              </ProtectedRoute>
-            }
-          />
+          {/* Notifications */}
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="notification" element={<Notifications />} />
 
           {/* Wallet - Protected (user auth) */}
           <Route

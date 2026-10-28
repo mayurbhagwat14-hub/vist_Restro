@@ -84,6 +84,17 @@ export default function useNotificationInbox(module, options = {}) {
     [fetchInbox, module]
   );
 
+  const markAllAsRead = useCallback(async () => {
+    if (!module) return;
+    setItems((prev) => prev.map((item) => ({ ...item, read: true })));
+    setUnreadCount(0);
+    try {
+      await notificationAPI.markAllAsRead({ contextModule: module });
+    } catch {
+      fetchInbox();
+    }
+  }, [fetchInbox, module]);
+
   const dismiss = useCallback(
     async (id) => {
       if (!id || !module) return;
@@ -119,9 +130,10 @@ export default function useNotificationInbox(module, options = {}) {
       loading,
       refresh: fetchInbox,
       markAsRead,
+      markAllAsRead,
       dismiss,
       dismissAll,
     }),
-    [dismiss, dismissAll, fetchInbox, items, loading, markAsRead, unreadCount]
+    [dismiss, dismissAll, fetchInbox, items, loading, markAllAsRead, markAsRead, unreadCount]
   );
 }

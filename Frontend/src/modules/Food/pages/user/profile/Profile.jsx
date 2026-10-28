@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
+  Bell,
   ChevronRight,
   Wallet,
   Tag,
@@ -87,6 +88,33 @@ export default function Profile() {
   const [referralReward, setReferralReward] = useState(0);
   const [walletBalance, setWalletBalance] = useState(0);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem('food_user_notifications');
+      const list = saved ? JSON.parse(saved) : [];
+      return Array.isArray(list) ? list.filter(n => !n.read).length : 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    const handleSync = (e) => {
+      if (e?.detail?.count !== undefined) {
+        setUnreadNotifications(Number(e.detail.count) || 0);
+      } else {
+        try {
+          const saved = localStorage.getItem('food_user_notifications');
+          const list = saved ? JSON.parse(saved) : [];
+          setUnreadNotifications(Array.isArray(list) ? list.filter(n => !n.read).length : 0);
+        } catch {
+          setUnreadNotifications(0);
+        }
+      }
+    };
+    window.addEventListener("notificationsUpdated", handleSync);
+    return () => window.removeEventListener("notificationsUpdated", handleSync);
+  }, []);
 
   // Trigger web push registration when profile mounts to ensure FCM token is saved
   useEffect(() => {
@@ -545,6 +573,40 @@ export default function Profile() {
                     transition={{ duration: 0.2 }}>
                     <ChevronRight className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Link>
+
+          <Link to="/food/user/notifications" className="block">
+            <motion.div
+              whileHover={{ x: 4, scale: 1.01 }}
+              transition={{ duration: 0.2, type: "spring", stiffness: 300 }}>
+              <Card className="bg-white dark:bg-[#1a1a1a] py-0 rounded-xl shadow-sm border-0 dark:border-gray-800 cursor-pointer">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      className="bg-gray-100 dark:bg-gray-800 rounded-full p-2"
+                      whileHover={{ rotate: 15, scale: 1.1 }}
+                      transition={{ duration: 0.3 }}>
+                      <Bell className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                    </motion.div>
+                    <span className="text-base font-medium text-gray-900 dark:text-white">
+                      Notifications
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {unreadNotifications > 0 && (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#5C381E] text-white">
+                        {unreadNotifications} new
+                      </span>
+                    )}
+                    <motion.div
+                      whileHover={{ x: 4 }}
+                      transition={{ duration: 0.2 }}>
+                      <ChevronRight className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    </motion.div>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

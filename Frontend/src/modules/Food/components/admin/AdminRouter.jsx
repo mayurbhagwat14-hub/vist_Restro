@@ -118,7 +118,6 @@ const AddonActivation = lazy(() => import("@food/pages/admin/system/AddonActivat
 const LandingPageManagement = lazy(() => import("@food/pages/admin/system/LandingPageManagement"));
 // Dining Admin Removed
 const AdminLogin = lazy(() => import("@food/pages/admin/auth/AdminLogin"));
-const AdminSignup = lazy(() => import("@food/pages/admin/auth/AdminSignup"));
 const AdminForgotPassword = lazy(() => import("@food/pages/admin/auth/AdminForgotPassword"));
 
 function FeatureSettingsRouteGuard() {
@@ -205,7 +204,7 @@ export default function AdminRouter() {
         {/* Admin Auth Routes */}
         <Route path="login" element={<AuthRedirect module="admin"><AdminLogin /></AuthRedirect>} />
         <Route path="forgot-password" element={<AuthRedirect module="admin"><AdminForgotPassword /></AuthRedirect>} />
-        <Route path="signup" element={<AuthRedirect module="admin"><AdminSignup /></AuthRedirect>} />
+        <Route path="signup" element={<Navigate to="/admin/login" replace />} />
 
         {/* Protected Routes - With Layout */}
         <Route
@@ -355,6 +354,7 @@ export default function AdminRouter() {
             <Route path="3rd-party-configurations/ai" element={<AISetup />} />
             <Route path="app-web-settings" element={<AppWebSettings />} />
             <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="notification" element={<Navigate to="/admin/food/notifications" replace />} />
             <Route path="broadcast-notification" element={<NotificationBroadcast />} />
             <Route path="notification-channels" element={<NotificationChannels />} />
             <Route path="landing-page-settings/admin" element={<LandingPageSettings type="admin" />} />

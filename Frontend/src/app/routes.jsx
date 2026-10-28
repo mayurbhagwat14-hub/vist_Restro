@@ -96,6 +96,10 @@ const AppRoutes = () => {
       <Route path="/usermain/*" element={<RedirectToFood />} />
       <Route path="/profile/*" element={<RedirectToFood />} />
       <Route path="/cart/*" element={<Navigate to="/food/user/cart" replace />} />
+      <Route path="/notification" element={<Navigate to="/food/user/notifications" replace />} />
+      <Route path="/notification/*" element={<Navigate to="/food/user/notifications" replace />} />
+      <Route path="/notifications" element={<Navigate to="/food/user/notifications" replace />} />
+      <Route path="/notifications/*" element={<Navigate to="/food/user/notifications" replace />} />
       <Route path="/orders/*" element={<RedirectToFood />} />
 
       {/* Fallback 404 */}

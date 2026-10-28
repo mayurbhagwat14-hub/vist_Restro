@@ -14,7 +14,6 @@ const UserRouter = lazy(() => import("@food/components/user/UserRouter"))
 // Admin Module
 const AdminRouter = lazy(() => import("@food/components/admin/AdminRouter"))
 const AdminLogin = lazy(() => import("@food/pages/admin/auth/AdminLogin"))
-const AdminSignup = lazy(() => import("@food/pages/admin/auth/AdminSignup"))
 const AdminForgotPassword = lazy(() => import("@food/pages/admin/auth/AdminForgotPassword"))
 
 
@@ -96,11 +95,7 @@ export default function App() {
           />
           <Route
             path="admin/signup"
-            element={
-              <AuthRedirect module="admin">
-                <AdminSignup />
-              </AuthRedirect>
-            }
+            element={<Navigate to="/admin/login" replace />}
           />
           <Route
             path="admin/forgot-password"
@@ -120,6 +115,12 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Direct notification route aliases */}
+          <Route path="notification" element={<Navigate to="/food/user/notifications" replace />} />
+          <Route path="notification/*" element={<Navigate to="/food/user/notifications" replace />} />
+          <Route path="notifications" element={<Navigate to="/food/user/notifications" replace />} />
+          <Route path="notifications/*" element={<Navigate to="/food/user/notifications" replace />} />
 
           {/* Legacy Redirects & Fallbacks - use absolute path to avoid /user appended in a loop */}
           <Route path="/" element={<Navigate to="/food/user" replace />} />
