@@ -26,12 +26,11 @@ logs/
 
 # ── Scratch & Script Files (Testing/Hardcoded data) ───────────────────────────
 scratch/
-scripts/
 scratch_files/
 */scratch/
 Backend/scratch/
-*/scripts/
 */scratch_files/
+!Backend/scripts/
 
 # ── Testing & Jest Files ──────────────────────────────────────────────────────
 *.test.js
