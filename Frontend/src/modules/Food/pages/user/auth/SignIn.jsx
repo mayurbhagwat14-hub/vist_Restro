@@ -203,25 +203,14 @@ export default function SignIn() {
       <main className="w-full max-w-[460px] min-h-[100dvh] bg-[#F7EEDD] flex flex-col relative overflow-hidden">
 
         {/* 1. Top Restaurant Building Photo */}
-        <div className="relative w-full h-[48vh] min-h-[300px] max-h-[400px] shrink-0 overflow-hidden bg-[#24150A]">
+        <div className="relative w-full h-[48vh] min-h-[300px] max-h-[400px] shrink-0 overflow-hidden bg-[#F7EEDD]">
           <img
-            src="/Warmly%20Lit%20Classical%20Boutique%20Hotel.png"
+            src="/warmly-lit-hotel-transparent.png"
             alt="VISIT Restaurant"
             className="w-full h-full object-cover object-[center_60%]"
           />
           {/* Subtle dusk vignette */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/25 pointer-events-none" />
-
-          {/* Elegant S-Curve Wave Transition — matching reference exactly */}
-          <div className="absolute -bottom-[1px] left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
-            <svg
-              viewBox="0 0 1000 180"
-              preserveAspectRatio="none"
-              className="w-full h-[90px] sm:h-[100px] block text-[#F7EEDD] fill-current"
-            >
-              <path d="M 0,60 C 180,30 350,120 550,140 C 700,155 850,150 1000,145 L 1000,180 L 0,180 Z" />
-            </svg>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/20 pointer-events-none" />
         </div>
 
         {/* 2. Content Section — Logo overlaps into wave area */}
