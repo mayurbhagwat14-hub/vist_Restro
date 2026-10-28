@@ -228,13 +228,14 @@ export default function SignIn() {
             />
           </div>
 
-          {/* Welcome Back Heading — Playfair Display Italic, matching reference */}
+          {/* Welcome Back Heading — Upright Serif, matching reference media_1793177007444.png */}
           <h1
             style={{
-              fontFamily: "'Playfair Display', Georgia, 'Times New Roman', serif",
-              color: "#3B2213",
+              fontFamily: "'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif",
+              color: "#3D210F",
               fontWeight: 600,
-              fontStyle: "italic",
+              fontStyle: "normal",
+              letterSpacing: "0.01em",
             }}
             className="text-[28px] sm:text-[30px] leading-tight mb-2 text-left select-none relative z-10"
           >
