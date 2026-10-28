@@ -77,13 +77,13 @@ export default function Offers() {
   usePublicSocket(socketListeners);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 transition-colors pb-24">
       {/* Banner Section */}
       <div className="relative w-full overflow-hidden min-h-[25vh] md:min-h-[30vh]">
         {/* Back Button */}
         <button 
           onClick={goBack}
-          className="absolute top-4 left-4 md:top-6 md:left-6 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-800/60 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-gray-800/80 transition-colors"
+          className="absolute top-4 left-4 md:top-6 md:left-6 z-20 w-10 h-10 md:w-12 md:h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors border border-white/10"
         >
           <ArrowLeft className="h-5 w-5 md:h-6 md:w-6 text-white" />
         </button>
@@ -108,7 +108,7 @@ export default function Offers() {
         {error && !loading && (
           <div className="flex flex-col items-center justify-center py-20">
             <p className="text-red-500 dark:text-red-400 text-center">{error}</p>
-            <Button onClick={() => window.location.reload()} className="mt-4">Retry</Button>
+            <Button onClick={() => window.location.reload()} className="mt-4 bg-[#5C381E] text-white">Retry</Button>
           </div>
         )}
 
@@ -118,7 +118,7 @@ export default function Offers() {
             {/* Grouped Offers Sections */}
             {Object.keys(groupedOffers).length > 0 && Object.entries(groupedOffers).map(([offerText, dishes]) => (
               <section key={offerText}>
-                <h2 className="text-2xl sm:text-3xl font-black text-red-500 dark:text-red-400 text-center mb-4 tracking-wide">
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#5C381E] dark:text-[#E6C687] text-center mb-4 tracking-tight">
                   {offerText}
                 </h2>
                 
@@ -129,10 +129,10 @@ export default function Offers() {
                   {dishes.slice(0, 8).map((dish) => (
                     <Link 
                       key={dish.id} 
-                      to={`/user/restaurants/${dish.restaurantSlug}`}
+                      to={`/food/user/restaurants/${dish.restaurantSlug}`}
                       className="w-full"
                     >
-                      <div className="group">
+                      <div className="group bg-[#FFFDF9] dark:bg-[#1A1410] border border-[#EADBCE] dark:border-white/10 rounded-2xl p-3 shadow-xs hover:border-[#C5A059]/40 hover:shadow-md transition-all">
                         {/* Image Container */}
                         <div className="relative h-32 sm:h-36 rounded-xl overflow-hidden mb-2">
                           <img 
@@ -141,28 +141,28 @@ export default function Offers() {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           {/* Offer Badge */}
-                          <div className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded">
+                          <div className="absolute top-2 left-2 bg-[#5C381E] text-[#FAF5ED] text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md shadow-xs">
                             {dish.offer}
                           </div>
                         </div>
                         
                         {/* Rating Badge */}
                         <div className="flex items-center gap-1 mb-1">
-                          <div className="bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                          <div className="bg-[#3B7A27] text-white text-[11px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
                             {dish.restaurantRating?.toFixed(1) || '0.0'}
                             <Star className="h-2.5 w-2.5 fill-white" />
                           </div>
                         </div>
                         
                         {/* Restaurant Info */}
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-1">
+                        <h3 className="font-serif font-bold text-[#2C1810] dark:text-gray-100 text-sm line-clamp-1">
                           {dish.restaurantName}
                         </h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1 mb-1">
+                        <p className="text-xs text-[#7C6E65] dark:text-gray-400 line-clamp-1 mb-1">
                           {dish.dishName} - ₹{dish.discountedPrice}
                         </p>
-                        <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-xs">
-                          <Clock className="h-3 w-3" />
+                        <div className="flex items-center gap-1 text-[#7C6E65] dark:text-gray-400 text-xs">
+                          <Clock className="h-3 w-3 text-[#C5A059]" />
                           <span>{dish.deliveryTime}</span>
                         </div>
                       </div>

@@ -2268,9 +2268,9 @@ export default function Cart() {
   }
 
   return (
-    <div className="relative min-h-screen bg-slate-50 dark:bg-[#0a0a0a]">
+    <div className="relative min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 transition-colors pb-24">
       {/* Header - Sticky at top */}
-      <div className="bg-[var(--module-theme-color,#5C381E)] shadow-md sticky top-0 z-20 flex-shrink-0">
+      <div className="bg-gradient-to-r from-[#2C1810] via-[#3B2012] to-[#1F0F08] border-b border-[#C5A059]/40 shadow-sm sticky top-0 z-20 flex-shrink-0">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between px-3 md:px-6 py-2 md:py-3 border-b border-white/10">
             <div className="flex items-center gap-2 flex-1 min-w-0">

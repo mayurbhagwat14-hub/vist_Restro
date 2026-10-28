@@ -374,17 +374,17 @@ export default function Wallet() {
   }
 
   return (
-    <AnimatedPage className="min-h-screen bg-white dark:bg-[#0a0a0a] w-full overflow-x-hidden">
-      <div className="bg-white dark:bg-[#1a1a1a] sticky top-0 z-10 border-b border-gray-100 dark:border-gray-800">
+    <AnimatedPage className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 w-full overflow-x-hidden transition-colors pb-24">
+      <div className="bg-[#FAF5ED]/95 dark:bg-[#120E0C]/95 backdrop-blur-md sticky top-0 z-10 border-b border-[#EADBCE] dark:border-white/10">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 px-4 sm:px-6 md:px-8 lg:px-10 py-4 md:py-5">
             <button
               onClick={goBack}
-              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors flex-shrink-0"
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors flex-shrink-0 cursor-pointer"
             >
-              <ArrowLeft className="h-5 w-5 md:h-6 md:w-6 text-gray-700 dark:text-white" />
+              <ArrowLeft className="h-5 w-5 md:h-6 md:w-6 text-[#2C1810] dark:text-white" />
             </button>
-            <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">Wallet</h1>
+            <h1 className="font-serif text-lg md:text-xl lg:text-2xl font-bold text-[#2C1810] dark:text-white">Wallet</h1>
           </div>
         </div>
       </div>

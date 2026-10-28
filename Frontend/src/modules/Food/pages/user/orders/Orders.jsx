@@ -538,12 +538,12 @@ export default function Orders() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] pb-10">
-        <div className="bg-[var(--module-theme-color,#5C381E)] p-4 flex items-center shadow-sm sticky top-0 z-10">
-          <Link to="/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6 text-white cursor-pointer" />
+      <div className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 pb-10 transition-colors">
+        <div className="bg-gradient-to-r from-[#2C1810] via-[#3B2012] to-[#1F0F08] border-b border-[#C5A059]/40 p-4 flex items-center shadow-sm sticky top-0 z-10">
+          <Link to="/food/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
+            <ArrowLeft className="w-5 h-5 text-[#FAF5ED] cursor-pointer" />
           </Link>
-          <h1 className="ml-2 text-xl font-bold text-white">Your Orders</h1>
+          <h1 className="ml-2 font-serif text-lg sm:text-xl font-bold text-[#FAF5ED]">Your Orders</h1>
         </div>
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 text-[#5C381E] animate-spin" />
@@ -554,17 +554,17 @@ export default function Orders() {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] pb-10">
-        <div className="bg-[var(--module-theme-color,#5C381E)] p-4 flex items-center shadow-sm sticky top-0 z-10">
-          <Link to="/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6 text-white cursor-pointer" />
+      <div className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 pb-10 transition-colors">
+        <div className="bg-gradient-to-r from-[#2C1810] via-[#3B2012] to-[#1F0F08] border-b border-[#C5A059]/40 p-4 flex items-center shadow-sm sticky top-0 z-10">
+          <Link to="/food/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
+            <ArrowLeft className="w-5 h-5 text-[#FAF5ED] cursor-pointer" />
           </Link>
-          <h1 className="ml-2 text-xl font-bold text-white">Your Orders</h1>
+          <h1 className="ml-2 font-serif text-lg sm:text-xl font-bold text-[#FAF5ED]">Your Orders</h1>
         </div>
-        <div className="px-4 py-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">You haven't placed any orders yet</p>
-          <Link to="/user">
-            <button className="mt-4 text-[#5C381E] font-medium">Start Ordering</button>
+        <div className="px-4 py-16 text-center max-w-sm mx-auto">
+          <p className="text-[#7C6E65] dark:text-gray-400 font-medium">You haven't placed any orders yet</p>
+          <Link to="/food/user">
+            <button className="mt-4 px-6 py-2.5 bg-[#5C381E] hover:bg-[#482A14] text-[#FAF5ED] font-bold rounded-xl transition-all shadow-xs cursor-pointer">Start Ordering</button>
           </Link>
         </div>
       </div>
@@ -572,25 +572,25 @@ export default function Orders() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 pb-16 font-sans transition-colors">
       {/* Header */}
-      <div className="bg-[var(--module-theme-color,#5C381E)] p-4 flex items-center shadow-sm sticky top-0 z-10">
-        <Link to="/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
-          <ArrowLeft className="w-6 h-6 text-white cursor-pointer" />
+      <div className="bg-gradient-to-r from-[#2C1810] via-[#3B2012] to-[#1F0F08] border-b border-[#C5A059]/40 p-4 flex items-center shadow-sm sticky top-0 z-10">
+        <Link to="/food/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
+          <ArrowLeft className="w-5 h-5 text-[#FAF5ED] cursor-pointer" />
         </Link>
-        <h1 className="ml-2 text-xl font-bold text-white">Your Orders</h1>
+        <h1 className="ml-2 font-serif text-lg sm:text-xl font-bold text-[#FAF5ED]">Your Orders</h1>
       </div>
 
       {/* Search Bar */}
-        <div className="p-4 bg-white dark:bg-slate-900 mt-1">
-          <div className="flex items-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-sm mb-4">
-            <Search className="w-5 h-5 text-[#5C381E]" />
+        <div className="p-4 bg-[#FAF5ED] dark:bg-[#120E0C] mt-1">
+          <div className="flex items-center bg-[#FFFDF9] dark:bg-[#1A1410] border border-[#EADBCE] dark:border-white/10 rounded-xl px-3 py-2 shadow-xs mb-4">
+            <Search className="w-5 h-5 text-[#C5A059]" />
             <input
               type="text"
               placeholder="Search by restaurant or dish"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 ml-3 outline-none text-gray-600 dark:text-gray-200 bg-transparent placeholder-gray-400"
+              className="flex-1 ml-3 outline-none text-[#2C1810] dark:text-gray-200 bg-transparent placeholder-[#7C6E65] text-sm"
             />
           </div>
 
@@ -648,8 +648,8 @@ export default function Orders() {
             return (
               <div 
                 key={order.id} 
-                className="relative bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden cursor-pointer hover:border-gray-300 dark:hover:border-slate-600 transition-colors"
-                onClick={() => navigate(`/user/orders/${order.id}`)}
+                className="relative bg-[#FFFDF9] dark:bg-[#1A1410] rounded-2xl shadow-xs border border-[#EADBCE] dark:border-white/10 overflow-hidden cursor-pointer hover:border-[#C5A059]/40 hover:shadow-md transition-all"
+                onClick={() => navigate(`/food/user/orders/${order.id}`)}
               >
                 {/* Card Header: Restaurant Info */}
                 <div className="flex items-start justify-between p-4 pb-2">

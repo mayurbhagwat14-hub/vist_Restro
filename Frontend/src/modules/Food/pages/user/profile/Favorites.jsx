@@ -38,30 +38,25 @@ export default function Favorites() {
 
   if (totalFavorites === 0) {
     return (
-      <AnimatedPage className="min-h-screen bg-gradient-to-b from-yellow-50/30 via-white to-orange-50/20 dark:from-[#0a0a0a] dark:via-[#0a0a0a] dark:to-[#0a0a0a] p-4">
+      <AnimatedPage className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 p-4 transition-colors">
         <div className="max-w-4xl mx-auto space-y-6">
           <ScrollReveal>
             <div className="flex items-center gap-3 sm:gap-4">
-              <Button onClick={() => navigate(-1)} variant="ghost" size="icon" className="rounded-full h-8 w-8 sm:h-10 sm:w-10">
-                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Button onClick={() => navigate(-1)} variant="ghost" size="icon" className="rounded-full h-8 w-8 sm:h-10 sm:w-10 hover:bg-[#EADBCE]/50">
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-[#2C1810] dark:text-white" />
               </Button>
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold">My Collections</h1>
+              <h1 className="font-serif text-lg sm:text-xl md:text-2xl font-bold text-[#2C1810] dark:text-white">My Collections</h1>
             </div>
           </ScrollReveal>
-          <Card>
+          <Card className="bg-[#FFFDF9] dark:bg-[#1A1410] border border-[#EADBCE] dark:border-white/10 shadow-xs">
             <CardContent className="py-12 text-center">
               <Heart
-                className="h-16 w-16 mx-auto mb-4"
-                style={{ color: "var(--module-theme-color, #5C381E)" }}
+                className="h-16 w-16 mx-auto mb-4 text-[#C5A059] opacity-70"
               />
-              <p className="text-muted-foreground text-lg mb-4">You haven't added any items to your collections yet</p>
-              <Link to="/user">
+              <p className="text-[#7C6E65] dark:text-gray-400 text-lg mb-4 font-medium">You haven't added any items to your collections yet</p>
+              <Link to="/food/user">
                 <Button
-                  className="text-white border-0"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(var(--module-theme-rgb,92, 56, 30),0.92), var(--module-theme-color,#5C381E))",
-                    boxShadow: "0 8px 18px rgba(var(--module-theme-rgb,92, 56, 30),0.25)",
-                  }}
+                  className="bg-[#5C381E] hover:bg-[#482A14] text-[#FAF5ED] font-bold rounded-xl shadow-xs"
                 >
                   Explore Items
                 </Button>
@@ -74,17 +69,17 @@ export default function Favorites() {
   }
 
   return (
-    <AnimatedPage className="min-h-screen bg-gradient-to-b from-yellow-50/30 via-white to-orange-50/20 dark:from-[#0a0a0a] dark:via-[#0a0a0a] dark:to-[#0a0a0a] p-4">
+    <AnimatedPage className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 p-4 transition-colors">
       <div className="max-w-6xl mx-auto space-y-6">
         <ScrollReveal>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <Button onClick={() => navigate(-1)} variant="ghost" size="icon" className="rounded-full h-8 w-8 sm:h-10 sm:w-10">
-                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Button onClick={() => navigate(-1)} variant="ghost" size="icon" className="rounded-full h-8 w-8 sm:h-10 sm:w-10 hover:bg-[#EADBCE]/50">
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-[#2C1810] dark:text-white" />
               </Button>
               <div>
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold">My Collections</h1>
-                <p className="text-gray-700 dark:text-gray-300 mt-1 text-sm font-semibold">
+                <h1 className="font-serif text-lg sm:text-xl md:text-2xl font-bold text-[#2C1810] dark:text-white">My Collections</h1>
+                <p className="text-[#7C6E65] dark:text-gray-400 mt-1 text-sm font-semibold">
                   {dishFavorites.length || 0} {dishFavorites.length === 1 ? "item" : "items"}
                 </p>
               </div>
@@ -93,7 +88,7 @@ export default function Favorites() {
         </ScrollReveal>
 
         {/* Unified Filter Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-800 pb-2 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 mb-6 border-b border-[#EADBCE] dark:border-white/10 pb-2 overflow-x-auto scrollbar-hide">
           {[
             { id: "all", label: `All (${dishFavorites.length})` },
             { id: "food", label: `Food (${dishFavorites.filter(d => (d.type || 'food') === 'food').length})` },
@@ -105,9 +100,9 @@ export default function Favorites() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 font-semibold text-xs whitespace-nowrap transition-colors rounded-lg ${isSelected
-                    ? "bg-[#5C381E] text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-855"
+                className={`px-4 py-2 font-semibold text-xs whitespace-nowrap transition-all rounded-xl cursor-pointer ${isSelected
+                    ? "bg-[#5C381E] text-white shadow-xs font-bold"
+                    : "bg-[#FFFDF9] dark:bg-[#1A1410] border border-[#EADBCE] dark:border-white/10 text-[#7C6E65] dark:text-gray-400 hover:text-[#5C381E] hover:border-[#C5A059]"
                   }`}
               >
                 {tab.label}

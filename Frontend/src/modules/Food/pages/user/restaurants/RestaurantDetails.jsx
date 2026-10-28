@@ -2111,24 +2111,24 @@ function RestaurantDetailsContent() {
   return (
     <AnimatedPage
       id="scrollingelement"
-      className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col"
+      className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 flex flex-col transition-colors"
     >
       {/* Sticky Header - Back, Restaurant Name, Search */}
-      <div className="sticky top-0 z-40 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-2.5 sm:py-3 border-b border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+      <div className="sticky top-0 z-40 bg-[#FAF5ED]/95 dark:bg-[#120E0C]/95 backdrop-blur-md px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-2.5 sm:py-3 border-b border-[#EADBCE] dark:border-white/10 shadow-xs transition-colors">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           {/* Left: Back Button + Restaurant Name */}
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full h-10 w-10 shrink-0 border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-[#1a1a1a]"
+              className="rounded-full h-10 w-10 shrink-0 border-[#EADBCE] dark:border-white/10 shadow-xs bg-[#FFFDF9] dark:bg-[#1A1410] text-[#2C1810] dark:text-white hover:bg-black/5"
               onClick={goBack}
               aria-label="Go back"
             >
-              <ArrowLeft className="h-5 w-5 text-gray-900 dark:text-white" />
+              <ArrowLeft className="h-5 w-5 text-[#2C1810] dark:text-white" />
             </Button>
             <div className="min-w-0">
-              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate leading-tight">
+              <h2 className="font-serif text-base sm:text-lg font-bold text-[#2C1810] dark:text-white truncate leading-tight">
                 {restaurant?.name || "Restaurant"}
               </h2>
               {restaurant?.deliveryTime && (

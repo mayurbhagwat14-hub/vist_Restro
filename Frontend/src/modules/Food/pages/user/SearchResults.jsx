@@ -827,7 +827,7 @@ export default function SearchResults() {
   const shouldShowGrayscale = false
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 transition-colors pb-24">
       {/* Informative out-of-service banner */}
       {isOutOfService && (
         <div className="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800/40 px-4 py-2.5">
@@ -841,7 +841,7 @@ export default function SearchResults() {
       )}
 
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-white dark:bg-[#1a1a1a] shadow-sm">
+      <div className="sticky top-0 z-20 bg-[#FAF5ED]/95 dark:bg-[#120E0C]/95 backdrop-blur-md border-b border-[#EADBCE] dark:border-white/10 shadow-xs">
         <div className="max-w-7xl mx-auto">
           {/* Search Bar with Back Button */}
           <div className="flex items-center gap-2 px-3 sm:px-4 md:px-6 lg:px-8 py-3 md:py-4 border-b border-gray-100 dark:border-gray-800">
