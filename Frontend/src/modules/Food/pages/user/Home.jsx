@@ -2810,17 +2810,7 @@ export default function Home() {
                   }}
                 />
 
-                {/* 2. Quick Cuisine Chips (Dynamic Admin Categories with Pure Veg Toggle) */}
-                <CuisineChipsRow
-                  categories={displayCategories}
-                  vegMode={vegMode}
-                  onVegModeToggle={handleVegModeChange}
-                  onCuisineSelect={(item) => {
-                    navigate(`/food/user/category/${item.slug || item.id}`);
-                  }}
-                />
-
-                {/* 3. Popular Categories (Dual Dark Vignette Cards) */}
+                {/* 2. Popular Categories (Dual Dark Vignette Cards) */}
                 <div id="popular-categories-section">
                   <PopularHeritageCategories
                     categories={displayCategories}
@@ -2830,14 +2820,14 @@ export default function Home() {
                   />
                 </div>
 
-                {/* 4. Top Picks Section */}
+                {/* 3. Categories Section */}
                 <div
                   id="categories-section"
                   className="px-4 md:px-0 py-2 space-y-2 bg-transparent"
                 >
                   <div className="flex items-center justify-between min-w-0">
                     <h2 className="font-serif text-base sm:text-lg font-bold text-[#2C1810] dark:text-white min-w-0 flex-shrink leading-tight">
-                      Top Picks
+                      Categories
                     </h2>
                     <Link
                       to="/food/user/categories"
