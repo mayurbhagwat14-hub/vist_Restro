@@ -191,30 +191,28 @@ export default function SignIn() {
   }
 
   return (
-    <AnimatedPage className="min-h-[100dvh] w-full bg-[#F7EEDD] flex flex-col items-center justify-start relative overflow-x-hidden selection:bg-[#6E3B13]/20 selection:text-[#3B2213]">
+    <AnimatedPage className="min-h-[100dvh] w-full bg-[#F6EBD7] flex flex-col items-center justify-start relative overflow-x-hidden selection:bg-[#6E3B13]/20 selection:text-[#3B2213]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
         html, body {
-          background-color: #F7EEDD !important;
+          background-color: #F6EBD7 !important;
         }
       `}</style>
 
       {/* Main Container - Edge to Edge, No Side Gaps */}
-      <main className="w-full max-w-[460px] min-h-[100dvh] bg-[#F7EEDD] flex flex-col relative overflow-hidden">
+      <main className="w-full max-w-[460px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative overflow-hidden">
 
         {/* 1. Top Restaurant Building Photo */}
-        <div className="relative w-full h-[48vh] min-h-[300px] max-h-[400px] shrink-0 overflow-hidden bg-[#F7EEDD]">
+        <div className="relative w-full shrink-0 overflow-hidden bg-[#F6EBD7]">
           <img
-            src="/warmly-lit-hotel-transparent.png"
+            src="/image%20copy.png"
             alt="VISIT Restaurant"
-            className="w-full h-full object-cover object-[center_60%]"
+            className="w-full h-auto block select-none pointer-events-none"
           />
-          {/* Subtle dusk vignette */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/20 pointer-events-none" />
         </div>
 
         {/* 2. Content Section — Logo overlaps into wave area */}
-        <div className="flex-1 flex flex-col px-7 relative z-20 -mt-16 pb-8">
+        <div className="flex-1 flex flex-col px-7 relative z-20 -mt-16 sm:-mt-20 pb-8">
 
           {/* Botanical Leaf Decorations */}
           <BotanicalLeavesLeft className="absolute -left-4 top-8 w-28 h-44 sm:w-32 sm:h-48 z-0 opacity-60" />

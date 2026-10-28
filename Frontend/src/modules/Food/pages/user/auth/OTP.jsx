@@ -378,13 +378,16 @@ export default function OTP() {
   }
 
   return (
-    <AnimatedPage className="min-h-[100dvh] w-full bg-[#F7EEDD] flex flex-col items-center justify-start relative overflow-x-hidden selection:bg-[#6E3B13]/20 selection:text-[#3B2213]">
+    <AnimatedPage className="min-h-[100dvh] w-full bg-[#F6EBD7] flex flex-col items-center justify-start relative overflow-x-hidden selection:bg-[#6E3B13]/20 selection:text-[#3B2213]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
+        html, body {
+          background-color: #F6EBD7 !important;
+        }
       `}</style>
 
       {/* Main Container - Responsive Mobile Canvas */}
-      <main className="w-full max-w-[420px] min-h-[100dvh] bg-[#F7EEDD] flex flex-col relative shadow-[0_0_50px_rgba(59,34,19,0.06)] pb-8 overflow-hidden">
+      <main className="w-full max-w-[420px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative shadow-[0_0_50px_rgba(59,34,19,0.06)] pb-8 overflow-hidden">
 
         {/* 1. Restaurant Building Photograph with Ambient Lighting */}
         <div className="relative w-full h-[290px] sm:h-[320px] shrink-0 overflow-hidden bg-[#24150A]">
@@ -410,7 +413,7 @@ export default function OTP() {
             <svg
               viewBox="0 0 1000 160"
               preserveAspectRatio="none"
-              className="w-full h-[70px] sm:h-[82px] block text-[#F7EEDD] fill-current"
+              className="w-full h-[70px] sm:h-[82px] block text-[#F6EBD7] fill-current"
             >
               <path d="M 0,38 C 220,68 440,128 780,145 C 890,150 960,147 1000,144 L 1000,160 L 0,160 Z" />
             </svg>
