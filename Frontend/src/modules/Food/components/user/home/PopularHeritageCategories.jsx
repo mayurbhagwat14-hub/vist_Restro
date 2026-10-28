@@ -105,15 +105,15 @@ export default function PopularHeritageCategories({ categories = [], onSelectCat
               loading="lazy"
             />
 
-            {/* Dark Vignette Overlay for Crisp Typography */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+            {/* Dark Vignette Overlay for Crisp Typography - clear at top, rich contrast at bottom */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 via-40% to-transparent transition-opacity duration-300" />
 
             {/* Card Content (Bottom Left) */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 flex flex-col justify-end">
-              <span className="font-serif text-lg sm:text-xl font-bold text-white tracking-wide leading-tight drop-shadow-sm group-hover:text-[#E2B755] transition-colors">
+            <div className="absolute bottom-0 left-0 right-0 p-2.5 xs:p-3 flex flex-col justify-end">
+              <span className="font-serif text-[13px] xs:text-[13.5px] sm:text-[15px] font-bold text-white tracking-wide leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] group-hover:text-[#E2B755] transition-colors line-clamp-2">
                 {cat.name}
               </span>
-              <span className="text-[11px] sm:text-xs font-medium text-white/80 line-clamp-1 mt-0.5">
+              <span className="text-[10px] xs:text-[10.5px] sm:text-[11px] font-medium text-[#F7EEDD]/90 tracking-wide line-clamp-1 mt-0.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
                 {cat.subtitle}
               </span>
             </div>
