@@ -193,7 +193,7 @@ export default function SignIn() {
   return (
     <AnimatedPage className="min-h-[100dvh] w-full bg-[#F6EBD7] flex flex-col items-center justify-start relative overflow-x-hidden selection:bg-[#6E3B13]/20 selection:text-[#3B2213]">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
         html, body {
           background-color: #F6EBD7 !important;
         }
@@ -228,15 +228,15 @@ export default function SignIn() {
             />
           </div>
 
-          {/* Welcome Back Heading — Clean, elegant modern Outfit typography */}
+          {/* Welcome Back Heading — Luxury Heritage Hospitality Serif */}
           <h1
             style={{
-              fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-              color: "#4A2E18",
-              fontWeight: 600,
-              letterSpacing: "-0.015em",
+              fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+              color: "#381E0D",
+              fontWeight: 700,
+              letterSpacing: "-0.01em",
             }}
-            className="text-[26px] sm:text-[28px] leading-tight mb-2 text-left select-none relative z-10"
+            className="text-[31px] sm:text-[33px] leading-[1.12] mb-1.5 text-left select-none relative z-10"
           >
             Welcome Back
           </h1>
