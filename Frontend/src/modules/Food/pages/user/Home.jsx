@@ -2837,7 +2837,7 @@ export default function Home() {
                     </Link>
                   </div>
                   {/* Categories Horizontal Slider */}
-                  <div className="flex overflow-x-auto gap-2.5 sm:gap-3.5 pb-1 scrollbar-hide -mx-4 px-4 mask-edge-fade items-start">
+                  <div className="flex overflow-x-auto gap-2 sm:gap-2.5 pb-1 scrollbar-hide -mx-4 px-4 mask-edge-fade items-start">
                     {(displayCategories.length > 8 ? displayCategories.slice(0, 8) : displayCategories).map((category, index) => {
                       const categoryImage = normalizeImageUrl(category.image || category.imageUrl) || category.image;
                       return (
@@ -2847,9 +2847,9 @@ export default function Home() {
                             const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-");
                             navigate(`/food/user/category/${slug}`);
                           }}
-                          className="flex-shrink-0 flex flex-col items-center gap-1.5 group w-[74px] xs:w-[78px] sm:w-[86px] md:w-[94px] cursor-pointer"
+                          className="flex-shrink-0 flex flex-col items-center gap-1 group w-[48px] xs:w-[52px] sm:w-[56px] cursor-pointer"
                         >
-                          <div className="relative w-[68px] h-[68px] xs:w-[72px] xs:h-[72px] sm:w-[80px] sm:h-[80px] md:w-[86px] md:h-[86px] shrink-0 aspect-square rounded-full overflow-hidden shadow-xs border-2 border-white dark:border-neutral-800 ring-1 ring-[#EADBCE] dark:ring-neutral-800 bg-white dark:bg-neutral-900 group-hover:ring-[#C5A059] group-hover:shadow-sm group-active:scale-95 transition-all duration-300 flex items-center justify-center">
+                          <div className="relative w-[44px] h-[44px] xs:w-[48px] xs:h-[48px] sm:w-[52px] sm:h-[52px] shrink-0 aspect-square rounded-full overflow-hidden shadow-xs border-[1.5px] border-white dark:border-neutral-800 ring-1 ring-[#EADBCE] dark:ring-neutral-800 bg-white dark:bg-neutral-900 group-hover:ring-[#C5A059] group-hover:shadow-sm group-active:scale-95 transition-all duration-300 flex items-center justify-center">
                             <img
                               src={categoryImage}
                               alt={category.name}
@@ -2857,7 +2857,7 @@ export default function Home() {
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 pointer-events-none"
                             />
                           </div>
-                          <span className="text-[11px] xs:text-xs sm:text-[13px] font-semibold text-[#2C1810] dark:text-gray-200 group-hover:text-[#C5A059] text-center leading-tight line-clamp-2 w-full px-0.5 tracking-tight capitalize">
+                          <span className="text-[9.5px] xs:text-[10px] sm:text-[10.5px] font-semibold text-[#2C1810] dark:text-gray-200 group-hover:text-[#C5A059] text-center leading-[1.15] line-clamp-2 w-full px-0.5 tracking-tight capitalize">
                             {category.name}
                           </span>
                         </div>
@@ -2866,12 +2866,12 @@ export default function Home() {
                     {displayCategories.length > 8 && (
                       <div
                         onClick={() => navigate("/food/user/categories")}
-                        className="flex-shrink-0 flex flex-col items-center justify-center gap-1 group w-[68px] xs:w-[72px] sm:w-[78px] cursor-pointer pt-3"
+                        className="flex-shrink-0 flex flex-col items-center justify-center gap-1 group w-[48px] xs:w-[52px] cursor-pointer"
                       >
-                        <div className="w-11 h-11 xs:w-12 xs:h-12 rounded-full bg-white dark:bg-zinc-800 border border-[#EADBCE] flex items-center justify-center group-hover:bg-[#C5A059] group-active:scale-90 transition-all duration-300 shadow-xs">
-                          <ArrowRight className="w-4 h-4 text-[#2C1810] dark:text-gray-300 group-hover:text-white transition-colors" />
+                        <div className="w-[44px] h-[44px] xs:w-[48px] xs:h-[48px] rounded-full bg-white dark:bg-zinc-800 border border-[#EADBCE] flex items-center justify-center group-hover:bg-[#C5A059] group-active:scale-90 transition-all duration-300 shadow-xs">
+                          <ArrowRight className="w-3.5 h-3.5 text-[#2C1810] dark:text-gray-300 group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-[11px] xs:text-xs font-semibold text-[#7C6E65] dark:text-gray-300 group-hover:text-[#C5A059] text-center leading-tight">
+                        <span className="text-[9.5px] xs:text-[10px] font-semibold text-[#7C6E65] dark:text-gray-300 group-hover:text-[#C5A059] text-center leading-tight">
                           View All
                         </span>
                       </div>
@@ -2940,9 +2940,9 @@ export default function Home() {
                                 const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-");
                                 navigate(`/food/user/category/${slug}`);
                               }}
-                              className="flex-shrink-0 flex flex-col items-center gap-0.5 group w-[58px] xs:w-[64px] sm:w-[70px] cursor-pointer"
+                              className="flex-shrink-0 flex flex-col items-center gap-0.5 group w-[48px] xs:w-[52px] sm:w-[56px] cursor-pointer"
                             >
-                              <div className="relative w-14 h-14 xs:w-15 xs:h-15 sm:w-16 sm:h-16 shrink-0 aspect-square rounded-full overflow-hidden shadow-sm border-2 border-white dark:border-neutral-800 ring-1 ring-gray-200 dark:ring-gray-800 bg-gray-50 dark:bg-neutral-900 group-hover:ring-[#5C381E] group-hover:shadow-md group-active:scale-95 transition-all duration-300 flex items-center justify-center">
+                              <div className="relative w-[40px] h-[40px] xs:w-[44px] xs:h-[44px] sm:w-[48px] sm:h-[48px] shrink-0 aspect-square rounded-full overflow-hidden shadow-xs border-[1.5px] border-white dark:border-neutral-800 ring-1 ring-gray-200 dark:ring-gray-800 bg-gray-50 dark:bg-neutral-900 group-hover:ring-[#5C381E] group-hover:shadow-sm group-active:scale-95 transition-all duration-300 flex items-center justify-center">
                                 <img
                                   src={categoryImage}
                                   alt={category.name}
@@ -2950,7 +2950,7 @@ export default function Home() {
                                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 pointer-events-none"
                                 />
                               </div>
-                              <span className="text-[10px] xs:text-[11px] font-semibold text-gray-800 dark:text-gray-200 group-hover:text-[#5C381E] text-center leading-tight line-clamp-1 w-full px-0.5 tracking-tight capitalize">
+                              <span className="text-[9.5px] xs:text-[10px] font-semibold text-gray-800 dark:text-gray-200 group-hover:text-[#5C381E] text-center leading-[1.15] line-clamp-1 w-full px-0.5 tracking-tight capitalize">
                                 {category.name}
                               </span>
                             </div>
@@ -2959,12 +2959,12 @@ export default function Home() {
                         {displayCategories.length > 8 && (
                           <div
                             onClick={() => navigate("/food/user/categories")}
-                            className="flex-shrink-0 flex flex-col items-center justify-center gap-0.5 group w-[52px] xs:w-[58px] cursor-pointer pt-2"
+                            className="flex-shrink-0 flex flex-col items-center justify-center gap-0.5 group w-[48px] xs:w-[52px] cursor-pointer"
                           >
-                            <div className="w-8 h-8 xs:w-9 xs:h-9 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#5C381E] group-active:scale-90 transition-all duration-300">
+                            <div className="w-[40px] h-[40px] xs:w-[44px] xs:h-[44px] rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#5C381E] group-active:scale-90 transition-all duration-300">
                               <ArrowRight className="w-3.5 h-3.5 text-gray-600 dark:text-gray-300 group-hover:text-white transition-colors" />
                             </div>
-                            <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 group-hover:text-[#5C381E] text-center leading-tight">
+                            <span className="text-[9.5px] xs:text-[10px] font-semibold text-gray-700 dark:text-gray-300 group-hover:text-[#5C381E] text-center leading-tight">
                               View All
                             </span>
                           </div>

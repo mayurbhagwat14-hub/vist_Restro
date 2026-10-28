@@ -114,26 +114,26 @@ export default function BottomNavigation() {
   const activeProfile = pathname.includes("/user/profile") || (pathname.includes("/auth/login") && location.search.includes("profile"));
 
   return (
-    <div className={`md:hidden fixed bottom-6 left-5 right-5 z-50 pointer-events-none hide-on-keyboard ${isKeyboardVisible ? 'hidden' : ''}`}>
-      <div className="flex items-center justify-around h-auto px-3 py-2 bg-[#FAF6F0]/95 dark:bg-[#1a1410]/95 backdrop-blur-[20px] border border-[#EADBCE] dark:border-white/10 rounded-full shadow-[0_16px_36px_rgba(44,24,16,0.12)] pointer-events-auto">
+    <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 w-full bg-[#FAF6F0]/98 dark:bg-[#1a1410]/98 backdrop-blur-xl border-t border-[#EADBCE] dark:border-white/10 shadow-[0_-4px_20px_rgba(44,24,16,0.06)] hide-on-keyboard ${isKeyboardVisible ? 'hidden' : ''}`}>
+      <div className="flex items-center justify-around h-[58px] max-w-lg mx-auto px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
 
         {/* Home Tab */}
         <Link
           to={activeModule.path}
-          className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeHome
-              ? "bg-[#EDE4D8] dark:bg-white/10 text-[#5C381E] dark:text-[#E6C687]"
-              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
+          className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-1 px-1 transition-all duration-200 relative rounded-xl ${activeHome
+              ? "text-[#5C381E] dark:text-[#E6C687]"
+              : "text-[#7C6E65] dark:text-gray-400 hover:text-[#5C381E]"
             }`}
         >
-          <div className="relative">
+          <div className={`p-1 rounded-xl transition-colors ${activeHome ? "bg-[#EDE4D8] dark:bg-white/10" : ""}`}>
             <Home
-              className={`h-5 w-5 transition-transform duration-300 ${activeHome ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
+              className={`h-5 w-5 transition-transform duration-200 ${activeHome ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
                 }`}
               strokeWidth={activeHome ? 2.4 : 1.9}
             />
           </div>
           <span
-            className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeHome ? "text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"
+            className={`text-[10px] tracking-tight transition-all ${activeHome ? "text-[#5C381E] dark:text-[#E6C687] font-bold" : "text-[#7C6E65] dark:text-gray-400 font-medium"
               }`}
           >
             Home
@@ -143,20 +143,20 @@ export default function BottomNavigation() {
         {/* Menu Tab */}
         <Link
           to={categoryPath}
-          className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeCat
-              ? "bg-[#EDE4D8] dark:bg-white/10 text-[#5C381E] dark:text-[#E6C687]"
-              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
+          className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-1 px-1 transition-all duration-200 relative rounded-xl ${activeCat
+              ? "text-[#5C381E] dark:text-[#E6C687]"
+              : "text-[#7C6E65] dark:text-gray-400 hover:text-[#5C381E]"
             }`}
         >
-          <div className="relative">
+          <div className={`p-1 rounded-xl transition-colors ${activeCat ? "bg-[#EDE4D8] dark:bg-white/10" : ""}`}>
             <UtensilsCrossed
-              className={`h-5 w-5 transition-transform duration-300 ${activeCat ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
+              className={`h-5 w-5 transition-transform duration-200 ${activeCat ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
                 }`}
               strokeWidth={activeCat ? 2.4 : 1.9}
             />
           </div>
           <span
-            className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeCat ? "text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"
+            className={`text-[10px] tracking-tight transition-all ${activeCat ? "text-[#5C381E] dark:text-[#E6C687] font-bold" : "text-[#7C6E65] dark:text-gray-400 font-medium"
               }`}
           >
             Menu
@@ -166,20 +166,20 @@ export default function BottomNavigation() {
         {/* Orders Tab */}
         <Link
           to={ordersDestination}
-          className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeOrders
-              ? "bg-[#EDE4D8] dark:bg-white/10 text-[#5C381E] dark:text-[#E6C687]"
-              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
+          className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-1 px-1 transition-all duration-200 relative rounded-xl ${activeOrders
+              ? "text-[#5C381E] dark:text-[#E6C687]"
+              : "text-[#7C6E65] dark:text-gray-400 hover:text-[#5C381E]"
             }`}
         >
-          <div className="relative">
+          <div className={`p-1 rounded-xl transition-colors ${activeOrders ? "bg-[#EDE4D8] dark:bg-white/10" : ""}`}>
             <ClipboardList
-              className={`h-5 w-5 transition-transform duration-300 ${activeOrders ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
+              className={`h-5 w-5 transition-transform duration-200 ${activeOrders ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
                 }`}
               strokeWidth={activeOrders ? 2.4 : 1.9}
             />
           </div>
           <span
-            className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeOrders ? "text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"
+            className={`text-[10px] tracking-tight transition-all ${activeOrders ? "text-[#5C381E] dark:text-[#E6C687] font-bold" : "text-[#7C6E65] dark:text-gray-400 font-medium"
               }`}
           >
             Orders
@@ -189,20 +189,20 @@ export default function BottomNavigation() {
         {/* Profile Tab */}
         <Link
           to={profileDestination}
-          className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeProfile
-              ? "bg-[#EDE4D8] dark:bg-white/10 text-[#5C381E] dark:text-[#E6C687]"
-              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
+          className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-1 px-1 transition-all duration-200 relative rounded-xl ${activeProfile
+              ? "text-[#5C381E] dark:text-[#E6C687]"
+              : "text-[#7C6E65] dark:text-gray-400 hover:text-[#5C381E]"
             }`}
         >
-          <div className="relative">
+          <div className={`p-1 rounded-xl transition-colors ${activeProfile ? "bg-[#EDE4D8] dark:bg-white/10" : ""}`}>
             <User
-              className={`h-5 w-5 transition-transform duration-300 ${activeProfile ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
+              className={`h-5 w-5 transition-transform duration-200 ${activeProfile ? "scale-105 text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400"
                 }`}
               strokeWidth={activeProfile ? 2.4 : 1.9}
             />
           </div>
           <span
-            className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeProfile ? "text-[#5C381E] dark:text-[#E6C687]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"
+            className={`text-[10px] tracking-tight transition-all ${activeProfile ? "text-[#5C381E] dark:text-[#E6C687] font-bold" : "text-[#7C6E65] dark:text-gray-400 font-medium"
               }`}
           >
             Profile

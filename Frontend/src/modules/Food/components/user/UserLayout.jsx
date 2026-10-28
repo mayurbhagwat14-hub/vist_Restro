@@ -272,7 +272,7 @@ export default function UserLayout() {
                 <div className="hidden md:block">
                   {showDesktopNavbar && <DesktopNavbar />}
                 </div>
-                <main className={showDesktopNavbar ? "md:pt-32" : ""}>
+                <main className={`${showDesktopNavbar ? "md:pt-32" : ""} ${showBottomNav ? "pb-20 md:pb-0" : ""}`}>
                   <Outlet />
                 </main>
                 {showBottomNav && <BottomNavigation />}
