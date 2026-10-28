@@ -340,11 +340,20 @@ export default function OTP() {
       const user = verifiedData.user
       const normalizedName = trimmed.replace(/\s+/g, " ")
 
-      await apiClient.put(
-        "/auth/profile",
-        { name: normalizedName },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      )
+      try {
+        await apiClient.put(
+          "/auth/profile",
+          { name: normalizedName },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        )
+      } catch (putErr) {
+        // Fallback to /food/user/profile
+        await apiClient.patch(
+          "/food/user/profile",
+          { name: normalizedName },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        )
+      }
 
       setUserAuthData("user", accessToken, { ...user, name: normalizedName }, refreshToken)
       scheduleProactiveRefresh("user")
@@ -379,80 +388,72 @@ export default function OTP() {
   return (
     <AnimatedPage className="min-h-[100dvh] w-full bg-[#F6EBD7] flex flex-col items-center justify-start relative overflow-x-hidden selection:bg-[#6E3B13]/20 selection:text-[#3B2213]">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
         html, body {
           background-color: #F6EBD7 !important;
         }
+        .page-serif-heading {
+          font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
+          color: #3D210F !important;
+          font-weight: 600 !important;
+          font-style: normal !important;
+          letter-spacing: 0.01em !important;
+        }
       `}</style>
 
-      {/* Main Container - Responsive Mobile Canvas */}
-      <main className="w-full max-w-[420px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative shadow-[0_0_50px_rgba(59,34,19,0.06)] pb-8 overflow-hidden">
+      {/* Main Container - Edge to Edge, No Side Gaps */}
+      <main className="w-full max-w-[460px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative overflow-hidden pb-8">
 
-        {/* 1. Restaurant Building Photograph with Ambient Lighting */}
-        <div className="relative w-full h-[290px] sm:h-[320px] shrink-0 overflow-hidden bg-[#24150A]">
-          <img
-            src="/visit-building.png"
-            alt="VISIT Restaurant"
-            className="w-full h-full object-cover object-[center_68%] scale-[1.04]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30 pointer-events-none" />
-
+        {/* 1. Top Restaurant Building Photo */}
+        <div className="relative w-full shrink-0 overflow-hidden bg-[#F6EBD7]">
           {/* Top Left Return Button */}
           <button
             type="button"
             onClick={() => navigate("/food/user/auth/login")}
-            className="absolute top-4 left-4 z-20 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 transition-all cursor-pointer shadow-md"
+            className="absolute top-4 left-4 z-30 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 transition-all cursor-pointer shadow-md"
             title="Back to login"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
 
-          {/* Elegant Diagonal S-Curve Wave matching Image 1 */}
-          <div className="absolute -bottom-[1px] left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
-            <svg
-              viewBox="0 0 1000 160"
-              preserveAspectRatio="none"
-              className="w-full h-[70px] sm:h-[82px] block text-[#F6EBD7] fill-current"
-            >
-              <path d="M 0,38 C 220,68 440,128 780,145 C 890,150 960,147 1000,144 L 1000,160 L 0,160 Z" />
-            </svg>
-          </div>
+          <img
+            src="/image%20copy.png"
+            alt="VISIT Restaurant"
+            className="w-full h-auto block select-none pointer-events-none"
+          />
         </div>
 
         {/* 2. Main OTP Content Section */}
-        <div className="flex-1 flex flex-col items-center px-6 sm:px-7 relative z-20 -mt-6">
+        <div className="flex-1 flex flex-col px-7 relative z-20 -mt-6 sm:-mt-8">
 
           {/* Delicate Botanical Illustrations */}
-          <BotanicalLeavesLeft className="absolute -left-3 top-0 w-32 h-52 sm:w-36 sm:h-56 z-0 opacity-70" />
-          <BotanicalLeavesRight className="absolute -right-3 top-36 w-32 h-52 sm:w-36 sm:h-56 z-0 opacity-70" />
-          <BotanicalLeavesRight className="absolute -right-3 bottom-0 w-28 h-44 sm:w-32 sm:h-48 z-0 opacity-55" />
+          <BotanicalLeavesLeft className="absolute -left-4 top-8 w-28 h-44 sm:w-32 sm:h-48 z-0 opacity-60" />
+          <BotanicalLeavesRight className="absolute -right-4 top-2 w-28 h-44 sm:w-32 sm:h-48 z-0 opacity-60" />
+          <BotanicalLeavesLeft className="absolute -left-6 bottom-4 w-24 h-38 sm:w-28 sm:h-42 z-0 opacity-40" />
 
           {/* VISIT RESTAURANT Logo Emblem Badge */}
-          <div className="relative z-10 mb-2 select-none flex justify-center">
+          <div className="relative z-10 mb-3 select-none flex justify-center">
             <img
-              src="/visit-logo.png"
+              src="/visit-logo.png?v=3"
               alt="VISIT RESTAURANT EST. 1996"
-              className="w-[145px] h-[145px] sm:w-[160px] sm:h-[160px] object-contain drop-shadow-[0_8px_18px_rgba(74,44,17,0.08)]"
+              className="w-[140px] h-[130px] sm:w-[155px] sm:h-[145px] object-contain drop-shadow-[0_4px_14px_rgba(74,44,17,0.12)]"
             />
           </div>
 
           {!showNameInput ? (
             <>
-              {/* Heading — Clean, elegant modern Outfit typography */}
+              {/* Heading — Luxury Upright Serif */}
               <h1
-                style={{
-                  fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                  color: "#4A2E18",
-                  fontWeight: 600,
-                  letterSpacing: "-0.015em",
-                }}
-                className="text-[25px] sm:text-[27px] leading-tight mb-2 text-center select-none"
+                className="page-serif-heading font-serif-editorial text-[26px] sm:text-[28px] leading-tight mb-2 text-center select-none relative z-10"
               >
                 Verify Your Number
               </h1>
 
               {/* Subtitle with Number Badge and Edit Button */}
-              <p className="text-xs sm:text-[13px] text-[#7E6C5E] text-center max-w-[280px] sm:max-w-[320px] mb-2 leading-relaxed select-none">
+              <p
+                style={{ fontFamily: "'Outfit', sans-serif" }}
+                className="text-xs sm:text-[13.5px] text-[#7E6D5E] text-center max-w-[280px] sm:max-w-[320px] mb-2 leading-relaxed select-none relative z-10"
+              >
                 Enter the 4-digit code sent to
               </p>
 
@@ -540,10 +541,9 @@ export default function OTP() {
                 type="button"
                 onClick={() => handleVerify()}
                 disabled={isLoading || otp.some((d) => !d)}
-                className="w-full h-[54px] sm:h-[58px] rounded-full sm:rounded-[26px] text-white font-semibold text-[15.5px] tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.99] disabled:opacity-50"
+                className="w-full h-[52px] sm:h-[54px] rounded-full text-white font-medium text-[15px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(74,44,17,0.18)] hover:shadow-[0_6px_20px_rgba(74,44,17,0.24)] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 style={{
-                  background: "linear-gradient(180deg, #6E3B13 0%, #522807 100%)",
-                  boxShadow: "0 8px 22px rgba(82, 40, 7, 0.28)",
+                  backgroundColor: "#5C381E",
                 }}
               >
                 {isLoading ? (
@@ -554,7 +554,7 @@ export default function OTP() {
                 ) : (
                   <>
                     <span>Verify &amp; Continue</span>
-                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                    <ArrowRight className="w-4 h-4 stroke-[2.2]" />
                   </>
                 )}
               </button>
@@ -562,15 +562,18 @@ export default function OTP() {
           ) : (
             /* First Time User: Enter Name */
             <form onSubmit={handleSaveName} className="w-full relative z-10 space-y-4">
-              <h2 className="font-editorial text-[24px] font-bold text-[#3E2211] text-center mb-1">
+              <h2 className="page-serif-heading font-serif-editorial text-[26px] sm:text-[28px] leading-tight text-[#3D210F] text-center mb-1">
                 Welcome to VISIT!
               </h2>
-              <p className="text-xs text-[#7E6C5E] text-center mb-4">
+              <p
+                style={{ fontFamily: "'Outfit', sans-serif" }}
+                className="text-[13px] sm:text-[13.5px] text-[#7E6D5E] text-center mb-4 leading-relaxed"
+              >
                 Please enter your name so we can personalize your experience.
               </p>
 
-              <div className="w-full bg-[#FFFFFF] border border-[#E8DEC8] focus-within:border-[#7A4B1F] focus-within:ring-2 focus-within:ring-[#7A4B1F]/15 rounded-[22px] px-4 py-3.5 shadow-sm">
-                <label className="block text-[10.5px] font-medium text-[#8F7C6B] uppercase tracking-wider mb-1">
+              <div className="w-full bg-[#FFFFFF] border border-[#E5DDD0] focus-within:border-[#6E3B13] focus-within:ring-2 focus-within:ring-[#6E3B13]/12 rounded-full px-5 py-3 shadow-[0_2px_8px_rgba(74,44,17,0.04)]">
+                <label className="block text-[10px] font-medium text-[#8E7B6B] uppercase tracking-wider mb-0.5">
                   Full Name
                 </label>
                 <input
@@ -596,9 +599,9 @@ export default function OTP() {
               <button
                 type="submit"
                 disabled={isLoading || !name.trim()}
-                className="w-full h-[52px] sm:h-[56px] rounded-[22px] text-white font-semibold text-[15.5px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_10px_25px_rgba(94,52,17,0.28)] hover:shadow-[0_12px_28px_rgba(94,52,17,0.36)] active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+                className="w-full h-[52px] sm:h-[54px] rounded-full text-white font-medium text-[15px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(74,44,17,0.18)] hover:shadow-[0_6px_20px_rgba(74,44,17,0.24)] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 style={{
-                  background: "linear-gradient(180deg, #7A4B1F 0%, #5E3411 100%)",
+                  backgroundColor: "#5C381E",
                 }}
               >
                 {isLoading ? (
@@ -609,7 +612,7 @@ export default function OTP() {
                 ) : (
                   <>
                     <span>Complete Profile</span>
-                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                    <ArrowRight className="w-4 h-4 stroke-[2.2]" />
                   </>
                 )}
               </button>

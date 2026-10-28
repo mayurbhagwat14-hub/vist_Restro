@@ -13,6 +13,7 @@ import {
 } from './auth.controller.js';
 import { authMiddleware, requireAdmin } from './auth.middleware.js';
 import { authRateLimiter } from '../../middleware/rateLimit.js';
+import { updateCurrentUserProfileController } from '../../modules/food/user/controllers/userProfile.controller.js';
 
 const router = express.Router();
 
@@ -37,6 +38,8 @@ router.post('/logout', logoutController);
 
 // Authenticated user profile (requires Bearer token)
 router.get('/me', authMiddleware, getMeController);
+router.put('/profile', authMiddleware, updateCurrentUserProfileController);
+router.patch('/profile', authMiddleware, updateCurrentUserProfileController);
 
 // Admin-only: profile update & change password (Bearer + ADMIN role)
 router.patch('/admin/profile', authMiddleware, requireAdmin, updateAdminProfileController);
