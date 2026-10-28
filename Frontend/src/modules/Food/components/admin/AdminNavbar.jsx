@@ -303,15 +303,17 @@ export default function AdminNavbar({ onMenuClick }) {
             </button>
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-24 sm:w-32 h-9 sm:h-12 flex items-center justify-center overflow-hidden">
+              <Link to="/admin/food" className="flex items-center justify-center h-10 sm:h-12">
                 <img
-                  src="/vist-logo-bronze.png"
-                  alt={businessSettings?.companyName || "Company"}
-                  className="w-[160px] sm:w-[200px] h-[160px] sm:h-[200px] max-w-none object-contain"
-                  style={{ mixBlendMode: "multiply" }}
+                  src="/visit-logo-transparent.png"
+                  alt={businessSettings?.companyName || "VIST Restaurant"}
+                  className="h-9 sm:h-11 w-auto object-contain"
                   loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.src = "/vist-logo-bronze.png";
+                  }}
                 />
-              </div>
+              </Link>
             </div>
           </div>
 
