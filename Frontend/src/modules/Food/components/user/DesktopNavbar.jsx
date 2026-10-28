@@ -250,21 +250,17 @@ export default function DesktopNavbar({ showLogo = true }) {
                         <div className="flex items-center gap-4 lg:gap-6 flex-shrink-0">
                             {/* Logo */}
                             {showLogo && (
-                                <Link to="/food/user" className="flex items-center justify-center flex-shrink-0 mr-4 md:mr-10 lg:mr-16">
-                                    {logoUrl || companyName ? (
-                                        <img
-                                            src={logoUrl || "/vist-logo-bronze.png"}
-                                            alt={companyName || "Company Logo"}
-                                            className="h-16 w-auto md:h-20 lg:h-24 object-contain scale-110 md:scale-[1.6] lg:scale-[1.8] origin-left"
-                                            onError={(e) => {
-                                                if (e.target.src !== quickSpicyLogo) {
-                                                    e.target.src = quickSpicyLogo
-                                                }
-                                            }}
-                                        />
-                                    ) : (
-                                        <img src={"/vist-logo-bronze.png"} alt={companyName || "Logo"} className="h-16 w-auto md:h-20 lg:h-24 object-contain scale-110 md:scale-[1.6] lg:scale-[1.8] origin-left" />
-                                    )}
+                                <Link to="/food/user" className="flex items-center flex-shrink-0 mr-4 md:mr-6 lg:mr-8 group">
+                                    <img
+                                        src={logoUrl || "/visit-logo-transparent.png"}
+                                        alt={companyName || "VIST Restaurant"}
+                                        className="h-12 w-auto md:h-13 lg:h-14 max-w-[180px] object-contain group-hover:scale-105 transition-transform duration-200"
+                                        onError={(e) => {
+                                            if (e.target.src !== quickSpicyLogo) {
+                                                e.target.src = quickSpicyLogo;
+                                            }
+                                        }}
+                                    />
                                 </Link>
                             )}
 

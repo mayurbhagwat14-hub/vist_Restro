@@ -73,11 +73,11 @@ export default function HomeHeader({
         <Link to="/food" className="flex items-center gap-3 group shrink-0">
           <div className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-full overflow-hidden border-2 border-[#C5A059]/60 shadow-sm bg-[#FFFDF9] shrink-0 flex items-center justify-center ring-2 ring-[#C5A059]/15">
             <img
-              src="/visit-crest-gold.jpg"
+              src="/visit-logo-transparent.png"
               alt="Visit Restaurant"
-              className="w-full h-full object-cover rounded-full scale-[1.18] group-hover:scale-125 transition-transform duration-300"
+              className="w-full h-full object-contain p-1 group-hover:scale-110 transition-transform duration-300"
               onError={(e) => {
-                // Fallback to bronze logo if crest image fails
+                // Fallback to bronze logo if transparent logo fails
                 e.currentTarget.src = "/vist-logo-bronze.png";
               }}
             />
