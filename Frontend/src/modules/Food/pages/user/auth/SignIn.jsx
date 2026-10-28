@@ -215,7 +215,7 @@ export default function SignIn() {
       <main className="w-full max-w-[460px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative overflow-hidden">
 
         {/* 1. Top Restaurant Building Photo */}
-        <div className="relative w-full h-[48vh] min-h-[300px] max-h-[400px] shrink-0 overflow-hidden bg-[#24150A]">
+        <div className="relative w-full shrink-0 overflow-hidden bg-[#F6EBD7]">
           {/* Back to Home Button */}
           <button
             type="button"
