@@ -64,7 +64,13 @@ export const normalizeImageUrl = (imageUrl, backendOrigin = "") => {
     }
   }
 
-  // Relative path like /uploads/foods/img.webp → prepend backend origin
+  // If it's a backend upload (/uploads/...), prepend backend origin.
+  // Frontend public assets (e.g. /vist-logo-bronze.png) belong to the frontend origin.
+  const isBackendUpload = /^\/?uploads\//i.test(normalized);
+  if (!isBackendUpload) {
+    return normalized.startsWith("/") ? normalized : `/${normalized}`;
+  }
+
   const absolutePath = normalized.startsWith("/")
     ? `${resolvedOrigin}${normalized}`
     : `${resolvedOrigin}/${normalized.replace(/^\.?\/*/, "")}`;

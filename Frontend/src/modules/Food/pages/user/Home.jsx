@@ -860,6 +860,13 @@ export default function Home() {
         }
       }
 
+      // If it's a backend upload (/uploads/...), prepend BACKEND_ORIGIN.
+      // Frontend public assets (e.g. /vist-logo-bronze.png) belong to the frontend origin.
+      const isBackendUpload = /^\/?uploads\//i.test(normalizedInput);
+      if (!isBackendUpload) {
+        return normalizedInput.startsWith("/") ? normalizedInput : `/${normalizedInput}`;
+      }
+
       const absolutePath = normalizedInput.startsWith("/")
         ? `${BACKEND_ORIGIN}${normalizedInput}`
         : `${BACKEND_ORIGIN}/${normalizedInput.replace(/^\.?\/*/, "")}`;

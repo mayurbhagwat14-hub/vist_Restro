@@ -43,13 +43,11 @@ const restaurantData = {
   closingTime: "11:00 PM",
   openDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   isAcceptingOrders: true,
-  profileImage: "/vist-logo-bronze.png",
+  profileImage: "https://res.cloudinary.com/wyq6essh/image/upload/v1793190391/food/restaurants/og5ncqsfmic7js8g2hb1.webp",
   coverImages: [
-    "/vist-dining-banner.jpg",
-    "/vist-dining.jpg",
-    "/vist-admin-desk.jpg"
+    "https://res.cloudinary.com/wyq6essh/image/upload/v1793190392/food/restaurants/ipic3pgzlcjziz5plovx.webp"
   ],
-  menuImages: ["/vist-dining-banner.jpg"],
+  menuImages: ["https://res.cloudinary.com/wyq6essh/image/upload/v1793190392/food/restaurants/ipic3pgzlcjziz5plovx.webp"],
   estimatedDeliveryTime: "30-35 mins",
   estimatedDeliveryTimeMinutes: 30,
   rating: 4.8,
