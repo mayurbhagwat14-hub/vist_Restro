@@ -1544,7 +1544,7 @@ export default function CategoryPage() {
   const isCategoryView = false
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100">
       {/* Informative out-of-service banner */}
       {isOutOfService && (
         <div className="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-800/40 px-4 py-2.5">

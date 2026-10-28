@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
-import { Home, LayoutGrid, ClipboardList, User } from "lucide-react"
+import { Home, UtensilsCrossed, ClipboardList, User } from "lucide-react"
 import { useActiveModule, MODULES } from "@food/hooks/useActiveModule"
 import { useEffect, useState } from "react"
 
@@ -100,45 +100,45 @@ export default function BottomNavigation() {
   const activeOrders = pathname.includes("/user/orders");
   const activeProfile = pathname.includes("/user/profile");
 
-  const activeColor = "var(--module-theme-color, #5C381E)"
-  const activeBg = "rgba(var(--module-theme-rgb, 92, 56, 30), 0.12)"
-  const activeFill = "rgba(var(--module-theme-rgb, 92, 56, 30), 0.2)"
+  const activeColor = "#2C1810"
+  const activeBg = "transparent"
+  const activeFill = "#2C1810"
 
   return (
     <div className={`md:hidden fixed bottom-6 left-5 right-5 z-50 pointer-events-none hide-on-keyboard ${isKeyboardVisible ? 'hidden' : ''}`}>
-      <div className="flex items-center justify-around h-auto px-4 py-2 bg-white/85 dark:bg-[#1a1a1a]/85 backdrop-blur-[20px] border border-white/50 dark:border-white/10 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.15)] pointer-events-auto">
+      <div className="flex items-center justify-around h-auto px-3 py-2 bg-[#FAF6F0]/92 dark:bg-[#1a1410]/92 backdrop-blur-[20px] border border-[#EADBCE] dark:border-white/10 rounded-full shadow-[0_16px_36px_rgba(44,24,16,0.12)] pointer-events-auto">
         
         {/* Home Tab */}
         <Link
           to={activeModule.path}
           className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeHome
               ? ""
-              : "text-gray-500 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
             }`}
           style={activeHome ? { color: activeColor, backgroundColor: activeBg } : undefined}
         >
           <div className="relative">
-            <Home className={`h-5 w-5 transition-transform duration-300 ${activeHome ? "scale-110" : "text-gray-500 dark:text-gray-400"}`} strokeWidth={activeHome ? 2.5 : 2} style={activeHome ? { color: activeColor, fill: activeFill } : undefined} />
+            <Home className={`h-5 w-5 transition-transform duration-300 ${activeHome ? "scale-110 text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400"}`} strokeWidth={activeHome ? 2.5 : 2} style={activeHome ? { color: activeColor, fill: activeFill } : undefined} />
           </div>
-          <span className={`text-[10px] sm:text-xs font-semibold tracking-wide transition-all ${activeHome ? "" : "text-gray-500 dark:text-gray-400 opacity-80"}`}>
+          <span className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeHome ? "text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"}`}>
             Home
           </span>
         </Link>
 
-        {/* Categories Tab */}
+        {/* Menu Tab */}
         <Link
           to={categoryPath}
           className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeCat
               ? ""
-              : "text-gray-500 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
             }`}
           style={activeCat ? { color: activeColor, backgroundColor: activeBg } : undefined}
         >
           <div className="relative">
-            <LayoutGrid className={`h-5 w-5 transition-transform duration-300 ${activeCat ? "scale-110" : "text-gray-500 dark:text-gray-400"}`} strokeWidth={activeCat ? 2.5 : 2} style={activeCat ? { color: activeColor, fill: activeFill } : undefined} />
+            <UtensilsCrossed className={`h-5 w-5 transition-transform duration-300 ${activeCat ? "scale-110 text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400"}`} strokeWidth={activeCat ? 2.5 : 2} style={activeCat ? { color: activeColor, fill: activeFill } : undefined} />
           </div>
-          <span className={`text-[10px] sm:text-xs font-semibold tracking-wide transition-all ${activeCat ? "" : "text-gray-500 dark:text-gray-400 opacity-80"}`}>
-            Categories
+          <span className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeCat ? "text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"}`}>
+            Menu
           </span>
         </Link>
 
@@ -147,14 +147,14 @@ export default function BottomNavigation() {
           to="/food/user/orders"
           className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeOrders
               ? ""
-              : "text-gray-500 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
             }`}
           style={activeOrders ? { color: activeColor, backgroundColor: activeBg } : undefined}
         >
           <div className="relative">
-            <ClipboardList className={`h-5 w-5 transition-transform duration-300 ${activeOrders ? "scale-110" : "text-gray-500 dark:text-gray-400"}`} strokeWidth={activeOrders ? 2.5 : 2} style={activeOrders ? { color: activeColor, fill: activeFill } : undefined} />
+            <ClipboardList className={`h-5 w-5 transition-transform duration-300 ${activeOrders ? "scale-110 text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400"}`} strokeWidth={activeOrders ? 2.5 : 2} style={activeOrders ? { color: activeColor, fill: activeFill } : undefined} />
           </div>
-          <span className={`text-[10px] sm:text-xs font-semibold tracking-wide transition-all ${activeOrders ? "" : "text-gray-500 dark:text-gray-400 opacity-80"}`}>
+          <span className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeOrders ? "text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"}`}>
             Orders
           </span>
         </Link>
@@ -164,14 +164,14 @@ export default function BottomNavigation() {
           to="/food/user/profile"
           className={`flex flex-1 flex-col items-center justify-center gap-1 px-2 py-1.5 transition-all duration-300 relative rounded-full ${activeProfile
               ? ""
-              : "text-gray-500 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              : "text-[#7C6E65] dark:text-gray-400 hover:bg-black/5 dark:hover:bg-gray-800/50"
             }`}
           style={activeProfile ? { color: activeColor, backgroundColor: activeBg } : undefined}
         >
           <div className="relative">
-            <User className={`h-5 w-5 transition-transform duration-300 ${activeProfile ? "scale-110" : "text-gray-500 dark:text-gray-400"}`} strokeWidth={activeProfile ? 2.5 : 2} style={activeProfile ? { color: activeColor, fill: activeFill } : undefined} />
+            <User className={`h-5 w-5 transition-transform duration-300 ${activeProfile ? "scale-110 text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400"}`} strokeWidth={activeProfile ? 2.5 : 2} style={activeProfile ? { color: activeColor, fill: activeFill } : undefined} />
           </div>
-          <span className={`text-[10px] sm:text-xs font-semibold tracking-wide transition-all ${activeProfile ? "" : "text-gray-500 dark:text-gray-400 opacity-80"}`}>
+          <span className={`text-[10px] sm:text-xs font-bold tracking-wide transition-all ${activeProfile ? "text-[#2C1810]" : "text-[#7C6E65] dark:text-gray-400 opacity-80"}`}>
             Profile
           </span>
         </Link>

@@ -3,18 +3,21 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "@food/context/CartContext";
 import { useActiveModule } from "@food/hooks/useActiveModule";
 
-export default function HeaderCartIcon() {
+export default function HeaderCartIcon({ className = "", iconClass = "" }) {
   const { cart } = useCart();
   const activeModuleId = useActiveModule();
   
   const totalItems = cart.reduce((total, item) => total + (item.quantity || 1), 0);
 
+  const defaultContainerClass = "h-8 w-8 flex items-center justify-center rounded-full bg-white/10 border border-white/10 cursor-pointer active:scale-90 transition-all dark:bg-gray-800/50 dark:border-gray-700";
+  const defaultIconClass = "h-4 w-4 text-white/90 drop-shadow-sm group-hover:text-[var(--module-theme-color)] transition-colors";
+
   return (
     <Link to="/food/user/cart" className="relative group">
-      <div className="h-8 w-8 flex items-center justify-center rounded-full bg-white/10 border border-white/10 cursor-pointer active:scale-90 transition-all dark:bg-gray-800/50 dark:border-gray-700">
-        <ShoppingCart className="h-4 w-4 text-white/90 drop-shadow-sm group-hover:text-[var(--module-theme-color)] transition-colors" />
+      <div className={className || defaultContainerClass}>
+        <ShoppingCart className={iconClass || defaultIconClass} />
         {totalItems > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 bg-[var(--module-theme-color, #5C381E)] text-white text-[9px] min-w-[14px] h-[14px] flex items-center justify-center rounded-full font-bold px-0.5 border border-white dark:border-[#1a1a1a]">
+          <span className="absolute -top-1.5 -right-1.5 bg-[#D32F2F] text-white text-[9px] min-w-[14px] h-[14px] flex items-center justify-center rounded-full font-bold px-0.5 border border-white shadow-xs">
             {totalItems > 9 ? '9+' : totalItems}
           </span>
         )}

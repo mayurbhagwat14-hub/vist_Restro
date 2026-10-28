@@ -67,13 +67,18 @@ export default function HeaderNotificationBell({ className = "", triggerClass = 
 
   const unreadCount = notifications.filter(n => !n.read).length + broadcastUnreadCount;
 
+  const hasCustomBg = triggerClass && (triggerClass.includes("bg-") || triggerClass.includes("rounded-"));
+  const buttonStyle = hasCustomBg 
+    ? `h-8 w-8 relative flex items-center justify-center cursor-pointer active:scale-95 transition-all ${triggerClass}`
+    : `h-8 w-8 relative flex items-center justify-center rounded-lg bg-white/10 border border-white/10 cursor-pointer active:scale-95 hover:bg-white/20 transition-all ${triggerClass}`;
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className={`h-8 w-8 relative flex items-center justify-center rounded-lg bg-white/10 border border-white/10 cursor-pointer active:scale-95 hover:bg-white/20 transition-all ${triggerClass}`}>
-          <Bell className={`h-5 w-5 ${className || "text-white"}`} />
+        <div className={buttonStyle}>
+          <Bell className={`h-4 w-4 ${className || "text-white"}`} />
           {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500 border border-white dark:border-zinc-900 animate-pulse" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#D32F2F] border border-white dark:border-zinc-900 animate-pulse" />
           )}
         </div>
       </PopoverTrigger>

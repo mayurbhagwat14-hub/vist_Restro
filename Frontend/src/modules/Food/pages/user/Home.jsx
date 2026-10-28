@@ -102,6 +102,9 @@ import { API_BASE_URL } from "@food/api/config";
 import OptimizedImage from "@food/components/OptimizedImage";
 import { getRestaurantAvailabilityStatus } from "@food/utils/restaurantAvailability";
 import HomeHeader from "@food/components/user/home/HomeHeader";
+import HeritageHeroBanner from "@food/components/user/home/HeritageHeroBanner";
+import CuisineChipsRow from "@food/components/user/home/CuisineChipsRow";
+import PopularHeritageCategories from "@food/components/user/home/PopularHeritageCategories";
 import ModuleNavbar from "@food/components/user/ModuleNavbar";
 
 import PromoRow from "@food/components/user/home/PromoRow";
@@ -2639,14 +2642,14 @@ export default function Home() {
 
   return (
 
-    <div className="relative min-h-screen bg-white dark:bg-[#0a0a0a] pb-16 md:pb-6 overflow-x-clip">
+    <div className="relative min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] pb-16 md:pb-6 overflow-x-clip">
 
 
       <div className="transition-all duration-300">
         {/* Unified Background for Entire Page - Vibrant Food Theme */}
         <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none overflow-hidden z-0">
           {/* Main Background */}
-          <div className="absolute inset-0 bg-white dark:bg-[#0a0a0a]"></div>
+          <div className="absolute inset-0 bg-[#FAF5ED] dark:bg-[#120E0C]"></div>
           {/* Background Elements - Reduced to 2 blobs with CSS animations for better performance */}
           <div className="absolute inset-0 overflow-hidden opacity-20">
             {/* Top right blob - CSS animation */}
@@ -2764,22 +2767,9 @@ export default function Home() {
           `}</style>
         </div>
 
-        <div className="relative overflow-x-clip bg-white dark:bg-[#0a0a0a]">
-          {/* Brand Top Section (Theme Color) */}
-          <div className="md:hidden relative overflow-hidden bg-[var(--module-theme-color,#5C381E)] rounded-b-[2rem] shadow-lg mb-2">
-            {festVideoActive && (
-              <div className="absolute inset-0 z-0">
-                <video
-                  src={festBannerVideoUrl}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                />
-                <div className="absolute inset-0 bg-black/40" />
-              </div>
-            )}
+        <div className="relative overflow-x-clip bg-[#F9F5EE] dark:bg-[#120E0C] min-h-screen text-[#2C1810] dark:text-neutral-100 transition-colors duration-300">
+          {/* Brand Top Section (Concept 2: Seamless Warm Header) */}
+          <div className="md:hidden relative bg-[#F9F5EE] dark:bg-[#120E0C] border-b border-[#EADBCE]/50 dark:border-neutral-800/50">
             <div className="relative z-10">
               <HomeHeader
                 activeTab={activeTab}
@@ -2791,18 +2781,10 @@ export default function Home() {
                 vegMode={vegMode}
                 handleVegModeChange={handleVegModeChange}
               />
-
-              {activeTab === "food" && (
-                <FestBanner
-                  isVegMode={vegMode}
-                  videoUrl={festBannerVideoUrl}
-                  hideFoodImages={true}
-                />
-              )}
             </div>
           </div>
 
-          <div className="md:hidden mb-4 mt-2">
+          <div className="md:hidden mb-2 mt-1">
             <ModuleNavbar />
           </div>
 
@@ -2814,19 +2796,54 @@ export default function Home() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-transparent dark:bg-transparent max-w-7xl mx-auto px-0 md:px-6 lg:px-8"
+                className="bg-transparent dark:bg-transparent max-w-7xl mx-auto px-0 md:px-6 lg:px-8 space-y-1 sm:space-y-2"
               >
+                {/* 1. Signature Heritage Hero Banner ("Serving same signature taste since 1996") */}
+                <HeritageHeroBanner
+                  onExploreClick={() => {
+                    const catEl = document.getElementById("popular-categories-section");
+                    if (catEl) {
+                      catEl.scrollIntoView({ behavior: "smooth" });
+                    } else {
+                      navigate("/food/user/categories");
+                    }
+                  }}
+                />
 
-                {/* "What's on your mind today?" Section - Now with Sticky Logic */}
+                {/* 2. Quick Cuisine Chips (Dynamic Admin Categories with Pure Veg Toggle) */}
+                <CuisineChipsRow
+                  categories={displayCategories}
+                  vegMode={vegMode}
+                  onVegModeToggle={handleVegModeChange}
+                  onCuisineSelect={(item) => {
+                    navigate(`/food/user/category/${item.slug || item.id}`);
+                  }}
+                />
+
+                {/* 3. Popular Categories (Dual Dark Vignette Cards) */}
+                <div id="popular-categories-section">
+                  <PopularHeritageCategories
+                    categories={displayCategories}
+                    onSelectCategory={(cat) => {
+                      navigate(`/food/user/category/${cat.slug}`);
+                    }}
+                  />
+                </div>
+
+                {/* 4. Top Picks Section */}
                 <div
                   id="categories-section"
-                  className="px-4 md:px-0 py-1.5 space-y-2 bg-white dark:bg-[#0a0a0a]"
+                  className="px-4 md:px-0 py-2 space-y-2 bg-transparent"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white min-w-0 flex-shrink leading-tight">What's on your mind today?</h2>
-                    <div className="h-[1px] bg-gray-100 dark:bg-gray-800 flex-1"></div>
-                    <Link to="/food/user/categories" className="text-sm font-bold text-[#5C381E] hover:text-[#482A14] transition-colors flex items-center gap-0.5 whitespace-nowrap shrink-0">
-                      View All <ArrowDownUp className="h-3 w-3 rotate-90" />
+                  <div className="flex items-center justify-between min-w-0">
+                    <h2 className="font-serif text-base sm:text-lg font-bold text-[#2C1810] dark:text-white min-w-0 flex-shrink leading-tight">
+                      Top Picks
+                    </h2>
+                    <Link
+                      to="/food/user/categories"
+                      className="text-xs font-bold text-[#C5A059] hover:text-[#2C1810] transition-colors flex items-center gap-0.5 whitespace-nowrap shrink-0"
+                    >
+                      View All <ChevronRight className="h-3.5 w-3.5" />
                     </Link>
                   </div>
                   {/* Categories Horizontal Slider */}
@@ -2842,7 +2859,7 @@ export default function Home() {
                           }}
                           className="flex-shrink-0 flex flex-col items-center gap-1.5 group w-[74px] xs:w-[78px] sm:w-[86px] md:w-[94px] cursor-pointer"
                         >
-                          <div className="relative w-[68px] h-[68px] xs:w-[72px] xs:h-[72px] sm:w-[80px] sm:h-[80px] md:w-[86px] md:h-[86px] shrink-0 aspect-square rounded-full overflow-hidden shadow-sm border-2 border-white dark:border-neutral-800 ring-1 ring-gray-200 dark:ring-gray-800 bg-gray-50 dark:bg-neutral-900 group-hover:ring-[#5C381E] group-hover:shadow-md group-active:scale-95 transition-all duration-300 flex items-center justify-center">
+                          <div className="relative w-[68px] h-[68px] xs:w-[72px] xs:h-[72px] sm:w-[80px] sm:h-[80px] md:w-[86px] md:h-[86px] shrink-0 aspect-square rounded-full overflow-hidden shadow-xs border-2 border-white dark:border-neutral-800 ring-1 ring-[#EADBCE] dark:ring-neutral-800 bg-white dark:bg-neutral-900 group-hover:ring-[#C5A059] group-hover:shadow-sm group-active:scale-95 transition-all duration-300 flex items-center justify-center">
                             <img
                               src={categoryImage}
                               alt={category.name}
@@ -2850,7 +2867,7 @@ export default function Home() {
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 pointer-events-none"
                             />
                           </div>
-                          <span className="text-[11px] xs:text-xs sm:text-[13px] font-semibold text-gray-800 dark:text-gray-200 group-hover:text-[#5C381E] text-center leading-tight line-clamp-2 w-full px-0.5 tracking-tight capitalize">
+                          <span className="text-[11px] xs:text-xs sm:text-[13px] font-semibold text-[#2C1810] dark:text-gray-200 group-hover:text-[#C5A059] text-center leading-tight line-clamp-2 w-full px-0.5 tracking-tight capitalize">
                             {category.name}
                           </span>
                         </div>
@@ -2861,10 +2878,10 @@ export default function Home() {
                         onClick={() => navigate("/food/user/categories")}
                         className="flex-shrink-0 flex flex-col items-center justify-center gap-1 group w-[68px] xs:w-[72px] sm:w-[78px] cursor-pointer pt-3"
                       >
-                        <div className="w-11 h-11 xs:w-12 xs:h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-[#5C381E] group-active:scale-90 transition-all duration-300">
-                          <ArrowRight className="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:text-white transition-colors" />
+                        <div className="w-11 h-11 xs:w-12 xs:h-12 rounded-full bg-white dark:bg-zinc-800 border border-[#EADBCE] flex items-center justify-center group-hover:bg-[#C5A059] group-active:scale-90 transition-all duration-300 shadow-xs">
+                          <ArrowRight className="w-4 h-4 text-[#2C1810] dark:text-gray-300 group-hover:text-white transition-colors" />
                         </div>
-                        <span className="text-[11px] xs:text-xs font-semibold text-gray-700 dark:text-gray-300 group-hover:text-[#5C381E] text-center leading-tight">
+                        <span className="text-[11px] xs:text-xs font-semibold text-[#7C6E65] dark:text-gray-300 group-hover:text-[#C5A059] text-center leading-tight">
                           View All
                         </span>
                       </div>
@@ -2880,7 +2897,7 @@ export default function Home() {
                       animate={{ y: 0 }}
                       exit={{ y: -200 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="md:hidden fixed top-0 left-0 right-0 z-[100] bg-white dark:bg-[#121212] shadow-md border-b border-gray-100 dark:border-gray-800 safe-top"
+                      className="md:hidden fixed top-0 left-0 right-0 z-[100] bg-[#FAF5ED] dark:bg-[#121212] shadow-md border-b border-[#EADBCE] dark:border-gray-800 safe-top"
                     >
                       {/* Search Bar Row (appears when scrolling up) */}
                       <AnimatePresence>
@@ -2923,7 +2940,7 @@ export default function Home() {
                       </AnimatePresence>
 
                       {/* Categories Slider (Sticky Mode) */}
-                      <div className="flex overflow-x-auto gap-2 sm:gap-2.5 py-1 px-4 scrollbar-hide mask-edge-fade items-start bg-white dark:bg-[#121212]">
+                      <div className="flex overflow-x-auto gap-2 sm:gap-2.5 py-1 px-4 scrollbar-hide mask-edge-fade items-start bg-[#FAF5ED] dark:bg-[#121212]">
                         {(displayCategories.length > 8 ? displayCategories.slice(0, 8) : displayCategories).map((category, index) => {
                           const categoryImage = normalizeImageUrl(category.image || category.imageUrl) || category.image;
                           return (
@@ -3012,7 +3029,7 @@ export default function Home() {
                     transition={{ duration: 0.35, delay: index * 0.05 }}>
                     <Link
                       to={`/user/restaurants/${restaurantSlug}`}
-                      className="block rounded-[20px] overflow-hidden border border-gray-100 dark:border-gray-800 bg-white dark:bg-[#1a1a1a] shadow-sm hover:shadow-md transition-shadow">
+                      className="block rounded-[20px] overflow-hidden border border-[#EADBCE] dark:border-neutral-800 bg-[#FFFDF9] dark:bg-[#1a1410] shadow-xs hover:shadow-md transition-shadow">
                       <div className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden rounded-t-[20px]">
                         <RestaurantImageCarousel
                           restaurant={restaurant}
@@ -3079,7 +3096,7 @@ export default function Home() {
                       state={{ backTo: "/user" }}
                       className="block w-full">
                       <div className="flex flex-col items-center gap-2 w-full group">
-                        <div className="relative w-full aspect-square rounded-[1.25rem] bg-white dark:bg-[#1a1a1a] flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(0,0,0,0.1)] group-hover:shadow-[0_12px_24px_-6px_rgba(0,0,0,0.15)] transition-all duration-500 overflow-hidden border border-gray-100 dark:border-gray-800 group-hover:border-[#5C381E]/40">
+                        <div className="relative w-full aspect-square rounded-[1.25rem] bg-[#FFFDF9] dark:bg-[#1a1410] flex items-center justify-center shadow-xs group-hover:shadow-md transition-all duration-500 overflow-hidden border border-[#EADBCE] dark:border-neutral-800 group-hover:border-[#C5A059]">
                           {/* Colorful Glow Background */}
                           <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-gradient-to-br ${index % 3 === 0 ? 'from-[#5C381E] to-rose-500' : index % 3 === 1 ? 'from-indigo-500 to-purple-500' : 'from-teal-500 to-emerald-500'} z-20 pointer-events-none`} />
 
@@ -3142,7 +3159,7 @@ export default function Home() {
               <RestaurantGridSkeleton count={4} />
             </div>
           ) : visibleRestaurants.length === 0 ? (
-            <div className="mx-4 flex flex-col items-center justify-center py-20 text-center px-4 bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div className="mx-4 flex flex-col items-center justify-center py-20 text-center px-4 bg-[#FFFDF9] dark:bg-[#111111] rounded-2xl border border-[#EADBCE] dark:border-gray-800">
               <UtensilsCrossed className="w-12 h-12 text-gray-300 dark:text-gray-700 mb-3" />
               <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">No Restaurants Available</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">We couldn't find any restaurants in your area right now. Try changing your location.</p>
@@ -3165,7 +3182,7 @@ export default function Home() {
                       to={`/food/user/restaurants/${restaurantSlug}`}
                       className="block h-full"
                     >
-                      <div className={`bg-white dark:bg-[#151515] rounded-[20px] overflow-hidden shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-800 group hover:shadow-[0_12px_30px_-6px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col h-full relative ${!isAvailable ? 'opacity-70' : ''}`}>
+                      <div className={`bg-[#FFFDF9] dark:bg-[#151515] rounded-[20px] overflow-hidden shadow-xs border border-[#EADBCE] dark:border-neutral-800 group hover:shadow-md transition-all duration-300 flex flex-col h-full relative ${!isAvailable ? 'opacity-70' : ''}`}>
                         {/* Restaurant Image */}
                         <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-50 dark:bg-gray-900 rounded-t-[20px]">
                           <RestaurantImageCarousel

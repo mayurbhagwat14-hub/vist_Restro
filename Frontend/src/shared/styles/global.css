@@ -17,32 +17,33 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --radius: 0.625rem;
-  --background: #ffffff;
-  --foreground: oklch(0.2 0.05 50);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.05 50);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.05 50);
+  --background: #FAF5ED;
+  --foreground: #2C1810;
+  --card: #FFFDF9;
+  --card-foreground: #2C1810;
+  --popover: #FFFDF9;
+  --popover-foreground: #2C1810;
   --primary: #5C381E;
-  --primary-foreground: oklch(0.15 0.05 50);
-  --secondary: oklch(0.95 0.02 90);
-  --secondary-foreground: oklch(0.3 0.08 60);
-  --muted: oklch(0.96 0.01 90);
-  --muted-foreground: oklch(0.5 0.05 50);
-  --accent: oklch(0.92 0.08 75);
-  --accent-foreground: oklch(0.25 0.06 55);
+  --primary-gold: #C5A059;
+  --primary-foreground: #FAF5ED;
+  --secondary: #F3ECE0;
+  --secondary-foreground: #2C1810;
+  --muted: #EADBCE;
+  --muted-foreground: #7C6E65;
+  --accent: #C5A059;
+  --accent-foreground: #2C1810;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.02 85);
-  --input: oklch(0.95 0.01 90);
-  --ring: #5C381E;
-  --sidebar: oklch(0.98 0.01 90);
-  --sidebar-foreground: oklch(0.2 0.05 50);
+  --border: #EADBCE;
+  --input: #FFFDF9;
+  --ring: #C5A059;
+  --sidebar: #FAF5ED;
+  --sidebar-foreground: #2C1810;
   --sidebar-primary: #5C381E;
-  --sidebar-primary-foreground: oklch(0.15 0.05 50);
-  --sidebar-accent: oklch(0.95 0.02 90);
-  --sidebar-accent-foreground: oklch(0.3 0.08 60);
-  --sidebar-border: oklch(0.9 0.02 85);
-  --sidebar-ring: #5C381E;
+  --sidebar-primary-foreground: #FAF5ED;
+  --sidebar-accent: #F3ECE0;
+  --sidebar-accent-foreground: #2C1810;
+  --sidebar-border: #EADBCE;
+  --sidebar-ring: #C5A059;
 }
 
 .font-serif-editorial,
@@ -81,7 +82,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --color-page-bg: #ffffff;
+  --color-page-bg: #FAF5ED;
   --color-primary-orange: #5C381E;
   --font-poppins: var(--font-poppins);
   --font-outfit: var(--font-outfit);
@@ -142,8 +143,12 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
+  html,
+  body,
+  #root {
     @apply bg-background text-foreground m-0 min-h-screen;
+    background-color: #FAF5ED;
+    color: #2C1810;
   }
 }
 
