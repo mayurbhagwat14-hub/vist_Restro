@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
-import { Smartphone, ArrowRight, Loader2, AlertCircle } from "lucide-react"
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom"
+import { Smartphone, ArrowRight, ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import AnimatedPage from "@food/components/user/AnimatedPage"
 import { authAPI } from "@food/api"
 import { motion } from "framer-motion"
+import { isModuleAuthenticated } from "@food/utils/auth"
 
 // Delicate Botanical Sprig (Left) matching reference
 function BotanicalLeavesLeft({ className = "" }) {
@@ -117,6 +118,7 @@ function BotanicalLeavesRight({ className = "" }) {
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
 
   const [phone, setPhone] = useState("")
@@ -124,13 +126,16 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false)
   const submittingRef = useRef(false)
 
-  // Redirect if already logged in
+  // Redirect if already genuinely logged in
   useEffect(() => {
-    const isAuth = localStorage.getItem("user_authenticated") === "true"
-    if (isAuth) {
-      navigate("/food/user", { replace: true })
+    if (isModuleAuthenticated("user")) {
+      const redirect = searchParams.get("redirect") || location.state?.from || "/food/user"
+      navigate(redirect, { replace: true })
+    } else {
+      // Clear legacy stale boolean flag
+      localStorage.removeItem("user_authenticated")
     }
-  }, [navigate])
+  }, [navigate, searchParams, location.state])
 
   const validatePhone = (num) => {
     const clean = num.replace(/\D/g, "")
@@ -176,7 +181,7 @@ export default function SignIn() {
         module: "user",
       }
       sessionStorage.setItem("userAuthData", JSON.stringify(authData))
-      const redirect = searchParams.get("redirect")
+      const redirect = searchParams.get("redirect") || location.state?.from || ""
       navigate(`/food/user/auth/otp${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ""}`)
     } catch (apiError) {
       const message =
@@ -210,7 +215,17 @@ export default function SignIn() {
       <main className="w-full max-w-[460px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative overflow-hidden">
 
         {/* 1. Top Restaurant Building Photo */}
-        <div className="relative w-full shrink-0 overflow-hidden bg-[#F6EBD7]">
+        <div className="relative w-full h-[48vh] min-h-[300px] max-h-[400px] shrink-0 overflow-hidden bg-[#24150A]">
+          {/* Back to Home Button */}
+          <button
+            type="button"
+            onClick={() => navigate("/food/user")}
+            className="absolute top-4 left-4 z-30 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 transition-all cursor-pointer shadow-md"
+            title="Back to home"
+          >
+            <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
+          </button>
+
           <img
             src="/image%20copy.png"
             alt="VISIT Restaurant"
@@ -252,7 +267,7 @@ export default function SignIn() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="w-full relative z-10 space-y-4">
-            
+
             {/* Input: Enter Mobile Number — clean single-line like reference */}
             <div className="w-full h-[54px] sm:h-[56px] bg-[#FFFFFF] border border-[#E5DDD0] rounded-full px-5 flex items-center gap-3 shadow-[0_2px_8px_rgba(74,44,17,0.04)] focus-within:border-[#6E3B13] focus-within:ring-2 focus-within:ring-[#6E3B13]/12 transition-all">
               <Smartphone className="w-[18px] h-[18px] text-[#8E7B6B] shrink-0" strokeWidth={1.8} />

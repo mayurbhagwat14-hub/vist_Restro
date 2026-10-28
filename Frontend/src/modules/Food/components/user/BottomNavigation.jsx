@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom"
 import { Home, UtensilsCrossed, ClipboardList, User } from "lucide-react"
 import { useActiveModule, MODULES } from "@food/hooks/useActiveModule"
 import { useEffect, useState } from "react"
+import { isModuleAuthenticated } from "@food/utils/auth"
 
 export default function BottomNavigation() {
   const location = useLocation()

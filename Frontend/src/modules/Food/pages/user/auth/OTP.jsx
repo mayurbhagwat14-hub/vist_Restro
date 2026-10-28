@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft, Loader2, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react"
 import AnimatedPage from "@food/components/user/AnimatedPage"
 import apiClient, { authAPI } from "@food/api"
-import { setAuthData as setUserAuthData, scheduleProactiveRefresh } from "@food/utils/auth"
+import { setAuthData as setUserAuthData, scheduleProactiveRefresh, isModuleAuthenticated } from "@food/utils/auth"
 import { motion } from "framer-motion"
 
 const FULL_NAME_REGEX = /^[A-Za-z ]+$/
@@ -139,10 +139,9 @@ export default function OTP() {
   const submittingRef = useRef(false)
 
   useEffect(() => {
-    // Redirect to home if already authenticated
-    const isAuthenticated = localStorage.getItem("user_authenticated") === "true"
-    if (isAuthenticated) {
-      navigate("/food/user", { replace: true })
+    // Redirect to destination if already authenticated
+    if (isModuleAuthenticated("user")) {
+      navigate(redirectTo, { replace: true })
       return
     }
 
