@@ -50,14 +50,15 @@ export const detectZonePublicController = async (req, res, next) => {
         }
 
         if (isGlobal) {
+            const defaultZone = await FoodZone.findOne({ isActive: true }).lean();
             return res.status(200).json({
                 success: true,
                 message: 'Global service active',
                 data: {
                     status: 'IN_SERVICE',
                     mode: 'GLOBAL',
-                    zoneId: null,
-                    zone: null,
+                    zoneId: defaultZone?._id || null,
+                    zone: defaultZone || null,
                     globalService: true
                 }
             });
@@ -80,6 +81,22 @@ export const detectZonePublicController = async (req, res, next) => {
                     }
                 });
             }
+        }
+
+        // Fallback to active PAN India zone so no user is blocked
+        const fallbackZone = await FoodZone.findOne({ isActive: true }).lean();
+        if (fallbackZone) {
+            return res.status(200).json({
+                success: true,
+                message: 'PAN India service active',
+                data: {
+                    status: 'IN_SERVICE',
+                    mode: 'GLOBAL',
+                    zoneId: fallbackZone._id,
+                    zone: fallbackZone,
+                    globalService: true
+                }
+            });
         }
 
         return res.status(200).json({
