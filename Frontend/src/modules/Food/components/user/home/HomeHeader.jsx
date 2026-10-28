@@ -65,7 +65,7 @@ export default function HomeHeader({
   return (
     <div className="relative pt-2 pb-0 px-4 transition-all duration-700 overflow-hidden bg-transparent shadow-none">
       {/* Subtle Artistic Glows - Adds depth without being 'boring' */}
-      <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-[#F84E04]/5 blur-[80px] rounded-full pointer-events-none" />
+      <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-[#5C381E]/5 blur-[80px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-20%] left-[-10%] w-48 h-48 bg-[#48c479]/5 blur-[80px] rounded-full pointer-events-none" />
 
       {/* Main Header Content */}
@@ -81,8 +81,8 @@ export default function HomeHeader({
             {/* Logo - Perfectly Cropped to Black Border (Currently Hidden) 
             <div className="w-[58px] h-[22px] sm:w-[68px] sm:h-[26px] overflow-hidden shrink-0 flex items-center justify-center rounded-[2px] shadow-sm">
               <img 
-                src="/zinzoo-logo.png" 
-                alt="ZinZoo" 
+                src="/vist-logo-bronze.png" 
+                alt="VIST Restaurant" 
                 className="w-[162%] max-w-none h-auto object-center" 
               />
             </div>
@@ -176,7 +176,7 @@ export default function HomeHeader({
           className="relative bg-white rounded-2xl flex items-center px-3.5 py-2.5 shadow-lg border border-black/5 cursor-pointer active:scale-[0.98] transition-all duration-300 max-w-[95%] mx-auto"
           onClick={handleSearchFocus}
         >
-          <Search className="h-4 w-4 text-[#F84E04] mr-2 shrink-0" strokeWidth={3} />
+          <Search className="h-4 w-4 text-[#5C381E] mr-2 shrink-0" strokeWidth={3} />
 
           <div className="flex-1 overflow-hidden relative h-4.5">
             <AnimatePresence mode="wait">

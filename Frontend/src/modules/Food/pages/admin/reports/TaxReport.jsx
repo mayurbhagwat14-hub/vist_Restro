@@ -410,7 +410,7 @@ export default function TaxReport() {
         <DialogContent className="max-w-md bg-white dark:bg-[#1a1a1a] border border-slate-200 dark:border-zinc-800 p-0 text-slate-900 dark:text-white opacity-0 data-[state=open]:opacity-100 data-[state=closed]:opacity-0 transition-opacity duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:scale-100 data-[state=closed]:scale-100">
           <DialogHeader className="px-6 pt-6 pb-4">
             <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
-              <Settings className="w-5 h-5 text-[#F84E04]" />
+              <Settings className="w-5 h-5 text-[#5C381E]" />
               Report Settings
             </DialogTitle>
           </DialogHeader>
@@ -422,7 +422,7 @@ export default function TaxReport() {
           <div className="px-6 pb-6 flex items-center justify-end">
             <button
               onClick={() => setIsSettingsOpen(false)}
-              className="px-4 py-2 text-sm font-medium rounded-lg bg-[#F84E04] hover:bg-[#d84303] text-white transition-all shadow-md"
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-[#5C381E] hover:bg-[#d84303] text-white transition-all shadow-md"
             >
               Close
             </button>
@@ -436,7 +436,7 @@ export default function TaxReport() {
           <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-zinc-800">
             <DialogTitle className="flex items-center justify-between text-slate-900 dark:text-white">
               <span className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#F84E04]" />
+                <FileText className="w-5 h-5 text-[#5C381E]" />
                 Tax Details: {selectedReport?.incomeSource}
               </span>
             </DialogTitle>
@@ -445,7 +445,7 @@ export default function TaxReport() {
           <div className="p-6 max-h-[70vh] overflow-y-auto">
             {detailLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-[#F84E04] animate-spin mb-4" />
+                <Loader2 className="w-8 h-8 text-[#5C381E] animate-spin mb-4" />
                 <p className="text-slate-600 dark:text-gray-400">Fetching order details...</p>
               </div>
             ) : reportDetail?.orders?.length > 0 ? (

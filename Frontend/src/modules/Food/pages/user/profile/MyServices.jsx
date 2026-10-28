@@ -274,8 +274,8 @@ export default function MyServices() {
               onClick={confirmCancel} 
               className="w-full sm:w-auto h-11 text-white border-0 rounded-xl"
               style={{
-                background: "linear-gradient(135deg, rgba(var(--module-theme-rgb,248,78,4),0.92), var(--module-theme-color,#F84E04))",
-                boxShadow: "0 8px 18px rgba(var(--module-theme-rgb,248,78,4),0.25)",
+                background: "linear-gradient(135deg, rgba(var(--module-theme-rgb,92, 56, 30),0.92), var(--module-theme-color,#5C381E))",
+                boxShadow: "0 8px 18px rgba(var(--module-theme-rgb,92, 56, 30),0.25)",
               }}
             >
               Yes, Cancel Booking

@@ -751,10 +751,10 @@ export async function createOrder(userId, dto, bypassRazorpay = false) {
         String(paymentMethod || "").toLowerCase() === "razorpay" &&
         String(payment?.status || "").toLowerCase() !== "paid";
 
-      let restaurantDisplayString = "ZinZooX";
+      let restaurantDisplayString = "VIST Restaurant";
       try {
         if (distinctRestaurantIds.length === 1) {
-          restaurantDisplayString = restaurant?.restaurantName || "ZinZooX";
+          restaurantDisplayString = restaurant?.restaurantName || "VIST Restaurant";
         } else if (distinctRestaurantIds.length > 1) {
           const restDocs = await mongoose.model('FoodRestaurant')
             .find({ _id: { $in: distinctRestaurantIds.map(id => toObjectId(id, 'Restaurant ID')) } })
@@ -773,7 +773,7 @@ export async function createOrder(userId, dto, bypassRazorpay = false) {
         await notifyOwnersSafely([{ ownerType: "USER", ownerId: userId }], {
           title: "Order Confirmed! 🍔",
           body: `Your order #${order.order_id || order._id} from ${restaurantDisplayString} has been placed successfully.`,
-          image: "https://i.ibb.co/5GzXz7r/Zinzoox-Brand-Image.png",
+          image: "/vist-logo-bronze.png",
           data: {
             type: "order_created",
             orderId: String(order._id),
@@ -912,7 +912,7 @@ export async function verifyPayment(userId, dto) {
       await notifyOwnersSafely([{ ownerType: "USER", ownerId: userId }], {
         title: "Payment Successful! ✅",
         body: `We have received your payment of ₹${totalAmount} for your Unified Order.`,
-        image: "https://i.ibb.co/5GzXz7r/Zinzoox-Brand-Image.png",
+        image: "/vist-logo-bronze.png",
         data: {
           type: "payment_success",
           orderId: "unified"
@@ -1001,7 +1001,7 @@ export async function verifyPayment(userId, dto) {
   await notifyOwnersSafely([{ ownerType: "USER", ownerId: userId }], {
     title: "Payment Successful! ✅",
     body: `We have received your payment of ₹${order.payment.amountDue} for Order #${order._id.toString()}.`,
-    image: "https://i.ibb.co/5GzXz7r/Zinzoox-Brand-Image.png",
+    image: "/vist-logo-bronze.png",
     data: {
       type: "payment_success",
       orderId: String(order._id.toString()),
@@ -1251,7 +1251,7 @@ async function createGroceryOrder(userId, dto, bypassRazorpay = false) {
       await notifyOwnersSafely([{ ownerType: "USER", ownerId: userId }], {
         title: "Grocery Order Confirmed! 🛒",
         body: `Your grocery order #${order.order_id || order._id} has been placed successfully.`,
-        image: "https://i.ibb.co/5GzXz7r/Zinzoox-Brand-Image.png",
+        image: "/vist-logo-bronze.png",
         data: {
           type: "order_created",
           orderId: String(order._id),
@@ -1610,7 +1610,7 @@ export async function cancelOrder(orderId, userId, reason) {
     {
       title: "Order Cancelled ",
       body: `Order #${order.order_id || order._id} has been cancelled successfully.${refundDetail}`,
-      image: "https://i.ibb.co/5GzXz7r/Zinzoox-Brand-Image.png",
+      image: "/vist-logo-bronze.png",
       data: {
         type: "order_cancelled",
         orderId: String(order._id.toString()),
@@ -1898,7 +1898,7 @@ export async function updateOrderStatusRestaurant(
       {
         title: title,
         body: body,
-        image: "https://i.ibb.co/5GzXz7r/Zinzoox-Brand-Image.png",
+        image: "/vist-logo-bronze.png",
         data: {
           type: "order_status_update",
           orderId: order._id.toString(),
@@ -2062,7 +2062,7 @@ async function resolveFoodOrdersItemRestaurants(ordersList) {
                 let rName = restaurantCache.get(rId);
                 if (!rName) {
                   const restDoc = await mongoose.model('FoodRestaurant').findById(rId).select('restaurantName').lean();
-                  rName = restDoc?.restaurantName || "ZinZooX";
+                  rName = restDoc?.restaurantName || "VIST Restaurant";
                   restaurantCache.set(rId, rName);
                 }
                 resolved = { restaurantId: rId, restaurantName: rName };

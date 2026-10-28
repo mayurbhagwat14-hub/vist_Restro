@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const path = 'c:\\Users\\hp\\Desktop\\GitDeployee\\Zin_Zoo\\backend\\src\\modules\\food\\admin\\services\\admin.service.js';
+const path = './src/modules/food/admin/services/admin.service.js';
 let content = fs.readFileSync(path, 'utf-8');
 
 const search = "const targetFoodType = body.foodType !== undefined ? (body.foodType === 'Veg' ? 'Veg' : 'Non-Veg') : \n(doc.foodType === 'Veg' ? 'Veg' : 'Non-Veg');";

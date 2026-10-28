@@ -152,7 +152,7 @@ export default function UserOrderDetails() {
           <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">Order not found</p>
           <button
             onClick={() => navigate("/user/orders")}
-            className="px-4 py-2 rounded-lg bg-[#F84E04] text-white text-sm font-semibold"
+            className="px-4 py-2 rounded-lg bg-[#5C381E] text-white text-sm font-semibold"
           >
             Back to Orders
           </button>
@@ -440,7 +440,7 @@ export default function UserOrderDetails() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] pb-24 font-sans relative">
       {/* Header */}
-      <div className="bg-[var(--module-theme-color,#F84E04)] p-4 flex items-center sticky top-0 z-20 shadow-md">
+      <div className="bg-[var(--module-theme-color,#5C381E)] p-4 flex items-center sticky top-0 z-20 shadow-md">
         <div className="max-w-3xl mx-auto w-full flex items-center gap-3">
           <button
             type="button"
@@ -541,7 +541,7 @@ export default function UserOrderDetails() {
               <button
                 type="button"
                 onClick={handleCallRestaurant}
-                className="w-8 h-8 rounded-full border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-[#F84E04] hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                className="w-8 h-8 rounded-full border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-[#5C381E] hover:bg-orange-50 dark:hover:bg-orange-950/30"
               >
                 <Phone className="w-4 h-4" />
               </button>
@@ -579,11 +579,11 @@ export default function UserOrderDetails() {
                 {(!order?.moduleType || order.moduleType !== 'accessories') && !String(order?.orderId || order?.order_id || "").startsWith("ACC-") && (
                   <div
                     className="w-3 h-3 md:w-4 md:h-4 border shrink-0 flex items-center justify-center"
-                    style={{ borderColor: item.isVeg !== false && item.foodType !== 'Non-Veg' ? "#16a34a" : "#F84E04" }}
+                    style={{ borderColor: item.isVeg !== false && item.foodType !== 'Non-Veg' ? "#16a34a" : "#5C381E" }}
                   >
                     <div
                       className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full"
-                      style={{ backgroundColor: item.isVeg !== false && item.foodType !== 'Non-Veg' ? "#16a34a" : "#F84E04" }}
+                      style={{ backgroundColor: item.isVeg !== false && item.foodType !== 'Non-Veg' ? "#16a34a" : "#5C381E" }}
                     />
                   </div>
                 )}
@@ -637,11 +637,11 @@ export default function UserOrderDetails() {
             <div className="flex justify-between">
               <span className="text-gray-400 dark:text-gray-500 font-medium">Delivery fee</span>
               {pricing.deliveryFee === 0 && (
-                <span className="text-[#F84E04] text-[10px] font-bold border border-[#F84E04] px-1 rounded ml-1">
+                <span className="text-[#5C381E] text-[10px] font-bold border border-[#5C381E] px-1 rounded ml-1">
                   FREE
                 </span>
               )}
-              <span className="text-[#F84E04] font-medium uppercase">
+              <span className="text-[#5C381E] font-medium uppercase">
                 {pricing.deliveryFee ? `₹${Number(pricing.deliveryFee).toFixed(2)}` : "Free"}
               </span>
             </div>
@@ -679,7 +679,7 @@ export default function UserOrderDetails() {
                 </svg>
               </div>
 
-              <div className="flex items-center justify-center gap-2 pt-1 text-[#F84E04] font-bold text-sm">
+              <div className="flex items-center justify-center gap-2 pt-1 text-[#5C381E] font-bold text-sm">
                 <span>??</span>
                 <span>
                   You saved ₹{Number(savings).toFixed(2)} on this order!
@@ -794,7 +794,7 @@ export default function UserOrderDetails() {
           <button
             type="button"
             onClick={() => handleReorder(order)}
-            className="flex-1 bg-[#F84E04] text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#D94F0C] transition-colors"
+            className="flex-1 bg-[#5C381E] text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#482A14] transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
             Reorder
@@ -802,7 +802,7 @@ export default function UserOrderDetails() {
           <button
             type="button"
             onClick={handleDownloadSummary}
-            className="flex-1 bg-white dark:bg-zinc-800 border border-[#F84E04] text-[#F84E04] py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+            className="flex-1 bg-white dark:bg-zinc-800 border border-[#5C381E] text-[#5C381E] py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
           >
             <Download className="w-4 h-4" />
             Invoice

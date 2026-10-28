@@ -14,7 +14,8 @@ const RestaurantImageCarousel = React.memo(({ restaurant, priority = false, back
     if (/^data:/i.test(url) || /^blob:/i.test(url)) return url;
 
     const isRelative = !/^(https?:|\/\/|data:|blob:)/i.test(url.trim());
-    const resolvedUrl = (backendOrigin && isRelative)
+    const isBackendUpload = /^\/?uploads\//i.test(url.trim());
+    const resolvedUrl = (backendOrigin && isRelative && isBackendUpload)
       ? `${backendOrigin.replace(/\/$/, "")}${url.startsWith("/") ? url : `/${url}`}`
       : url;
 

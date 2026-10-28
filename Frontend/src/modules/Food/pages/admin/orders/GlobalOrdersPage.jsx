@@ -63,7 +63,7 @@ export default function GlobalOrdersPage() {
             onClick={() => setSelectedModule(mod)}
             className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
               selectedModule === mod
-                ? "bg-[#F84E04] text-white shadow-sm"
+                ? "bg-[#5C381E] text-white shadow-sm"
                 : "bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-850"
             }`}
           >

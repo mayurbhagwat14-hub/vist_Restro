@@ -78,13 +78,13 @@ export const generateThermalInvoice = async (order, moduleType = "food", fallbac
       const totalItems = items.reduce((sum, item) => sum + toNumber(item.quantity || 1), 0)
 
       // Generate QR code
-      const feedbackUrl = `https://zinzoo.in/feedback?orderId=${orderId}`
+      const feedbackUrl = `/feedback?orderId=${orderId}`
       const qrDataUrl = await QRCode.toDataURL(feedbackUrl, {
         width: 200, margin: 1, color: { dark: "#000000", light: "#ffffff" }
       }).catch(() => null)
 
       // Load logo
-      const logoDataUrl = await imageUrlToDataUrl("/zinzoo-logo.png").catch(() => null)
+      const logoDataUrl = await imageUrlToDataUrl("/vist-logo-bronze.png").catch(() => null)
 
       let estimatedHeight = 230 + (items.length * 5)
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [receiptWidth, estimatedHeight] })
@@ -107,12 +107,12 @@ export const generateThermalInvoice = async (order, moduleType = "food", fallbac
         y += imgH + 4
       } else {
         setFont(10, "bold")
-        center("ZIN ZOO X", y + 8)
+        center("VIST RESTAURANT", y + 8)
         y += 12
       }
 
       setFont(12, "bold")
-      center("ZIN ZOO X", y)
+      center("VIST RESTAURANT", y)
       y += 4
 
       setFont(7, "bold")
@@ -138,7 +138,7 @@ export const generateThermalInvoice = async (order, moduleType = "food", fallbac
       y += 3.5
       center("8225874798", y)
       y += 3.5
-      center("www.zinzoo.in", y)
+      center("www.vistrestaurant.com", y)
       y += 4
 
       if (platformGstNumber) {
@@ -167,7 +167,7 @@ export const generateThermalInvoice = async (order, moduleType = "food", fallbac
       solidLine(y); y += 4;
 
       doc.text("Customer", margin, y); doc.text(`: ${customerName}`, margin + 22, y); y += 4;
-      doc.text("Delivery Partner", margin, y); doc.text(`: ZIN ZOO X Rider`, margin + 22, y); y += 4;
+      doc.text("Delivery Partner", margin, y); doc.text(`: VIST Rider`, margin + 22, y); y += 4;
 
       solidLine(y); y += 4;
 
@@ -246,12 +246,12 @@ export const generateThermalInvoice = async (order, moduleType = "food", fallbac
       }
 
       setFont(6, "bold"); center("FOLLOW US", y); y += 4;
-      setFont(5.5, "normal"); center("Instagram | Facebook | WhatsApp   @zinzoox._01", y); y += 5;
+      setFont(5.5, "normal"); center("Instagram | Facebook | WhatsApp   @vistrestaurant", y); y += 5;
 
       setFont(5, "normal"); center("Safe Delivery | Fresh Food | On Time", y); y += 3;
       center("10:00 AM to 12:00 AM", y);
 
-      const filename = `ZIN_ZOO_X_Receipt_${billNo}.pdf`;
+      const filename = `VIST_Restaurant_Receipt_${billNo}.pdf`;
       doc.save(filename);
     } catch (error) {
       debugError("Error generating PDF invoice:", error)

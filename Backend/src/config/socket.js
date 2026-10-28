@@ -44,8 +44,13 @@ const roomNames = {
 export const initSocket = async (server) => {
     io = new Server(server, {
         cors: {
-            origin: config.socketCorsOrigin,
-            methods: ['GET', 'POST']
+            origin: (origin, callback) => {
+                // Return true to dynamically accept the requesting origin (localhost, 127.0.0.1, mobile clients, etc.)
+                callback(null, true);
+            },
+            credentials: true,
+            methods: ['GET', 'POST', 'OPTIONS'],
+            allowedHeaders: ['*']
         }
     });
 

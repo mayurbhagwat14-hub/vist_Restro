@@ -15,7 +15,7 @@ import {
 import { Input } from "@food/components/ui/input"
 import { Label } from "@food/components/ui/label"
 import { Eye, EyeOff } from "lucide-react"
-import quickSpicyLogo from "@food/assets/zinzoox-logo.png"
+import quickSpicyLogo from "@food/assets/vist-logo.png"
 const debugLog = (...args) => {}
 const debugWarn = (...args) => {}
 const debugError = (...args) => {}
@@ -139,7 +139,7 @@ export default function AdminLogin() {
             <div className="flex w-full items-center gap-4 sm:gap-5">
               <div className="flex h-12 w-32 shrink-0 items-center justify-center overflow-hidden">
                 <img
-                  src="/zinzoo-logo.png"
+                  src="/vist-logo-bronze.png"
                   alt="Logo"
                   className="w-[200px] h-[200px] max-w-none object-contain"
                   style={{ mixBlendMode: "multiply" }}
@@ -226,7 +226,7 @@ export default function AdminLogin() {
 
               <Button
                 type="submit"
-                className="h-12 w-full bg-[#F84E04] text-white transition-colors hover:bg-[#D94203] focus-visible:ring-2 focus-visible:ring-[#F84E04] focus-visible:ring-offset-2 font-bold"
+                className="h-12 w-full bg-[#5C381E] text-white transition-colors hover:bg-[#482A14] focus-visible:ring-2 focus-visible:ring-[#5C381E] focus-visible:ring-offset-2 font-bold"
                 disabled={isLoading}
               >
                 {isLoading ? "Logging in..." : "Login"}

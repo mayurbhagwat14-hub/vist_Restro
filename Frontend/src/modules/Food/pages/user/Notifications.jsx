@@ -18,7 +18,7 @@ const DEFAULT_NOTIFICATIONS = [
     timestamp: Date.now() - 120000,
     read: false,
     icon: "CheckCircle2",
-    iconColor: "text-[#F84E04]"
+    iconColor: "text-[#5C381E]"
   },
   {
     id: "2",
@@ -29,7 +29,7 @@ const DEFAULT_NOTIFICATIONS = [
     timestamp: Date.now() - 3600000,
     read: false,
     icon: "Tag",
-    iconColor: "text-[#F84E04]"
+    iconColor: "text-[#5C381E]"
   }
 ]
 
@@ -76,7 +76,7 @@ export default function Notifications() {
         timestamp: Date.now(),
         read: false,
         icon: isCancelled ? "AlertCircle" : "CheckCircle2",
-        iconColor: isCancelled ? "text-red-600" : "text-[#F84E04]"
+        iconColor: isCancelled ? "text-red-600" : "text-[#5C381E]"
       }
       setNotificationsList(prev => [newNotification, ...prev])
     }
@@ -172,10 +172,10 @@ export default function Notifications() {
             </Button>
           </Link>
           <div className="flex items-center gap-2 sm:gap-3 flex-1">
-            <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-[#F84E04] fill-[#F84E04]" />
+            <Bell className="h-5 w-5 sm:h-6 sm:w-6 text-[#5C381E] fill-[#5C381E]" />
             <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white">Notifications</h1>
             {unreadCount > 0 && (
-              <Badge className="bg-[#F84E04] text-white text-xs md:text-sm">
+              <Badge className="bg-[#5C381E] text-white text-xs md:text-sm">
                 {unreadCount}
               </Badge>
             )}
@@ -206,7 +206,7 @@ export default function Notifications() {
               >
                 {/* Unread Dot - Top Right */}
                 {!notification.read && (
-                  <div className="absolute top-2 right-2 w-2.5 h-2.5 md:w-3 md:h-3 bg-[#F84E04] rounded-full" />
+                  <div className="absolute top-2 right-2 w-2.5 h-2.5 md:w-3 md:h-3 bg-[#5C381E] rounded-full" />
                 )}
 
                 <CardContent className="p-3 md:p-4 lg:p-5">

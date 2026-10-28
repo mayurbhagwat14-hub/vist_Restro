@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { UtensilsCrossed, ShoppingCart, ShoppingBag, Briefcase, Car } from "lucide-react";
 import { MODULES, useActiveModule } from "@food/hooks/useActiveModule";
+import { useModuleSettings } from "@food/hooks/useModuleSettings";
 
 const iconMap = {
   "food": UtensilsCrossed,
@@ -13,7 +14,19 @@ const iconMap = {
 
 export default function ModuleNavbar({ className = "" }) {
   const activeModuleId = useActiveModule();
+  const moduleSettings = useModuleSettings();
   const scrollRef = useRef(null);
+
+  // Filter modules based on admin moduleSettings
+  const visibleModules = useMemo(() => {
+    return MODULES.filter((module) => {
+      if (module.id === "food") return true;
+      if (module.id === "grocery") return Boolean(moduleSettings.grocery);
+      if (module.id === "accessories") return Boolean(moduleSettings.accessories);
+      if (module.id === "services") return Boolean(moduleSettings.services);
+      return false;
+    });
+  }, [moduleSettings]);
 
   // Auto-scroll to active item on mount
   useEffect(() => {
@@ -28,6 +41,11 @@ export default function ModuleNavbar({ className = "" }) {
     }
   }, [activeModuleId]);
 
+  // If only single-vendor food is enabled (length <= 1), hide the service switcher bar completely!
+  if (visibleModules.length <= 1) {
+    return null;
+  }
+
   return (
     <div className={`w-full py-2 bg-transparent md:hidden ${className}`}>
       <div 
@@ -35,7 +53,7 @@ export default function ModuleNavbar({ className = "" }) {
         className="flex justify-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide scroll-smooth px-4 pb-2"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {MODULES.map((module) => {
+        {visibleModules.map((module) => {
           const Icon = iconMap[module.id] || ShoppingBag;
           const isActive = module.id === activeModuleId;
           
@@ -49,7 +67,7 @@ export default function ModuleNavbar({ className = "" }) {
               <div 
                 className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all shadow-sm
                   ${isActive 
-                    ? "bg-[var(--module-theme-color,#F84E04)] text-white shadow-md transform scale-105" 
+                    ? "bg-[var(--module-theme-color,#5C381E)] text-white shadow-md transform scale-105" 
                     : "bg-white dark:bg-[#1a1a1a] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
               >

@@ -51,7 +51,7 @@ export async function updateCategory(req, res, next) {
         if (req.body.image !== undefined) {
             const newImg = String(req.body.image || '').trim();
             const oldImg = category.image || '';
-            if (oldImg && newImg !== oldImg && oldImg.startsWith('/uploads/')) {
+            if (oldImg && newImg !== oldImg) {
                 try {
                     const { deleteLocalFile } = await import('../../../services/localUpload.service.js');
                     await deleteLocalFile(oldImg);
@@ -150,7 +150,7 @@ export async function updateProduct(req, res, next) {
         if (req.body.image !== undefined) {
             const newImg = String(req.body.image || '').trim();
             const oldImg = product.image || '';
-            if (oldImg && newImg !== oldImg && oldImg.startsWith('/uploads/')) {
+            if (oldImg && newImg !== oldImg) {
                 try {
                     const { deleteLocalFile } = await import('../../../services/localUpload.service.js');
                     await deleteLocalFile(oldImg);

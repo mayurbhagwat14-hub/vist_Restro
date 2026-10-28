@@ -250,7 +250,7 @@ export default function ServiceCategoryDetails() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 dark:text-white text-base group-hover:text-[#F84E04] transition-colors">{sub.name}</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-white text-base group-hover:text-[#5C381E] transition-colors">{sub.name}</h3>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                           {sub.services.length > 0 
                             ? `${sub.services.length} ${sub.services.length === 1 ? 'service' : 'services'} available`
@@ -260,7 +260,7 @@ export default function ServiceCategoryDetails() {
                       </div>
 
                       {/* Arrow */}
-                      <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-[#F84E04] group-hover:translate-x-1 transition-all flex-shrink-0" />
+                      <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-[#5C381E] group-hover:translate-x-1 transition-all flex-shrink-0" />
                     </motion.div>
                   ))}
                 </div>
@@ -323,7 +323,7 @@ export default function ServiceCategoryDetails() {
                     </p>
                     <button
                       onClick={() => setActiveSubCategory(null)}
-                      className="mt-6 px-5 py-2 rounded-full text-sm font-bold text-[#F84E04] bg-orange-50 dark:bg-orange-950/20 hover:bg-orange-100 dark:hover:bg-orange-950/30 transition-colors"
+                      className="mt-6 px-5 py-2 rounded-full text-sm font-bold text-[#5C381E] bg-orange-50 dark:bg-orange-950/20 hover:bg-orange-100 dark:hover:bg-orange-950/30 transition-colors"
                     >
                       ← Browse Other Sub-Categories
                     </button>
@@ -431,7 +431,7 @@ function ServiceCard({ svc, idx, onBook }) {
         </div>
         <button
           className="rounded-full font-bold px-6 py-2 text-white shadow-md text-sm transition-all hover:opacity-90"
-          style={{ background: 'linear-gradient(to right, #F84E04, #D40261)' }}
+          style={{ background: 'linear-gradient(to right, #5C381E, #D40261)' }}
           onClick={() => onBook(svc)}
         >
           Add

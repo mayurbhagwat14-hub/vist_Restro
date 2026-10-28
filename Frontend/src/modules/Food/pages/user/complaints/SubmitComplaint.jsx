@@ -167,7 +167,7 @@ export default function SubmitComplaint() {
           <button
             type="button"
             onClick={() => navigate("/user/profile/issues")}
-            className="ml-auto text-sm font-semibold text-[#F84E04]"
+            className="ml-auto text-sm font-semibold text-[#5C381E]"
           >
             View History
           </button>
@@ -212,7 +212,7 @@ export default function SubmitComplaint() {
             <select
               value={formData.complaintType}
               onChange={(e) => setFormData({ ...formData, complaintType: e.target.value })}
-              className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-[#F84E04] focus:border-transparent text-gray-800 dark:text-white"
+              className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-[#5C381E] focus:border-transparent text-gray-800 dark:text-white"
               required
             >
               <option value="" className="dark:bg-zinc-900">Select complaint type</option>
@@ -233,7 +233,7 @@ export default function SubmitComplaint() {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Please provide details about the issue with your order..."
-              className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-[#F84E04] focus:border-transparent text-gray-800 dark:text-white h-32 resize-none"
+              className="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-[#5C381E] focus:border-transparent text-gray-800 dark:text-white h-32 resize-none"
               required
               maxLength={1000}
             />
@@ -259,7 +259,7 @@ export default function SubmitComplaint() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#F84E04] text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#D94F0C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#5C381E] text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#482A14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>

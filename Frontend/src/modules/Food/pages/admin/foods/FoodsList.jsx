@@ -657,7 +657,7 @@ export default function FoodsList() {
               <button
                 type="button"
                 onClick={() => setShowBulkDeleteModal(true)}
-                className="px-4 py-2.5 rounded-lg bg-[#F84E04] text-white text-sm font-medium hover:bg-[#D94203] transition-colors inline-flex items-center gap-2"
+                className="px-4 py-2.5 rounded-lg bg-[#5C381E] text-white text-sm font-medium hover:bg-[#482A14] transition-colors inline-flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Delete {selectedIds.length} Items</span>
@@ -666,7 +666,7 @@ export default function FoodsList() {
             <button
               type="button"
               onClick={openAddFoodModal}
-              className="px-4 py-2.5 rounded-lg bg-[#F84E04] text-white text-sm font-medium hover:bg-[#D94203] transition-colors inline-flex items-center gap-2"
+              className="px-4 py-2.5 rounded-lg bg-[#5C381E] text-white text-sm font-medium hover:bg-[#482A14] transition-colors inline-flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               <span>Add Food</span>
@@ -675,7 +675,7 @@ export default function FoodsList() {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="px-4 py-2.5 text-sm rounded-lg border border-transparent bg-[#F84E04] text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#F84E04]/50 min-w-[150px] cursor-pointer hover:bg-[#D94203] transition-all flex items-center justify-between gap-2"
+                  className="px-4 py-2.5 text-sm rounded-lg border border-transparent bg-[#5C381E] text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#5C381E]/50 min-w-[150px] cursor-pointer hover:bg-[#482A14] transition-all flex items-center justify-between gap-2"
                 >
                   <span className="truncate max-w-[140px]">
                     {selectedCategory === "all" ? "All Categories" : filterCategories.find(c => String(c.id) === String(selectedCategory))?.name || "All Categories"}
@@ -692,7 +692,7 @@ export default function FoodsList() {
                       placeholder="Search category..."
                       value={categorySearchQuery}
                       onChange={(e) => setCategorySearchQuery(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#F84E04] focus:ring-1 focus:ring-[#F84E04] dark:bg-slate-900 dark:border-slate-700 dark:text-white placeholder:text-slate-400"
+                      className="w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] dark:bg-slate-900 dark:border-slate-700 dark:text-white placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -704,7 +704,7 @@ export default function FoodsList() {
                       setIsCategoryDropdownOpen(false)
                       setCategorySearchQuery("")
                     }}
-                    className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors ${selectedCategory === "all" ? "bg-orange-50 text-[#F84E04] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+                    className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors ${selectedCategory === "all" ? "bg-orange-50 text-[#5C381E] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
                   >
                     All Categories
                   </button>
@@ -719,7 +719,7 @@ export default function FoodsList() {
                           setIsCategoryDropdownOpen(false)
                           setCategorySearchQuery("")
                         }}
-                        className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors truncate ${selectedCategory === cat.id ? "bg-orange-50 text-[#F84E04] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+                        className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors truncate ${selectedCategory === cat.id ? "bg-orange-50 text-[#5C381E] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
                       >
                         {cat.name}
                       </button>
@@ -732,7 +732,7 @@ export default function FoodsList() {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="px-4 py-2.5 text-sm rounded-lg border border-transparent bg-[#F84E04] text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#F84E04]/50 min-w-[150px] cursor-pointer hover:bg-[#D94203] transition-all flex items-center justify-between gap-2"
+                  className="px-4 py-2.5 text-sm rounded-lg border border-transparent bg-[#5C381E] text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#5C381E]/50 min-w-[150px] cursor-pointer hover:bg-[#482A14] transition-all flex items-center justify-between gap-2"
                 >
                   <span className="truncate max-w-[140px]">
                     {selectedRestaurant === "all" ? "All Restaurants" : restaurantsForFilter.find(r => String(r.id) === String(selectedRestaurant))?.name || "All Restaurants"}
@@ -749,7 +749,7 @@ export default function FoodsList() {
                       placeholder="Search restaurant..."
                       value={restaurantSearchQuery}
                       onChange={(e) => setRestaurantSearchQuery(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#F84E04] focus:ring-1 focus:ring-[#F84E04] dark:bg-slate-900 dark:border-slate-700 dark:text-white placeholder:text-slate-400"
+                      className="w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] dark:bg-slate-900 dark:border-slate-700 dark:text-white placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -761,7 +761,7 @@ export default function FoodsList() {
                       setIsRestaurantDropdownOpen(false)
                       setRestaurantSearchQuery("")
                     }}
-                    className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors ${selectedRestaurant === "all" ? "bg-orange-50 text-[#F84E04] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+                    className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors ${selectedRestaurant === "all" ? "bg-orange-50 text-[#5C381E] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
                   >
                     All Restaurants
                   </button>
@@ -776,7 +776,7 @@ export default function FoodsList() {
                           setIsRestaurantDropdownOpen(false)
                           setRestaurantSearchQuery("")
                         }}
-                        className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors truncate ${selectedRestaurant === r.id ? "bg-orange-50 text-[#F84E04] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+                        className={`w-full text-left px-3 py-2.5 text-sm rounded-md transition-colors truncate ${selectedRestaurant === r.id ? "bg-orange-50 text-[#5C381E] font-medium dark:bg-orange-900/20" : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
                       >
                         {r.name}
                       </button>
@@ -812,7 +812,7 @@ export default function FoodsList() {
                       if (input) input.indeterminate = isSomeVisibleSelected;
                     }}
                     onChange={handleSelectAll}
-                    className="w-4 h-4 rounded border-slate-300 text-[#F84E04] focus:ring-[#F84E04]"
+                    className="w-4 h-4 rounded border-slate-300 text-[#5C381E] focus:ring-[#5C381E]"
                   />
                 </th>
                 <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-700 uppercase tracking-wider">
@@ -875,7 +875,7 @@ export default function FoodsList() {
                         type="checkbox"
                         checked={selectedIds.includes(String(food.id))}
                         onChange={(e) => handleSelectOne(e, food.id)}
-                        className="w-4 h-4 rounded border-slate-300 text-[#F84E04] focus:ring-[#F84E04]"
+                        className="w-4 h-4 rounded border-slate-300 text-[#5C381E] focus:ring-[#5C381E]"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -1334,7 +1334,7 @@ export default function FoodsList() {
                 type="button"
                 onClick={handleFoodFormSubmit}
                 disabled={submittingFood}
-                className="px-4 py-2.5 rounded-lg bg-[#F84E04] text-white text-sm font-medium hover:bg-[#D94203] transition-colors disabled:opacity-60 inline-flex items-center gap-2"
+                className="px-4 py-2.5 rounded-lg bg-[#5C381E] text-white text-sm font-medium hover:bg-[#482A14] transition-colors disabled:opacity-60 inline-flex items-center gap-2"
               >
                 {submittingFood ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>{submittingFood ? "Saving..." : foodFormMode === "edit" ? "Update Food" : "Add Food"}</span>
@@ -1364,7 +1364,7 @@ export default function FoodsList() {
             <button
               onClick={handleBulkDelete}
               disabled={isBulkDeleting}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#F84E04] hover:bg-[#D94203] rounded-lg transition-colors inline-flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#5C381E] hover:bg-[#482A14] rounded-lg transition-colors inline-flex items-center gap-2"
             >
               {isBulkDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
               {isBulkDeleting ? "Deleting..." : "Delete"}

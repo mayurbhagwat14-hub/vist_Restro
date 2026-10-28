@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, X, Pencil, Loader2, Camera, Upload, Trash2, User } from "lucide-react"
 import { Button } from "@food/components/ui/button"
@@ -47,7 +47,7 @@ const genderOptions = [
 // Load profile data from localStorage (legacy + current keys)
 const loadProfileFromStorage = () => {
   try {
-    const candidates = ["user_user", "userProfile", "zinzoox_user_profile"]
+    const candidates = ["user_user", "userProfile", "vist_user_profile"]
     for (const key of candidates) {
       const stored = localStorage.getItem(key)
       if (stored) return JSON.parse(stored)
@@ -524,14 +524,14 @@ export default function EditProfile() {
         {/* Avatar Section */}
         <div className="flex justify-center">
           <div className="relative">
-            <Avatar className="h-24 w-24 bg-[#F84E04] border-0">
+            <Avatar className="h-24 w-24 bg-[#5C381E] border-0">
               {imagePreview && (
                 <AvatarImage
                   src={imagePreview}
                   alt={formData.name || 'User'}
                 />
               )}
-              <AvatarFallback className="bg-[#F84E04] text-white text-3xl font-semibold">
+              <AvatarFallback className="bg-[#5C381E] text-white text-3xl font-semibold">
                 <User className="h-10 w-10 text-white" />
               </AvatarFallback>
             </Avatar>
@@ -539,7 +539,7 @@ export default function EditProfile() {
             <button
               onClick={handleProfileImageAction}
               disabled={isUploadingImage}
-              className="absolute bottom-0 right-0 w-8 h-8 bg-[#F84E04] rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:bg-[#D94F0C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute bottom-0 right-0 w-8 h-8 bg-[#5C381E] rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:bg-[#482A14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploadingImage ? (
                 <Loader2 className="h-4 w-4 text-white animate-spin" />
@@ -581,7 +581,7 @@ export default function EditProfile() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
-                  className="pr-10 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#F84E04] focus:ring-1 focus:ring-[#F84E04] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
+                  className="pr-10 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
                   placeholder="Name"
                 />
                 {formData.name && (
@@ -630,7 +630,7 @@ export default function EditProfile() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className="flex-1 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#F84E04] focus:ring-1 focus:ring-[#F84E04] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
+                  className="flex-1 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white"
                   placeholder="Email"
                 />
               </div>
@@ -651,7 +651,7 @@ export default function EditProfile() {
                   value={formData.dateOfBirth}
                   onChange={(e) => handleChange('dateOfBirth', e.target.value)}
                   max={dayjs().format('YYYY-MM-DD')}
-                  className="flex-1 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#F84E04] focus:ring-1 focus:ring-[#F84E04] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white [&::-webkit-calendar-picker-indicator]:dark:invert"
+                  className="flex-1 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white [&::-webkit-calendar-picker-indicator]:dark:invert"
                 />
               </div>
               {fieldErrors.dateOfBirth && (
@@ -671,7 +671,7 @@ export default function EditProfile() {
                   value={formData.anniversary}
                   onChange={(e) => handleChange('anniversary', e.target.value)}
                   max={dayjs().format('YYYY-MM-DD')}
-                  className="flex-1 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#F84E04] focus:ring-1 focus:ring-[#F84E04] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white [&::-webkit-calendar-picker-indicator]:dark:invert"
+                  className="flex-1 h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white [&::-webkit-calendar-picker-indicator]:dark:invert"
                 />
               </div>
             </div>
@@ -685,7 +685,7 @@ export default function EditProfile() {
                 value={formData.gender || ""}
                 onValueChange={(value) => handleChange('gender', value)}
               >
-                <SelectTrigger className="h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#F84E04] focus:ring-1 focus:ring-[#F84E04] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white">
+                <SelectTrigger className="h-12 text-base border border-gray-300 dark:border-gray-700 focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] rounded-lg bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white">
                   <SelectValue placeholder="Gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -705,7 +705,7 @@ export default function EditProfile() {
           onClick={handleUpdate}
           disabled={!hasChanges || isSaving || isUploadingImage || hasValidationErrors}
           className={`w-full h-14 rounded-xl font-semibold text-base transition-all mb-2 ${hasChanges && !isSaving && !isUploadingImage && !hasValidationErrors
-              ? 'bg-[#F84E04] hover:bg-[#D94F0C] text-white'
+              ? 'bg-[#5C381E] hover:bg-[#482A14] text-white'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
         >

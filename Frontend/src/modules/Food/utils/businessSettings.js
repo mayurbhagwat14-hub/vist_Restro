@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Business Settings Utility
  * Handles loading and updating business settings (favicon, title, logo)
  */
@@ -8,14 +8,14 @@ import { API_ENDPOINTS } from "@food/api/config";
 import { publicGetOnce } from "@food/api";
 
 // Cache keys and constants
-const SETTINGS_KEY = "business_settings_cache_v5"; // INCREMENTED to force refresh
+const SETTINGS_KEY = "business_settings_cache_v9"; // Bumped for VIST Restaurant branding
 const TIMESTAMP_KEY = "business_settings_timestamp";
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 const DEFAULT_MODULE_POWER_SCANNING = {
-  user: { themeColor: "#F84E04", fontFamily: "Poppins" },
-  restaurant: { themeColor: "#F84E04", fontFamily: "Poppins" },
-  delivery: { themeColor: "#F84E04", fontFamily: "Poppins" },
+  user: { themeColor: '#5C381E', fontFamily: "Poppins" },
+  restaurant: { themeColor: "#5C381E", fontFamily: "Poppins" },
+  delivery: { themeColor: "#00B761", fontFamily: "Poppins" },
 };
 
 const FONT_STACKS = {
@@ -55,7 +55,7 @@ const LEGACY_BRAND_TAILWIND_COLORS = [
 const hexToRgbTuple = (hex) => {
   const raw = String(hex || "").trim();
   const normalized = raw.startsWith("#") ? raw.slice(1) : raw;
-  if (!/^[0-9A-Fa-f]{6}$/.test(normalized)) return "248,78,4";
+  if (!/^[0-9A-Fa-f]{6}$/.test(normalized)) return "92, 56, 30";
   const r = parseInt(normalized.slice(0, 2), 16);
   const g = parseInt(normalized.slice(2, 4), 16);
   const b = parseInt(normalized.slice(4, 6), 16);
@@ -185,8 +185,13 @@ const buildThemeOverrideCss = () => {
       .join("\n");
 
   return `
-    html, body, #root, #root * {
+    html, body, #root, #root *:not(.vist-editorial-title):not(.font-serif-editorial):not(#vist-login-title) {
       font-family: var(--module-font-family, 'Poppins', sans-serif) !important;
+    }
+    #vist-login-title,
+    .vist-editorial-title,
+    .font-serif-editorial {
+      font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
     }
     .theme-text {
       color: var(--module-theme-color) !important;
@@ -400,7 +405,7 @@ export const updateFavicon = (url) => {
   const link = document.createElement("link");
   link.rel = "icon";
   link.type = "image/png";
-  link.href = '/zinzoo-logo.png'; // Force Zin Zoo X logo
+  link.href = url || '/vist-logo-bronze.png'; // VIST Restaurant logo
   // Prevent third-party cookie warning (Cloudinary)
   link.crossOrigin = "anonymous";
   document.head.appendChild(link);
@@ -435,7 +440,7 @@ const resolveFaviconByModule = (settings, moduleName = "user") => {
  */
 export const updateTitle = (companyName) => {
   if (typeof document !== 'undefined') {
-    document.title = 'Zin Zoo X'; // Force Zin Zoo X title
+    document.title = companyName || 'VIST Restaurant';
   }
 };
 
@@ -527,17 +532,18 @@ export const getCachedSettings = () => {
 
 /**
  * Get company name from business settings with fallback
- * @returns {string} Company name or default "Zinzoox Food"
+ * @returns {string} Company name or default "VIST Restaurant"
  */
 export const getCompanyName = () => {
-  return "Zin Zoo X";
+  return cachedSettings?.companyName || "VIST Restaurant";
 };
 
 /**
  * Get company name asynchronously (loads if not cached)
- * @returns {Promise<string>} Company name or default "Zinzoox Food"
+ * @returns {Promise<string>} Company name or default "VIST Restaurant"
  */
 export const getCompanyNameAsync = async () => {
-  return "Zin Zoo X";
+  const settings = await loadBusinessSettings();
+  return settings?.companyName || cachedSettings?.companyName || "VIST Restaurant";
 };
 

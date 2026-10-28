@@ -127,7 +127,7 @@ export default function Services() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-4 py-1 leading-normal md:leading-normal"
         >
-          Expert Services, <span className="text-[#F84E04] pb-2">At Your Doorstep</span>
+          Expert Services, <span className="text-[#5C381E] pb-2">At Your Doorstep</span>
         </motion.h1>
 
         <motion.p

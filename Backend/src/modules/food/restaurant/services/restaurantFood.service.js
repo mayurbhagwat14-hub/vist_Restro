@@ -38,8 +38,8 @@ const IMAGE_UPLOAD_FOLDER = 'food/items';
 const shouldUploadImageUrl = (value) => {
     const url = toStr(value);
     if (!url) return false;
-    // Do not upload if it's already a local URL
-    if (url.startsWith('/uploads/')) return false;
+    // Do not upload if it's already a local URL or Cloudinary URL
+    if (url.startsWith('/uploads/') || url.includes('res.cloudinary.com')) return false;
     if (/^data:/i.test(url) || /^blob:/i.test(url)) return false;
     return /^https?:\/\//i.test(url);
 };

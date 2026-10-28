@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import AppRoutes from './routes'
 
-// Zin Zoo client-side entry point application container
+// VIST Restaurant client-side entry point application container
 function App() {
   useEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") return;

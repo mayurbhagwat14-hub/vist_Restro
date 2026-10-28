@@ -193,10 +193,10 @@ const DeliveryMap = React.memo(({ orderId, order, isVisible }) => {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span>Preparing fresh at ZinZOO Partner Kitchen</span>
+          <span>Preparing fresh at VIST Restaurant Kitchen</span>
         </div>
         <div>
-          <span>ZinZOO Direct Kitchen Dispatch</span>
+          <span>VIST Direct Kitchen Dispatch</span>
         </div>
       </div>
     </div>
@@ -498,14 +498,14 @@ export default function OrderTracking() {
               angle: 60,
               spread: 60,
               origin: { x: 0, y: 0.8 },
-              colors: ['#F84E04', '#F59E0B', '#D97706', '#F84E04']
+              colors: ['#5C381E', '#F59E0B', '#D97706', '#5C381E']
             });
             confetti({
               particleCount: 4,
               angle: 120,
               spread: 60,
               origin: { x: 1, y: 0.8 },
-              colors: ['#F84E04', '#F59E0B', '#D97706', '#F84E04']
+              colors: ['#5C381E', '#F59E0B', '#D97706', '#5C381E']
             });
 
             if (Date.now() < end) {
@@ -1283,7 +1283,7 @@ export default function OrderTracking() {
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 dark:text-white">Order Not Found</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">{error || 'The order you\'re looking for doesn\'t exist.'}</p>
           <Link to="/user/orders">
-            <Button className="text-white border-0" style={{ backgroundColor: "var(--module-theme-color, #F84E04)" }}>Back to Orders</Button>
+            <Button className="text-white border-0" style={{ backgroundColor: "var(--module-theme-color, #5C381E)" }}>Back to Orders</Button>
           </Link>
         </div>
       </AnimatedPage>
@@ -1380,7 +1380,7 @@ export default function OrderTracking() {
   const complaintOrderId = encodeURIComponent(
     String(order?.orderId || order?.id || orderId || "")
   )
-  const themeColor = "var(--module-theme-color, #F84E04)"
+  const themeColor = "var(--module-theme-color, #5C381E)"
   const themeRgb = "var(--module-theme-rgb, 235,89,14)"
 
   return (
@@ -1436,7 +1436,7 @@ export default function OrderTracking() {
 
       {/* Theme Header */}
       <motion.div
-        className="bg-[var(--module-theme-color,#F84E04)] text-white sticky top-0 z-50 shadow-md"
+        className="bg-[var(--module-theme-color,#5C381E)] text-white sticky top-0 z-50 shadow-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
@@ -1540,7 +1540,7 @@ export default function OrderTracking() {
                 <div className="relative">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 p-0.5 shadow-md shadow-orange-500/20">
                     <div className="w-full h-full rounded-[14px] bg-white dark:bg-zinc-900 flex items-center justify-center overflow-hidden">
-                      <User className="w-6 h-6 text-[#F84E04]" />
+                      <User className="w-6 h-6 text-[#5C381E]" />
                     </div>
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-900 flex items-center justify-center">
@@ -1580,11 +1580,11 @@ export default function OrderTracking() {
                   <p className="text-[11px] font-medium text-orange-900 dark:text-orange-300">
                     Share this delivery OTP with Vishnu
                   </p>
-                  <p className="text-lg font-black tracking-widest text-[#F84E04]">
+                  <p className="text-lg font-black tracking-widest text-[#5C381E]">
                     {customerDeliveryOtp}
                   </p>
                 </div>
-                <Shield className="w-6 h-6 text-[#F84E04] opacity-80" />
+                <Shield className="w-6 h-6 text-[#5C381E] opacity-80" />
               </div>
             )}
           </div>
@@ -1665,9 +1665,9 @@ export default function OrderTracking() {
               <div key={i} className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-2 min-w-0">
                   <div
-                    className={`w-3.5 h-3.5 mt-0.5 border flex items-center justify-center p-[1px] shrink-0 ${resolvedIsVeg ? "border-[#16a34a] bg-green-50/40 dark:bg-green-900/25" : "border-[#F84E04] bg-red-50/40 dark:bg-red-900/25"}`}
+                    className={`w-3.5 h-3.5 mt-0.5 border flex items-center justify-center p-[1px] shrink-0 ${resolvedIsVeg ? "border-[#16a34a] bg-green-50/40 dark:bg-green-900/25" : "border-[#5C381E] bg-red-50/40 dark:bg-red-900/25"}`}
                   >
-                    <div className={`w-full h-full rounded-full ${resolvedIsVeg ? "bg-[#16a34a]" : "bg-[#F84E04]"}`} />
+                    <div className={`w-full h-full rounded-full ${resolvedIsVeg ? "bg-[#16a34a]" : "bg-[#5C381E]"}`} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm text-gray-700 dark:text-gray-300 font-medium truncate">

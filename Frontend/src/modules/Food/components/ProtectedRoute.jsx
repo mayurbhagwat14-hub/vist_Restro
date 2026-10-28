@@ -9,7 +9,7 @@ const baseURL =
     ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, "")
     : "";
 
-const REFRESH_LOCK_KEY = (module) => `zinzoo_refresh_lock_${module}`;
+const REFRESH_LOCK_KEY = (module) => `vist_refresh_lock_${module}`;
 const REFRESH_LOCK_TTL = 8000; // 8 seconds — covers the 10s request timeout
 
 /**

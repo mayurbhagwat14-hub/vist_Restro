@@ -196,12 +196,12 @@ export default function Restaurants() {
 
                         <div className="mt-auto pt-2.5 border-t border-gray-100 dark:border-gray-800/60 flex items-center justify-between">
                           <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[10px] sm:text-[11px] font-medium">
-                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#F84E04]" />
+                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#5C381E]" />
                             <span>{restaurant.deliveryTime}</span>
                           </div>
                           <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
                           <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-[10px] sm:text-[11px] font-medium">
-                            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#F84E04]" />
+                            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#5C381E]" />
                             <span>{restaurant.distance}</span>
                           </div>
                         </div>

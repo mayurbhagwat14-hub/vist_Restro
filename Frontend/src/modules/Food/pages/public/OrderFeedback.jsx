@@ -61,7 +61,7 @@ export default function OrderFeedback() {
           <div>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Thank You!</h2>
             <p className="text-slate-600 text-sm">
-              We look forward to serving you again at <span className="font-semibold text-emerald-600">Zin Zoo</span>.
+              We look forward to serving you again at <span className="font-semibold text-emerald-600">VIST Restaurant</span>.
             </p>
           </div>
           <div className="w-full h-px bg-slate-100" />
@@ -78,8 +78,8 @@ export default function OrderFeedback() {
       {/* Header */}
       <div className="bg-white border-b border-slate-100 px-4 py-4 flex items-center justify-center sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-2">
-          <img src="/zinzoo-logo.png" alt="Zin Zoo" className="w-8 h-8 object-contain" />
-          <span className="text-lg font-bold text-slate-950">Zin Zoo</span>
+          <img src="/vist-logo-bronze.png" alt="VIST Restaurant" className="w-8 h-8 object-contain" />
+          <span className="text-lg font-bold text-slate-950">VIST Restaurant</span>
         </div>
       </div>
 

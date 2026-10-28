@@ -1,15 +1,33 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@food/components/ui/popover";
 import { MODULES, useActiveModule } from "@food/hooks/useActiveModule";
+import { useModuleSettings } from "@food/hooks/useModuleSettings";
 
 export default function ModuleSwitcher({ variant = "light" }) {
   const activeModuleId = useActiveModule();
+  const moduleSettings = useModuleSettings();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Filter modules based on admin moduleSettings
+  const visibleModules = useMemo(() => {
+    return MODULES.filter((module) => {
+      if (module.id === "food") return true;
+      if (module.id === "grocery") return Boolean(moduleSettings.grocery);
+      if (module.id === "accessories") return Boolean(moduleSettings.accessories);
+      if (module.id === "services") return Boolean(moduleSettings.services);
+      return false;
+    });
+  }, [moduleSettings]);
+
   // Filter out the currently active module
-  const availableModules = MODULES.filter(mod => mod.id !== activeModuleId);
+  const availableModules = visibleModules.filter(mod => mod.id !== activeModuleId);
+
+  // If no other modules are available, hide the switcher
+  if (availableModules.length === 0) {
+    return null;
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -33,7 +51,7 @@ export default function ModuleSwitcher({ variant = "light" }) {
                 key={module.id}
                 to={module.path}
                 onClick={() => setIsOpen(false)}
-                className="px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--module-theme-color,#F84E04)] rounded-md transition-colors flex items-center"
+                className="px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--module-theme-color,#5C381E)] rounded-md transition-colors flex items-center"
               >
                 {module.label}
               </Link>

@@ -93,14 +93,14 @@ export default function AppFeedback() {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="What did you like or dislike?"
-                className="w-full rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-4 py-3 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#F84E04] focus:border-transparent transition-all"
+                className="w-full rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-4 py-3 min-h-[120px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#5C381E] focus:border-transparent transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={submitting || rating === 0}
-              className="w-full bg-blue-600 dark:bg-[#F84E04] text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 dark:hover:bg-[#D94F0C] active:bg-blue-800 dark:active:bg-[#C44509] disabled:bg-gray-300 dark:disabled:bg-zinc-700 disabled:text-gray-500 dark:disabled:text-zinc-500 transition-colors mt-2"
+              className="w-full bg-blue-600 dark:bg-[#5C381E] text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 dark:hover:bg-[#482A14] active:bg-blue-800 dark:active:bg-[#C44509] disabled:bg-gray-300 dark:disabled:bg-zinc-700 disabled:text-gray-500 dark:disabled:text-zinc-500 transition-colors mt-2"
             >
               {submitting ? (
                 <>

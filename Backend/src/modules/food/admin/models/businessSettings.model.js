@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 
 const businessSettingsSchema = new mongoose.Schema(
     {
-        companyName: { type: String, required: true, default: 'Zinzoox' },
-        email: { type: String, required: true, default: 'admin@zinzoox.com' },
+        companyName: { type: String, required: true, default: 'VIST Restaurant' },
+        email: { type: String, required: true, default: 'admin@vistrestaurant.com' },
         phone: {
             countryCode: { type: String, default: '+91' },
             number: { type: String, default: '' }
@@ -38,7 +38,7 @@ const businessSettingsSchema = new mongoose.Schema(
         },
         powerScanning: {
             user: {
-                themeColor: { type: String, default: '#F84E04' },
+                themeColor: { type: String, default: '#5C381E' },
                 fontFamily: { type: String, default: 'Poppins' }
             },
             restaurant: {

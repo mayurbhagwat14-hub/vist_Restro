@@ -60,7 +60,7 @@ import { adminAPI } from "@food/api"
 import { getCachedSettings, loadBusinessSettings } from "@food/utils/businessSettings"
 import { canAccessFeatureSettings, canAccessSuperPowers } from "@food/utils/adminPermissions"
 import { canAdminAccess, isSuperAdmin, resolvePermissionSectionByPath } from "@food/utils/adminRbac"
-import quickSpicyLogo from "@food/assets/zinzoox-logo.png"
+import quickSpicyLogo from "@food/assets/vist-logo.png"
 const debugLog = (...args) => {}
 const debugWarn = (...args) => {}
 const debugError = (...args) => {}
@@ -149,6 +149,9 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
   const [codControlEnabled, setCodControlEnabled] = useState(true)
   const [adminAccessSectionEnabled, setAdminAccessSectionEnabled] = useState(true)
   const [rootLandingAndUnregisteredControlEnabled, setRootLandingAndUnregisteredControlEnabled] = useState(true)
+  const [groceryModuleEnabled, setGroceryModuleEnabled] = useState(false)
+  const [accessoriesModuleEnabled, setAccessoriesModuleEnabled] = useState(false)
+  const [servicesModuleEnabled, setServicesModuleEnabled] = useState(false)
   const [canViewFeatureSettings, setCanViewFeatureSettings] = useState(false)
   const [adminUser, setAdminUser] = useState(() => {
     try {
@@ -218,6 +221,9 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
         const codFeature = rows.find((row) => row.key === "cod_control")
         const adminAccessFeature = rows.find((row) => row.key === "admin_access_section")
         const rootAndUnregisteredFeature = rows.find((row) => row.key === "root_landing_and_unregistered_control")
+        const groceryFeature = rows.find((row) => row.key === "module_grocery")
+        const accessoriesFeature = rows.find((row) => row.key === "module_accessories")
+        const servicesFeature = rows.find((row) => row.key === "module_services")
         if (feature) {
           setRestaurantSubscriptionEnabled((prev) =>
             parseFeatureEnabled(feature.isEnabled, prev)
@@ -236,6 +242,21 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
         if (rootAndUnregisteredFeature) {
           setRootLandingAndUnregisteredControlEnabled((prev) =>
             parseFeatureEnabled(rootAndUnregisteredFeature.isEnabled, prev)
+          )
+        }
+        if (groceryFeature) {
+          setGroceryModuleEnabled((prev) =>
+            parseFeatureEnabled(groceryFeature.isEnabled, prev)
+          )
+        }
+        if (accessoriesFeature) {
+          setAccessoriesModuleEnabled((prev) =>
+            parseFeatureEnabled(accessoriesFeature.isEnabled, prev)
+          )
+        }
+        if (servicesFeature) {
+          setServicesModuleEnabled((prev) =>
+            parseFeatureEnabled(servicesFeature.isEnabled, prev)
           )
         }
       } catch (error) {
@@ -263,6 +284,21 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
       }
       if (detail.key === "root_landing_and_unregistered_control") {
         setRootLandingAndUnregisteredControlEnabled((prev) =>
+          parseFeatureEnabled(detail.isEnabled, prev)
+        )
+      }
+      if (detail.key === "module_grocery") {
+        setGroceryModuleEnabled((prev) =>
+          parseFeatureEnabled(detail.isEnabled, prev)
+        )
+      }
+      if (detail.key === "module_accessories") {
+        setAccessoriesModuleEnabled((prev) =>
+          parseFeatureEnabled(detail.isEnabled, prev)
+        )
+      }
+      if (detail.key === "module_services") {
+        setServicesModuleEnabled((prev) =>
           parseFeatureEnabled(detail.isEnabled, prev)
         )
       }
@@ -309,6 +345,15 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
       }
 
       if (section.type !== "section" || !Array.isArray(section.items)) return section
+      if (section.label === "GROCERY MANAGEMENT" && !groceryModuleEnabled) {
+        return null
+      }
+      if (section.label === "ACCESSORIES MANAGEMENT" && !accessoriesModuleEnabled) {
+        return null
+      }
+      if (section.label === "SERVICE MANAGEMENT" && !servicesModuleEnabled) {
+        return null
+      }
       return {
         ...section,
         items: section.items
@@ -362,7 +407,17 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
       if (section?.type !== "section") return true
       return Array.isArray(section.items) && section.items.length > 0
     })
-  }, [adminAccessSectionEnabled, adminUser, canViewFeatureSettings, codControlEnabled, restaurantSubscriptionEnabled, rootLandingAndUnregisteredControlEnabled])
+  }, [
+    adminAccessSectionEnabled,
+    adminUser,
+    canViewFeatureSettings,
+    codControlEnabled,
+    restaurantSubscriptionEnabled,
+    rootLandingAndUnregisteredControlEnabled,
+    groceryModuleEnabled,
+    accessoriesModuleEnabled,
+    servicesModuleEnabled
+  ])
 
   const getBadgeCount = (label = "", path = "") => {
     const l = label.toLowerCase()
@@ -694,8 +749,8 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
             "flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-300 ease-out menu-item-animate text-left",
             isInSection ? "text-sm font-semibold" : "text-sm",
             isActive(item.path)
-              ? "bg-white/20 text-white border border-white/25 font-semibold"
-              : "text-white/80 hover:bg-white/10 hover:text-white",
+              ? "bg-[#5C381E] text-white shadow-sm font-semibold"
+              : "text-neutral-300 hover:bg-neutral-800/80 hover:text-white",
             isEffectiveCollapsed && "justify-center px-2"
           )}
           style={{ animationDelay: `${index * 0.05}s` }}
@@ -704,7 +759,7 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
           <Icon className={cn(
             "shrink-0 transition-all duration-300 text-left",
             isInSection ? "w-4 h-4" : "w-4 h-4",
-            isActive(item.path) ? "text-white scale-110" : "text-white/80"
+            isActive(item.path) ? "text-white scale-110" : "text-neutral-400"
           )} />
           {!isEffectiveCollapsed && (
             <div className="flex-1 flex items-center justify-between overflow-hidden">
@@ -737,12 +792,12 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
               onClick={() => toggleSection(sectionKey)}
               className={cn(
                 "w-full flex items-center justify-center px-2 py-2 rounded-lg transition-all duration-300 ease-out text-sm font-medium",
-                "text-white hover:bg-white/10"
+                "text-neutral-300 hover:bg-neutral-800/80 hover:text-white"
               )}
               title={item.label}
             >
               <div className="relative">
-                <Icon className="w-4 h-4 shrink-0 text-white/80 transition-transform duration-300" />
+                <Icon className="w-4 h-4 shrink-0 text-neutral-400 transition-transform duration-300" />
                 {getBadgeCount(item.label, item.path) > 0 && (
                   <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-600 rounded-full border-2 border-neutral-950" />
                 )}
@@ -758,11 +813,11 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
             onClick={() => toggleSection(sectionKey)}
             className={cn(
               "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-all duration-300 ease-out text-sm font-medium text-left",
-              "text-white hover:bg-white/10"
+              "text-neutral-300 hover:bg-neutral-800/80 hover:text-white"
             )}
           >
             <div className="flex items-center gap-2.5 text-left flex-1 min-w-0">
-              <Icon className="w-4 h-4 shrink-0 text-white/80 transition-transform duration-300" />
+              <Icon className="w-4 h-4 shrink-0 text-neutral-400 transition-transform duration-300" />
               <span className="font-medium text-left truncate">{item.label}</span>
               {getBadgeCount(item.label, item.path) > 0 && (
                 <span className="shrink-0 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1 min-w-[18px] text-center">
@@ -771,11 +826,11 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
               )}
             </div>
             <div className="transition-transform duration-300 shrink-0" style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
-              <ChevronDown className="w-4 h-4 shrink-0 text-white/80" />
+              <ChevronDown className="w-4 h-4 shrink-0 text-neutral-400" />
             </div>
           </button>
           {isExpanded && item.subItems && (
-            <div className="ml-5 mt-1 space-y-1 border-white/10 pl-3 submenu-animate overflow-hidden">
+            <div className="ml-5 mt-1 space-y-1 border-l border-neutral-800 pl-3 submenu-animate overflow-hidden">
               {item.subItems.map((subItem, subIndex) => {
                 const allSubPaths = item.subItems.map(si => si.path)
                 const isSubItemActive = isActive(subItem.path, allSubPaths)
@@ -795,19 +850,19 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
                     className={cn(
                       "w-full grid grid-cols-[8px_minmax(0,1fr)_auto] items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-300 ease-out text-sm font-normal text-left",
                       isSubItemActive
-                        ? "bg-white/20 text-white font-semibold"
-                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                        ? "bg-[#5C381E]/20 text-[#5C381E] font-semibold"
+                        : "text-neutral-400 hover:bg-neutral-800/60 hover:text-white"
                     )}
                     style={{ animationDelay: `${subIndex * 0.03}s` }}
                   >
                     <span className={cn(
                       "w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300",
-                      isSubItemActive ? "bg-white scale-125" : "bg-white/55"
+                      isSubItemActive ? "bg-[#5C381E] scale-125" : "bg-neutral-600"
                     )}></span>
                     <span
                       className={cn(
                         "block text-left text-[13px] leading-5",
-                        isSubItemActive ? "text-white" : "text-white/80"
+                        isSubItemActive ? "text-[#5C381E] font-medium" : "text-neutral-400"
                       )}
                     >
                       {String(displaySubLabel || subItem?.label || subItem?.path || "Menu item")}
@@ -901,7 +956,7 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
       `}</style>
       <div
         className={cn(
-          "bg-[#F84E04] admin-sidebar border-r border-white/10 h-screen fixed left-0 top-0 z-[60] lg:z-30 flex flex-col overflow-hidden shadow-2xl",
+          "bg-[#111111] dark:bg-[#0d0d0d] admin-sidebar border-r border-neutral-800 h-screen fixed left-0 top-0 z-[60] lg:z-30 flex flex-col overflow-hidden shadow-2xl",
           "transform transition-all duration-300 ease-in-out",
           "lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full",
@@ -909,7 +964,7 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
         )}
       >
         {/* Header with Logo and Brand */}
-        <div className="shrink-0 px-3 py-3 border-b border-white/10 bg-transparent animate-[fadeIn_0.4s_ease-out]">
+        <div className="shrink-0 px-3 py-3 border-b border-neutral-800 bg-transparent animate-[fadeIn_0.4s_ease-out]">
           <div className="flex items-center justify-between mb-3">
             {!isEffectiveCollapsed && (
               <div className="flex items-center gap-2 animate-[slideIn_0.3s_ease-out]">
@@ -920,7 +975,7 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
             )}
             {isEffectiveCollapsed && (
               <div className="w-full flex items-center justify-center">
-                <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shadow-lg ring-1 ring-white/20">
+                <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center shadow-lg ring-1 ring-neutral-700">
                   <span className="text-white font-bold text-base">AP</span>
                 </div>
               </div>
@@ -929,7 +984,7 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
               {!isMobile && (
                 <button
                   onClick={toggleCollapse}
-                  className="text-neutral-300 hover:text-white transition-all duration-200 hover:scale-110 p-1.5 rounded-lg hover:bg-white/5"
+                  className="text-neutral-400 hover:text-white transition-all duration-200 hover:scale-110 p-1.5 rounded-lg hover:bg-neutral-800"
                   title={isEffectiveCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
                   {isEffectiveCollapsed ? (
@@ -941,7 +996,7 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
               )}
               <button
                 onClick={onClose}
-                className="lg:hidden p-1.5 text-neutral-300 hover:text-white transition-all duration-200 hover:scale-110 rounded-lg hover:bg-white/10"
+                className="lg:hidden p-1.5 text-neutral-400 hover:text-white transition-all duration-200 hover:scale-110 rounded-lg hover:bg-neutral-800"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
@@ -952,21 +1007,21 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
           {/* Search Bar */}
           {!isEffectiveCollapsed && (
             <div className="relative animate-[slideIn_0.4s_ease-out_0.2s_both]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4 z-10 transition-colors duration-200" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4 z-10 transition-colors duration-200" />
               <Input
                 type="text"
                 placeholder="Search Menu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={cn(
-                  "w-full pl-9 py-2 bg-black/15 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 text-left",
+                  "w-full pl-9 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#5C381E]/50 focus:border-[#5C381E] transition-all duration-200 text-left",
                   searchQuery ? "pr-9" : "pr-3"
                 )}
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-all duration-200 hover:scale-110 z-10"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-white transition-all duration-200 hover:scale-110 z-10"
                   aria-label="Clear search"
                 >
                   <X className="w-4 h-4" />
@@ -981,7 +1036,7 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
           {filteredMenuData.length === 0 && searchQuery.trim() ? (
             <div className="px-3 py-12 text-left animate-[fadeIn_0.4s_ease-out]">
               <p className="text-white text-sm font-medium text-left">No menu items found</p>
-              <p className="text-white/70 text-xs mt-2 text-left">Try a different search term</p>
+              <p className="text-neutral-400 text-xs mt-2 text-left">Try a different search term</p>
             </div>
           ) : (
             filteredMenuData.map((item, index) => {
@@ -996,14 +1051,14 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
                   <div
                     key={sectionStableKey}
                     className={cn(
-                      index > 0 ? "mt-4 pt-4 border-t border-white/10" : "",
+                      index > 0 ? "mt-4 pt-4 border-t border-neutral-800/80" : "",
                       "animate-[fadeIn_0.4s_ease-out]"
                     )}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     {!isEffectiveCollapsed && (
                       <div className="px-3 py-2 mb-2">
-                        <span className="text-white/60 font-bold text-xs uppercase tracking-wider text-left">
+                        <span className="text-neutral-400 font-bold text-xs uppercase tracking-wider text-left">
                           {item.label}
                         </span>
                       </div>

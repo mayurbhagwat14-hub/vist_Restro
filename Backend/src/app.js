@@ -34,6 +34,12 @@ if (!fs.existsSync(uploadsPath)) {
 }
 app.use('/uploads', express.static(uploadsPath));
 
+// Also serve public branding assets if requested directly from backend
+const frontendPublicPath = path.resolve(process.cwd(), '../frontend/public');
+if (fs.existsSync(frontendPublicPath)) {
+  app.use(express.static(frontendPublicPath));
+}
+
 // Dynamically serve subfolders under /uploads (for legacy DB entries that only store the filename)
 if (fs.existsSync(uploadsPath)) {
   const getSubdirs = (dirPath) => {

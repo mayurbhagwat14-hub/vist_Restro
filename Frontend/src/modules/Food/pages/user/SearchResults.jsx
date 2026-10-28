@@ -834,7 +834,7 @@ export default function SearchResults() {
           <div className="max-w-7xl mx-auto flex items-center gap-2.5">
             <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300">
-              <span className="font-semibold">Outside service area.</span> ZINZOOX food ordering is not available at your current location. You can still browse restaurants and menus.
+              <span className="font-semibold">Outside service area.</span> VIST Restaurant food ordering is not available at your current location. You can still browse restaurants and menus.
             </p>
           </div>
         </div>
@@ -882,15 +882,15 @@ export default function SearchResults() {
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.id)}
-                  className={`flex flex-col items-center gap-1.5 flex-shrink-0 pb-2 transition-all ${isSelected ? 'border-b-2 border-[#F84E04]' : ''
+                  className={`flex flex-col items-center gap-1.5 flex-shrink-0 pb-2 transition-all ${isSelected ? 'border-b-2 border-[#5C381E]' : ''
                     }`}
                 >
                   {isAllCategory ? (
-                    <div className={`w-16 h-16 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-[#F84E04] dark:border-[#F84E04] shadow-lg bg-[#FFF2EB] dark:bg-[#F84E04]/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#222222]'}`}>
-                      <Grid2x2 className={`h-6 w-6 ${isSelected ? 'text-[#F84E04]' : 'text-gray-500 dark:text-gray-400'}`} />
+                    <div className={`w-16 h-16 rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#222222]'}`}>
+                      <Grid2x2 className={`h-6 w-6 ${isSelected ? 'text-[#5C381E]' : 'text-gray-500 dark:text-gray-400'}`} />
                     </div>
                   ) : cat.image ? (
-                    <div className={`w-16 h-16 rounded-full overflow-hidden border-2 transition-all ${isSelected ? 'border-[#F84E04] dark:border-[#F84E04] shadow-lg' : 'border-transparent'
+                    <div className={`w-16 h-16 rounded-full overflow-hidden border-2 transition-all ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg' : 'border-transparent'
                       }`}>
                       <img
                         src={cat.image}
@@ -899,12 +899,12 @@ export default function SearchResults() {
                       />
                     </div>
                   ) : (
-                    <div className={`w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#F84E04] dark:border-[#F84E04] shadow-lg bg-[#FFF2EB] dark:bg-[#F84E04]/20' : 'border-transparent'
+                    <div className={`w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#5C381E] dark:border-[#5C381E] shadow-lg bg-[#FFF2EB] dark:bg-[#5C381E]/20' : 'border-transparent'
                       }`}>
                       <span className="text-xl">???</span>
                     </div>
                   )}
-                  <span className={`text-xs font-medium whitespace-nowrap ${isSelected ? 'text-[#F84E04] dark:text-[#F84E04]' : 'text-gray-600 dark:text-gray-400'
+                  <span className={`text-xs font-medium whitespace-nowrap ${isSelected ? 'text-[#5C381E] dark:text-[#5C381E]' : 'text-gray-600 dark:text-gray-400'
                     }`}>
                     {cat.name}
                   </span>
@@ -940,15 +940,15 @@ export default function SearchResults() {
                   variant="outline"
                   onClick={() => toggleFilter(filter.id)}
                   className={`h-9 px-3 rounded-lg flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 transition-all font-medium ${isActive
-                    ? 'bg-[#F84E04] text-white border-[#F84E04] hover:bg-[#D94F0C] dark:bg-[#F84E04] dark:hover:bg-[#D94F0C]'
+                    ? 'bg-[#5C381E] text-white border-[#5C381E] hover:bg-[#482A14] dark:bg-[#5C381E] dark:hover:bg-[#482A14]'
                     : 'bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
                     }`}
                 >
                   {filter.hasIcon && filter.id === 'price-match' && (
-                    <span className={`text-xs ${isActive ? 'text-white' : 'text-[#F84E04] dark:text-[#F84E04]'}`}>?</span>
+                    <span className={`text-xs ${isActive ? 'text-white' : 'text-[#5C381E] dark:text-[#5C381E]'}`}>?</span>
                   )}
                   {filter.hasIcon && filter.id === 'flat-50-off' && (
-                    <span className={`text-xs ${isActive ? 'text-white' : 'text-[#F84E04] dark:text-[#F84E04]'}`}>?</span>
+                    <span className={`text-xs ${isActive ? 'text-white' : 'text-[#5C381E] dark:text-[#5C381E]'}`}>?</span>
                   )}
                   <span className={`text-sm font-bold ${isActive ? 'text-white' : 'text-black dark:text-white'}`}>{filter.label}</span>
                 </Button>
@@ -998,7 +998,7 @@ export default function SearchResults() {
                         )}
                         {/* Offer Badge - Only show if offer exists */}
                         {restaurant.offer && (
-                          <div className="absolute top-1.5 left-1.5 bg-gradient-to-r from-[#F84E04] to-[#D94F0C] text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                          <div className="absolute top-1.5 left-1.5 bg-gradient-to-r from-[#5C381E] to-[#482A14] text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
                             {restaurant.offer}
                           </div>
                         )}
@@ -1150,7 +1150,7 @@ export default function SearchResults() {
                       {/* Offer Badge */}
                       {restaurant.offer && (
                         <div className="flex items-center gap-2 text-sm lg:text-base mt-auto">
-                          <BadgePercent className="h-4 w-4 lg:h-5 lg:w-5 text-[#F84E04] dark:text-[#F84E04]" strokeWidth={2} />
+                          <BadgePercent className="h-4 w-4 lg:h-5 lg:w-5 text-[#5C381E] dark:text-[#5C381E]" strokeWidth={2} />
                           <span className="text-gray-700 dark:text-gray-300 font-medium">{restaurant.offer}</span>
                         </div>
                       )}

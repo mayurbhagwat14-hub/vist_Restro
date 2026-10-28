@@ -4,7 +4,10 @@ export const FEATURE_KEYS = {
     RESTAURANT_SUBSCRIPTION: 'restaurant_subscription',
     COD_CONTROL: 'cod_control',
     ADMIN_ACCESS_SECTION: 'admin_access_section',
-    ROOT_LANDING_AND_UNREGISTERED_CONTROL: 'root_landing_and_unregistered_control'
+    ROOT_LANDING_AND_UNREGISTERED_CONTROL: 'root_landing_and_unregistered_control',
+    MODULE_GROCERY: 'module_grocery',
+    MODULE_ACCESSORIES: 'module_accessories',
+    MODULE_SERVICES: 'module_services'
 };
 
 const DEFAULT_FEATURES = [
@@ -31,6 +34,24 @@ const DEFAULT_FEATURES = [
         name: 'Root Landing & Unregistered Restaurants',
         description: 'Controls root URL behavior and Unregistered Restaurants visibility. When disabled, root redirects to /food/user and Unregistered Restaurants is hidden.',
         isEnabled: true
+    },
+    {
+        key: FEATURE_KEYS.MODULE_GROCERY,
+        name: 'Grocery Module',
+        description: 'Controls Grocery management in admin sidebar and Grocery section visibility on user app.',
+        isEnabled: false
+    },
+    {
+        key: FEATURE_KEYS.MODULE_ACCESSORIES,
+        name: 'Accessories Module',
+        description: 'Controls Accessories management in admin sidebar and Accessories section visibility on user app.',
+        isEnabled: false
+    },
+    {
+        key: FEATURE_KEYS.MODULE_SERVICES,
+        name: 'Services Module',
+        description: 'Controls Service management & bookings in admin sidebar and Services visibility on user app.',
+        isEnabled: false
     }
 ];
 

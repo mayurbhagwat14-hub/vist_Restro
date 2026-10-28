@@ -1,6 +1,6 @@
 import http from 'http';
 import crypto from 'crypto';
-// restart trigger
+// restart trigger - env updated
 import { exec } from 'child_process';
 
 import app from './src/app.js';
@@ -67,19 +67,17 @@ const startServer = async () => {
         // 2. Create HTTP server from Express app
         const httpServer = http.createServer(app);
 
-        // 3. Initialize Socket.IO with the HTTP server (or a separate server if port is different)
-        let socketHttpServer = httpServer;
+        // 3. Initialize Socket.IO with the main HTTP server (port 5000)
+        const ioInstance = await initSocket(httpServer);
         const sPort = Number(config.socketPort || 5001);
         const apiPort = Number(config.port || 5000);
         
-        if (sPort && sPort !== apiPort) {
-            socketHttpServer = http.createServer();
-            await initSocket(socketHttpServer);
+        if (sPort && sPort !== apiPort && ioInstance) {
+            const socketHttpServer = http.createServer();
+            ioInstance.attach(socketHttpServer);
             socketHttpServer.listen(sPort, config.host, () => {
-                logger.info(`Socket.io server running separately on ${config.host}:${sPort}`);
+                logger.info(`Socket.io server also attached and listening on ${config.host}:${sPort}`);
             });
-        } else {
-            await initSocket(httpServer);
         }
 
         if (config.redisEnabled) {

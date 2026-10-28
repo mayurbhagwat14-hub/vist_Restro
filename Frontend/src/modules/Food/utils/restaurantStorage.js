@@ -1,10 +1,10 @@
-﻿// Utility for managing restaurant data across pages
+// Utility for managing restaurant data across pages
 const debugLog = (...args) => {}
 const debugWarn = (...args) => {}
 const debugError = (...args) => {}
 
 
-const STORAGE_KEY = "zinzoox_restaurants"
+const STORAGE_KEY = "vist_restaurants"
 
 // Get restaurants from localStorage
 export const getRestaurants = () => {

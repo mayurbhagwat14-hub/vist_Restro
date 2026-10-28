@@ -7,6 +7,7 @@ import { Button } from "@food/components/ui/button"
 import { Input } from "@food/components/ui/input"
 import { searchAPI } from "@/services/api"
 import { motion, AnimatePresence } from "framer-motion"
+import { useModuleSettings } from "@food/hooks/useModuleSettings"
 
 // Helper to resolve media URLs consistently
 const getMediaUrl = (url) => {
@@ -23,6 +24,7 @@ export default function GlobalSearchResults() {
   const navigate = useNavigate()
   
   const [query, setQuery] = useState(initialQuery)
+  const moduleSettings = useModuleSettings()
   const [results, setResults] = useState({ food: [], grocery: [], accessories: [], services: [] })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -89,21 +91,28 @@ export default function GlobalSearchResults() {
     setActiveTab("all")
   }
 
-  // Derived filtered results
+  // Derived filtered results based on activeTab and moduleSettings
   const displayResults = useMemo(() => {
+    const activeData = {
+      food: results.food || [],
+      grocery: moduleSettings.grocery ? (results.grocery || []) : [],
+      accessories: moduleSettings.accessories ? (results.accessories || []) : [],
+      services: moduleSettings.services ? (results.services || []) : []
+    };
+
     if (activeTab === "all") {
-        return results;
+      return activeData;
     }
     return {
-        food: activeTab === "food" ? results.food : [],
-        grocery: activeTab === "grocery" ? results.grocery : [],
-        accessories: activeTab === "accessories" ? results.accessories : [],
-        services: activeTab === "services" ? results.services : []
+      food: activeTab === "food" ? activeData.food : [],
+      grocery: activeTab === "grocery" ? activeData.grocery : [],
+      accessories: activeTab === "accessories" ? activeData.accessories : [],
+      services: activeTab === "services" ? activeData.services : []
     };
-  }, [results, activeTab]);
+  }, [results, activeTab, moduleSettings]);
 
-  const hasAnyResults = Object.values(results).some(arr => arr.length > 0);
-  const totalResultsCount = Object.values(results).reduce((acc, arr) => acc + arr.length, 0);
+  const hasAnyResults = Object.values(displayResults).some(arr => arr.length > 0);
+  const totalResultsCount = Object.values(displayResults).reduce((acc, arr) => acc + arr.length, 0);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950">
@@ -186,29 +195,35 @@ export default function GlobalSearchResults() {
                             className={activeTab === "food" ? "bg-orange-500 hover:bg-orange-600 rounded-full" : "rounded-full"}
                             onClick={() => setActiveTab("food")}
                         >
-                            Food ({results.food.length})
+                            Food ({results.food?.length || 0})
                         </Button>
-                        <Button 
-                            variant={activeTab === "grocery" ? "default" : "outline"}
-                            className={activeTab === "grocery" ? "bg-green-500 hover:bg-green-600 rounded-full" : "rounded-full"}
-                            onClick={() => setActiveTab("grocery")}
-                        >
-                            Grocery ({results.grocery.length})
-                        </Button>
-                        <Button 
-                            variant={activeTab === "accessories" ? "default" : "outline"}
-                            className={activeTab === "accessories" ? "bg-blue-500 hover:bg-blue-600 rounded-full" : "rounded-full"}
-                            onClick={() => setActiveTab("accessories")}
-                        >
-                            Accessories ({results.accessories.length})
-                        </Button>
-                        <Button 
-                            variant={activeTab === "services" ? "default" : "outline"}
-                            className={activeTab === "services" ? "bg-purple-500 hover:bg-purple-600 rounded-full" : "rounded-full"}
-                            onClick={() => setActiveTab("services")}
-                        >
-                            Services ({results.services.length})
-                        </Button>
+                        {moduleSettings.grocery && (
+                          <Button 
+                              variant={activeTab === "grocery" ? "default" : "outline"}
+                              className={activeTab === "grocery" ? "bg-green-500 hover:bg-green-600 rounded-full" : "rounded-full"}
+                              onClick={() => setActiveTab("grocery")}
+                          >
+                              Grocery ({results.grocery?.length || 0})
+                          </Button>
+                        )}
+                        {moduleSettings.accessories && (
+                          <Button 
+                              variant={activeTab === "accessories" ? "default" : "outline"}
+                              className={activeTab === "accessories" ? "bg-blue-500 hover:bg-blue-600 rounded-full" : "rounded-full"}
+                              onClick={() => setActiveTab("accessories")}
+                          >
+                              Accessories ({results.accessories?.length || 0})
+                          </Button>
+                        )}
+                        {moduleSettings.services && (
+                          <Button 
+                              variant={activeTab === "services" ? "default" : "outline"}
+                              className={activeTab === "services" ? "bg-purple-500 hover:bg-purple-600 rounded-full" : "rounded-full"}
+                              onClick={() => setActiveTab("services")}
+                          >
+                              Services ({results.services?.length || 0})
+                          </Button>
+                        )}
                     </div>
 
                     <div className="grid gap-8">

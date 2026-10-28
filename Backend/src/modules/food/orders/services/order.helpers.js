@@ -166,7 +166,7 @@ export function normalizeOrderForClient(orderDoc) {
   const isFood = order.moduleType === 'food' || (!order.moduleType && uniqueNames.length > 0) || (!order.moduleType && !order.items?.[0]?.foodName);
   const restaurantNameText = uniqueNames.length > 0 
     ? uniqueNames.join(", ") 
-    : (isFood ? "ZinZooX Kitchen" : "");
+    : (isFood ? "VIST Restaurant Kitchen" : "");
 
   return {
     ...order,

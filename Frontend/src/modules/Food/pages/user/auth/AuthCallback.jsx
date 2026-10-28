@@ -118,7 +118,7 @@ export default function AuthCallback() {
   }
 
   return (
-    <AnimatedPage className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50/30 via-white to-orange-100/20 dark:from-gray-900 dark:via-[#0a0a0a] dark:to-gray-900 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12">
+    <AnimatedPage className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50/50 via-white to-neutral-50/30 dark:from-gray-900 dark:via-[#0a0a0a] dark:to-gray-900 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12">
       <Card className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl shadow-xl dark:shadow-2xl border-0 md:border md:border-gray-200 dark:md:border-gray-800">
         <CardHeader className="text-center space-y-2 md:space-y-3 lg:space-y-4 p-6 md:p-8 lg:p-10">
           <CardTitle className="text-2xl md:text-3xl lg:text-4xl font-bold text-black dark:text-white">
@@ -135,7 +135,7 @@ export default function AuthCallback() {
         <CardContent className="space-y-6 md:space-y-8 p-6 md:p-8 lg:p-10 pt-0 md:pt-0 lg:pt-0">
           {status === "loading" && (
             <div className="flex flex-col items-center justify-center py-8 md:py-12 space-y-4 md:space-y-6">
-              <Loader2 className="h-12 w-12 md:h-16 md:w-16 text-[#F84E04] animate-spin" />
+              <Loader2 className="h-12 w-12 md:h-16 md:w-16 text-[#5C381E] animate-spin" />
               <p className="text-sm md:text-base text-muted-foreground text-center">
                 Please wait while we verify your credentials...
               </p>
@@ -145,10 +145,10 @@ export default function AuthCallback() {
           {status === "success" && (
             <div className="flex flex-col items-center justify-center py-8 md:py-12 space-y-4 md:space-y-6">
               <div className="relative">
-                <CheckCircle2 className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 text-[#F84E04] animate-in fade-in zoom-in duration-500" />
+                <CheckCircle2 className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 text-[#5C381E] animate-in fade-in zoom-in duration-500" />
               </div>
               <div className="text-center space-y-2 md:space-y-3">
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold text-[#F84E04] dark:text-[#F84E04]">
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-semibold text-[#5C381E] dark:text-[#5C381E]">
                   Welcome!
                 </h3>
                 <p className="text-sm md:text-base text-muted-foreground">
@@ -187,7 +187,7 @@ export default function AuthCallback() {
                 </Button>
                 <Button
                   onClick={handleRetry}
-                  className="flex-1 h-11 md:h-12 text-base md:text-lg bg-[#F84E04] hover:bg-[#D94F0C] text-white transition-all hover:shadow-lg active:scale-[0.98]"
+                  className="flex-1 h-11 md:h-12 text-base md:text-lg bg-[#5C381E] hover:bg-[#482A14] text-white transition-all hover:shadow-lg active:scale-[0.98]"
                 >
                   Try Again
                 </Button>

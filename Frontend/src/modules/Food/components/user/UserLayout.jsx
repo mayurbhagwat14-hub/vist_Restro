@@ -259,7 +259,7 @@ export default function UserLayout() {
   const showDesktopNavbar = !isAuthPage && !isCartOrCheckoutPage && !isProfileSubpage && !isOffersPage && !isCategoriesPage
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0a0a0a] transition-colors duration-200">
+    <div className={`min-h-screen ${isAuthPage ? "bg-[#F7EEDD]" : "bg-[#f5f5f5] dark:bg-[#0a0a0a]"} transition-colors duration-200`}>
       <CartProvider>
         <ProfileProvider>
           <OrdersProvider>

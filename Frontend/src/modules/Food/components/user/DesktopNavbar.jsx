@@ -10,7 +10,7 @@ import { useLocationSelector, useSearchOverlay } from "./UserLayout"
 import { useProfile } from "@food/context/ProfileContext"
 import { FaLocationDot } from "react-icons/fa6"
 import { AnimatePresence, motion } from "framer-motion"
-import quickSpicyLogo from "@food/assets/zinzoox-logo.png"
+import quickSpicyLogo from "@food/assets/vist-logo.png"
 import { getCachedSettings, loadBusinessSettings } from "@food/utils/businessSettings"
 import HeaderNotificationBell from "./HeaderNotificationBell"
 import { searchAPI } from "@/services/api"
@@ -253,7 +253,7 @@ export default function DesktopNavbar({ showLogo = true }) {
                                 <Link to="/food/user" className="flex items-center justify-center flex-shrink-0 mr-4 md:mr-10 lg:mr-16">
                                     {logoUrl || companyName ? (
                                         <img
-                                            src={logoUrl || "/zinzoo-logo.png"}
+                                            src={logoUrl || "/vist-logo-bronze.png"}
                                             alt={companyName || "Company Logo"}
                                             className="h-16 w-auto md:h-20 lg:h-24 object-contain scale-110 md:scale-[1.6] lg:scale-[1.8] origin-left"
                                             onError={(e) => {
@@ -263,7 +263,7 @@ export default function DesktopNavbar({ showLogo = true }) {
                                             }}
                                         />
                                     ) : (
-                                        <img src={"/zinzoo-logo.png"} alt={companyName || "Logo"} className="h-16 w-auto md:h-20 lg:h-24 object-contain scale-110 md:scale-[1.6] lg:scale-[1.8] origin-left" />
+                                        <img src={"/vist-logo-bronze.png"} alt={companyName || "Logo"} className="h-16 w-auto md:h-20 lg:h-24 object-contain scale-110 md:scale-[1.6] lg:scale-[1.8] origin-left" />
                                     )}
                                 </Link>
                             )}
@@ -306,7 +306,7 @@ export default function DesktopNavbar({ showLogo = true }) {
                         <div className="flex-1 max-w-3xl mx-4 flex items-center gap-4">
                             {/* Search Bar */}
                             <div className="relative flex-1" ref={searchRef}>
-                                <div className="relative bg-gray-100 dark:bg-[#2a2a2a] rounded-lg transition-all duration-300 focus-within:ring-2 focus-within:ring-[#F84E04] focus-within:bg-white dark:focus-within:bg-[#1a1a1a] border border-transparent focus-within:border-[#F84E04]/20">
+                                <div className="relative bg-gray-100 dark:bg-[#2a2a2a] rounded-lg transition-all duration-300 focus-within:ring-2 focus-within:ring-[#5C381E] focus-within:bg-white dark:focus-within:bg-[#1a1a1a] border border-transparent focus-within:border-[#5C381E]/20">
                                     <div className="flex items-center px-3 py-2">
                                         <Search className="h-4 w-4 text-gray-500 flex-shrink-0 mr-3" />
                                         <Input
@@ -357,7 +357,7 @@ export default function DesktopNavbar({ showLogo = true }) {
                                         >
                                             {isSearching ? (
                                                 <div className="flex items-center justify-center p-8">
-                                                    <Loader2 className="h-6 w-6 animate-spin text-[#F84E04]" />
+                                                    <Loader2 className="h-6 w-6 animate-spin text-[#5C381E]" />
                                                     <span className="ml-2 text-sm text-gray-500">Searching...</span>
                                                 </div>
                                             ) : !hasAnyResults ? (

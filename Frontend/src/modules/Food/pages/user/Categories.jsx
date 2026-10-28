@@ -99,13 +99,13 @@ export default function Categories() {
       {/* Search Bar */}
       <div className="px-4 py-6">
         <div className="relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400 dark:text-neutral-500 group-focus-within:text-[#F84E04] transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400 dark:text-neutral-500 group-focus-within:text-[#5C381E] transition-colors" />
           <input
             type="text"
             placeholder="Search specialties, cuisines..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-neutral-50 dark:bg-[#1a1a1a] border border-neutral-100 dark:border-neutral-800 rounded-2xl text-sm font-medium text-neutral-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-[#F84E04]/5 focus:border-[#F84E04] transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
+            className="w-full pl-12 pr-4 py-4 bg-neutral-50 dark:bg-[#1a1a1a] border border-neutral-100 dark:border-neutral-800 rounded-2xl text-sm font-medium text-neutral-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-[#5C381E]/5 focus:border-[#5C381E] transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
           />
         </div>
       </div>
@@ -135,12 +135,12 @@ export default function Categories() {
                     to={`/food/user/category/${category.slug}`}
                     className="flex flex-col items-center gap-1 group"
                   >
-                    <div className="relative w-full aspect-square flex items-center justify-center group-active:scale-95 transition-all duration-300 bg-transparent">
+                    <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-sm border-2 border-white dark:border-neutral-800 ring-1 ring-neutral-200 dark:ring-neutral-800 bg-neutral-50 dark:bg-neutral-900 group-hover:ring-[#5C381E] group-hover:shadow-md group-active:scale-95 transition-all duration-300 flex items-center justify-center">
                       <img
                         src={category.image}
                         alt={category.name}
                         loading="lazy"
-                        className="w-full h-full object-contain scale-110 sm:scale-115 group-hover:scale-120 transition-transform duration-300 mix-blend-multiply dark:mix-blend-normal pointer-events-none"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 pointer-events-none"
                       />
                     </div>
                     <span className="text-xs sm:text-[13px] font-semibold text-neutral-800 dark:text-neutral-200 text-center leading-tight line-clamp-2 tracking-tight capitalize">

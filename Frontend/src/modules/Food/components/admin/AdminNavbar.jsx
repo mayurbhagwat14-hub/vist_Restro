@@ -42,7 +42,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@food/components/ui/popover";
-import quickSpicyLogo from "@food/assets/zinzoox-logo.png";
+import quickSpicyLogo from "@food/assets/vist-logo.png";
 import { adminAPI } from "@food/api";
 import { clearModuleAuth } from "@food/utils/auth";
 import { getCachedSettings, loadBusinessSettings } from "@food/utils/businessSettings";
@@ -305,7 +305,7 @@ export default function AdminNavbar({ onMenuClick }) {
             <div className="flex items-center gap-2">
               <div className="w-24 sm:w-32 h-9 sm:h-12 flex items-center justify-center overflow-hidden">
                 <img
-                  src="/zinzoo-logo.png"
+                  src="/vist-logo-bronze.png"
                   alt={businessSettings?.companyName || "Company"}
                   className="w-[160px] sm:w-[200px] h-[160px] sm:h-[200px] max-w-none object-contain"
                   style={{ mixBlendMode: "multiply" }}

@@ -188,10 +188,10 @@ export default function ZoneSetup() {
     // Initialize live preview polygon
     previewPolygonRef.current = new google.maps.Polygon({
       map: map,
-      strokeColor: "#F84E04",
+      strokeColor: "#5C381E",
       strokeOpacity: 0.8,
       strokeWeight: 3,
-      fillColor: "#F84E04",
+      fillColor: "#5C381E",
       fillOpacity: 0.25
     })
 
@@ -236,7 +236,7 @@ export default function ZoneSetup() {
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 7,
-          fillColor: "#F84E04",
+          fillColor: "#5C381E",
           fillOpacity: 1,
           strokeColor: "#FFFFFF",
           strokeWeight: 2
@@ -507,7 +507,7 @@ export default function ZoneSetup() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <MapPin className="h-6 w-6 text-[#F84E04]" /> Service Zone Configuration
+              <MapPin className="h-6 w-6 text-[#5C381E]" /> Service Zone Configuration
             </h1>
             <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
               Define operational boundaries for Food, Grocery, Accessories, and Services.
@@ -533,7 +533,7 @@ export default function ZoneSetup() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#F84E04] bg-[#F84E04]/10 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#5C381E] bg-[#5C381E]/10 px-2 py-0.5 rounded-full">
                     Platform Control
                   </span>
                   <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
@@ -541,7 +541,7 @@ export default function ZoneSetup() {
                   </CardTitle>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
-                  Control whether ZINZOOX food ordering is available globally or restricted to custom polygon service zones.
+                  Control whether VIST Restaurant food ordering is available globally or restricted to custom polygon service zones.
                 </p>
               </div>
 
@@ -593,7 +593,7 @@ export default function ZoneSetup() {
               <CardHeader className="pb-3 border-b border-slate-100">
                 <CardTitle className="text-base font-bold flex items-center justify-between">
                   <span>Defined Service Zones</span>
-                  <span className="text-xs bg-[#F84E04]/10 text-[#F84E04] px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-xs bg-[#5C381E]/10 text-[#5C381E] px-2 py-0.5 rounded-full font-medium">
                     {zones.length} Active
                   </span>
                 </CardTitle>
@@ -712,7 +712,7 @@ export default function ZoneSetup() {
                   ) : (
                     <Button
                       onClick={handleStartDrawing}
-                      className="bg-[#F84E04] hover:bg-[#F84E04]/90 text-white font-semibold text-xs h-8"
+                      className="bg-[#5C381E] hover:bg-[#5C381E]/90 text-white font-semibold text-xs h-8"
                     >
                       <Plus className="h-4 w-4 mr-1" /> Start Drawing
                     </Button>

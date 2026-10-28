@@ -220,13 +220,13 @@ export default function AccessoriesPage() {
     <AnimatedPage>
       <div className="min-h-screen bg-gray-50 dark:bg-[#121212] pb-24 font-outfit">
         {/* Header */}
-        <div className="md:hidden sticky top-0 z-40 bg-[var(--module-theme-color,#F84E04)] shadow-md">
+        <div className="md:hidden sticky top-0 z-40 bg-[var(--module-theme-color,#5C381E)] shadow-md">
           <div className="flex items-center gap-3 p-4">
             <button onClick={() => navigate("/food")} className="p-2 -ml-2 rounded-full hover:bg-white/20">
               <ChevronLeft className="w-6 h-6 text-white" />
             </button>
             <div>
-              <h1 className="text-xl font-bold font-poppins text-white">Zin Zoo X</h1>
+              <h1 className="text-xl font-bold font-poppins text-white">VIST Restro</h1>
               <p className="text-xs text-white/80 font-medium">Premium Accessories</p>
             </div>
             <div className="ml-auto flex items-center gap-2.5">
@@ -234,7 +234,7 @@ export default function AccessoriesPage() {
               <div ref={cartIconRef} className="bg-white/10 text-white p-2 rounded-lg flex items-center gap-2 relative cursor-pointer hover:bg-white/20 transition-colors" onClick={() => navigate("/food/user/cart?module=accessories")}>
                 <ShoppingCart className="w-5 h-5" />
                 {cart.filter(i => i.moduleType === 'accessories').reduce((a, b) => a + (b.quantity || 1), 0) > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-white text-[var(--module-theme-color,#F84E04)] text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute -top-1.5 -right-1.5 bg-white text-[var(--module-theme-color,#5C381E)] text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                      {cart.filter(i => i.moduleType === 'accessories').reduce((a, b) => a + (b.quantity || 1), 0)}
                   </span>
                 )}
@@ -263,14 +263,14 @@ export default function AccessoriesPage() {
           {/* Desktop Header */}
           <div className="hidden">
             <div>
-              <h1 className="text-2xl font-bold font-poppins text-gray-900 dark:text-white">Zin Zoo X</h1>
+              <h1 className="text-2xl font-bold font-poppins text-gray-900 dark:text-white">VIST Restro</h1>
               <p className="text-xs text-gray-500 font-medium">Premium Accessories</p>
             </div>
             <div className="relative w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Search for 'Watches', 'Bags'..."
-                className="pl-9 h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl text-sm focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-[var(--module-theme-color,#F84E04)]"
+                className="pl-9 h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl text-sm focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-[var(--module-theme-color,#5C381E)]"
                 value={searchQuery}
                 onChange={handleSearch}
               />
@@ -382,9 +382,9 @@ export default function AccessoriesPage() {
                     onClick={() => navigate("/food/user/accessories/categories")}
                   >
                     <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center p-1 transition-all bg-orange-50 dark:bg-orange-950/20 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 border border-transparent">
-                      <Plus className="w-6 h-6 text-[#F84E04]" />
+                      <Plus className="w-6 h-6 text-[#5C381E]" />
                     </div>
-                    <span className="text-[11px] font-semibold text-center leading-tight text-gray-700 dark:text-gray-300 group-hover:text-[#F84E04]">
+                    <span className="text-[11px] font-semibold text-center leading-tight text-gray-700 dark:text-gray-300 group-hover:text-[#5C381E]">
                       More
                     </span>
                   </div>
@@ -492,7 +492,7 @@ export default function AccessoriesPage() {
                         ) : qty === 0 ? (
                           <button 
                             onClick={(e) => handleAdd(e, product)}
-                            className="bg-[#F84E04] hover:bg-[#D94203] text-white transition-colors h-8 px-4 rounded-lg font-extrabold text-[10px] uppercase tracking-wider shadow-sm hover:shadow-md flex items-center justify-center"
+                            className="bg-[#5C381E] hover:bg-[#482A14] text-white transition-colors h-8 px-4 rounded-lg font-extrabold text-[10px] uppercase tracking-wider shadow-sm hover:shadow-md flex items-center justify-center"
                           >
                             ADD
                           </button>

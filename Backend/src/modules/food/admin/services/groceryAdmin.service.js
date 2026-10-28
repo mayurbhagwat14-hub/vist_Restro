@@ -52,7 +52,7 @@ export async function updateGroceryCategory(id, data) {
     if (data.image !== undefined) {
         const newImg = String(data.image || '').trim();
         const oldImg = doc.image || '';
-        if (oldImg && newImg !== oldImg && oldImg.startsWith('/uploads/')) {
+        if (oldImg && newImg !== oldImg) {
             try {
                 const { deleteLocalFile } = await import('../../../services/localUpload.service.js');
                 await deleteLocalFile(oldImg);
@@ -126,7 +126,7 @@ export async function updateGroceryProduct(id, data) {
     if (data.image !== undefined) {
         const newImg = String(data.image || '').trim();
         const oldImg = doc.image || '';
-        if (oldImg && newImg !== oldImg && oldImg.startsWith('/uploads/')) {
+        if (oldImg && newImg !== oldImg) {
             try {
                 const { deleteLocalFile } = await import('../../../services/localUpload.service.js');
                 await deleteLocalFile(oldImg);

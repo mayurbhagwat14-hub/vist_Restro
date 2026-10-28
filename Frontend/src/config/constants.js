@@ -1,5 +1,5 @@
-﻿export const APP_CONFIG = {
-  NAME: 'Zinzoox',
+export const APP_CONFIG = {
+  NAME: 'VIST Restaurant',
   VERSION: '1.0.0',
 };
 

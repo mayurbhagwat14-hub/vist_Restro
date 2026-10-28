@@ -231,6 +231,7 @@ export const adminSidebarMenu = [
     type: "section",
     label: "SYSTEM SETTINGS",
     items: [
+      { type: "link", label: "Module & Feature Settings", path: "/admin/food/feature-settings", icon: "Settings" },
       { type: "link", label: "Zone Setup", path: "/admin/food/zones", icon: "MapPin" },
       { type: "link", label: "Delivery & Fee Settings", path: "/admin/food/fee-settings", icon: "CreditCard" },
       { type: "link", label: "Broadcast Notification", path: "/admin/food/broadcast-notification", icon: "Bell" },

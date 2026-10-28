@@ -1,6 +1,14 @@
+import dns from 'dns';
 import mongoose from 'mongoose';
 import { config } from './env.js';
 import { logger } from '../utils/logger.js';
+
+// Resolve MongoDB Atlas SRV record issues caused by local ISP/router DNS
+try {
+    dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch (dnsErr) {
+    logger.warn(`Could not set custom DNS servers: ${dnsErr.message}`);
+}
 
 export const connectDB = async () => {
     try {

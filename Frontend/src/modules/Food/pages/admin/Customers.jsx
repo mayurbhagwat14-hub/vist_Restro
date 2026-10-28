@@ -621,7 +621,7 @@ export default function Customers() {
                         onClick={() => handlePageChange(p)}
                         className={`w-8 h-8 flex items-center justify-center text-xs font-semibold rounded-lg transition-all ${
                           currentPage === p
-                            ? "bg-[#F84E04] text-white shadow-sm"
+                            ? "bg-[#5C381E] text-white shadow-sm"
                             : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                         }`}
                       >

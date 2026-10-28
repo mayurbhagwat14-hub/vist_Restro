@@ -473,9 +473,9 @@ export default function Wallet() {
                       className="w-full md:w-auto md:min-w-[200px] lg:min-w-[240px] h-12 md:h-14 lg:h-16 text-white font-semibold text-sm md:text-base lg:text-lg rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                       style={{
                         background:
-                          "linear-gradient(135deg, rgba(var(--module-theme-rgb,248,78,4),0.94), var(--module-theme-color,#F84E04))",
+                          "linear-gradient(135deg, rgba(var(--module-theme-rgb,92, 56, 30),0.94), var(--module-theme-color,#5C381E))",
                         boxShadow:
-                          "0 12px 24px rgba(var(--module-theme-rgb,248,78,4),0.30)",
+                          "0 12px 24px rgba(var(--module-theme-rgb,92, 56, 30),0.30)",
                       }}
                       onClick={() => setAddMoneyModalOpen(true)}
                     >

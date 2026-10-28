@@ -483,7 +483,7 @@ export default function AdminProfile() {
               <Button
                 type="button"
                 onClick={handleStartEditing}
-                className="bg-[#F84E04] text-white hover:bg-[#D94203] font-semibold"
+                className="bg-[#5C381E] text-white hover:bg-[#482A14] font-semibold"
               >
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit
@@ -503,7 +503,7 @@ export default function AdminProfile() {
                   type="submit"
                   form="admin-profile-form"
                   disabled={saving || uploading}
-                  className="bg-[#F84E04] text-white hover:bg-[#D94203] h-10 px-6 font-semibold"
+                  className="bg-[#5C381E] text-white hover:bg-[#482A14] h-10 px-6 font-semibold"
                 >
                   {uploading ? (
                     <>
@@ -1171,7 +1171,7 @@ const MapPicker = ({ form, setForm }) => {
         <input
           ref={autocompleteInputRef}
           type="text"
-          className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#F84E04]"
+          className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#5C381E]"
           placeholder="Search location or establishment..."
         />
       </div>

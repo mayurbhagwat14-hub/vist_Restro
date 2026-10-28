@@ -47,7 +47,7 @@ export default function AboutUs() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [aboutData, setAboutData] = useState({
-    appName: 'Zinzoox Food',
+    appName: 'VIST Restaurant',
     version: '1.0.0',
     description: '',
     logo: '',
@@ -194,7 +194,7 @@ export default function AboutUs() {
     return (
       <div className="h-full overflow-y-auto bg-slate-50 p-4 lg:p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F84E04] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C381E] mx-auto"></div>
           <p className="mt-4 text-slate-600">Loading...</p>
         </div>
       </div>
@@ -292,7 +292,7 @@ export default function AboutUs() {
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Features</CardTitle>
-            <Button onClick={addFeature} size="sm" variant="outline" className="border-[#F84E04] text-[#F84E04] hover:bg-orange-50 hover:text-[#D94203]">
+            <Button onClick={addFeature} size="sm" variant="outline" className="border-[#5C381E] text-[#5C381E] hover:bg-orange-50 hover:text-[#482A14]">
               <Plus className="h-4 w-4 mr-2" />
               Add Feature
             </Button>
@@ -386,7 +386,7 @@ export default function AboutUs() {
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={saving} size="lg" className="bg-[#F84E04] hover:bg-[#D94203] text-white transition-colors">
+          <Button onClick={handleSave} disabled={saving} size="lg" className="bg-[#5C381E] hover:bg-[#482A14] text-white transition-colors">
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>

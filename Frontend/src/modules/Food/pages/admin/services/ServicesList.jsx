@@ -175,7 +175,7 @@ export default function ServicesList() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => handleOpenModal()}
-              className="px-4 py-2 text-xs font-bold text-white bg-[#F84E04] hover:bg-[#D40261] rounded-lg transition-colors flex items-center gap-1.5 shadow-sm shadow-[#F84E04]/20 hover:shadow-[#F84E04]/30"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#5C381E] hover:bg-[#D40261] rounded-lg transition-colors flex items-center gap-1.5 shadow-sm shadow-[#5C381E]/20 hover:shadow-[#5C381E]/30"
             >
               <Plus className="w-4 h-4" /> Add Service
             </button>
@@ -322,7 +322,7 @@ export default function ServicesList() {
                 placeholder="e.g. AC Repair Service"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#F84E04]"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#5C381E]"
               />
             </div>
 
@@ -383,7 +383,7 @@ export default function ServicesList() {
                   min="0"
                   value={formData.basePrice}
                   onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#F84E04]"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#5C381E]"
                 />
               </div>
               <div>
@@ -394,7 +394,7 @@ export default function ServicesList() {
                   min="0"
                   value={formData.visitingCharge}
                   onChange={(e) => setFormData({ ...formData, visitingCharge: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#F84E04]"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#5C381E]"
                 />
               </div>
             </div>
@@ -405,7 +405,7 @@ export default function ServicesList() {
                 rows="3"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#F84E04] resize-none"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-[#5C381E] resize-none"
               ></textarea>
             </div>
 
@@ -413,7 +413,7 @@ export default function ServicesList() {
               <button
                 type="submit"
                 disabled={isSubmitting || isUploading}
-                className="w-full py-3 bg-[#F84E04] hover:bg-[#D40261] text-white font-bold rounded-xl text-sm transition-colors flex justify-center items-center gap-2 shadow-sm shadow-[#F84E04]/20 hover:shadow-[#F84E04]/30"
+                className="w-full py-3 bg-[#5C381E] hover:bg-[#D40261] text-white font-bold rounded-xl text-sm transition-colors flex justify-center items-center gap-2 shadow-sm shadow-[#5C381E]/20 hover:shadow-[#5C381E]/30"
               >
                 {(isSubmitting || isUploading) && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isSubmitting ? 'Saving...' : 'Save Service'}

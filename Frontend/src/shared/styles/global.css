@@ -17,14 +17,13 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --radius: 0.625rem;
-  
   --background: #ffffff;
   --foreground: oklch(0.2 0.05 50);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.2 0.05 50);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0.05 50);
-  --primary: #F84E04;
+  --primary: #5C381E;
   --primary-foreground: oklch(0.15 0.05 50);
   --secondary: oklch(0.95 0.02 90);
   --secondary-foreground: oklch(0.3 0.08 60);
@@ -35,15 +34,20 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.9 0.02 85);
   --input: oklch(0.95 0.01 90);
-  --ring: #F84E04;
+  --ring: #5C381E;
   --sidebar: oklch(0.98 0.01 90);
   --sidebar-foreground: oklch(0.2 0.05 50);
-  --sidebar-primary: #F84E04;
+  --sidebar-primary: #5C381E;
   --sidebar-primary-foreground: oklch(0.15 0.05 50);
   --sidebar-accent: oklch(0.95 0.02 90);
   --sidebar-accent-foreground: oklch(0.3 0.08 60);
   --sidebar-border: oklch(0.9 0.02 85);
-  --sidebar-ring: #F84E04;
+  --sidebar-ring: #5C381E;
+}
+
+.font-serif-editorial,
+.vist-serif-title {
+  font-family: 'Playfair Display', 'Cormorant Garamond', 'Baskerville', 'Didot', 'Georgia', serif !important;
 }
 
 @theme inline {
@@ -78,7 +82,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-page-bg: #ffffff;
-  --color-primary-orange: #F84E04;
+  --color-primary-orange: #5C381E;
   --font-poppins: var(--font-poppins);
   --font-outfit: var(--font-outfit);
 
@@ -87,18 +91,18 @@
   --color-slate-900: #171717;
   --color-slate-950: #0a0a0a;
 
-  /* Override blue to primary theme color #F84E04 */
-  --color-blue-50: #fff7ed;
-  --color-blue-100: #ffedd5;
-  --color-blue-200: #fed7aa;
-  --color-blue-300: #fdba74;
-  --color-blue-400: #fb923c;
-  --color-blue-500: #f97316;
-  --color-blue-600: #F84E04;
-  --color-blue-700: #D94203;
-  --color-blue-800: #9a3412;
-  --color-blue-900: #7c2d12;
-  --color-blue-950: #431407;
+  /* Override blue to primary theme color #5C381E */
+  --color-blue-50: #f4f8eb;
+  --color-blue-100: #e6f0d3;
+  --color-blue-200: #DBC8B2;
+  --color-blue-300: #BA9873;
+  --color-blue-400: #8C673B;
+  --color-blue-500: #6E4321;
+  --color-blue-600: #5C381E;
+  --color-blue-700: #442611;
+  --color-blue-800: #3A200E;
+  --color-blue-900: #321B0B;
+  --color-blue-950: #1d2c08;
 }
 
 .dark {
@@ -108,7 +112,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #F84E04;
+  --primary: #5C381E;
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -462,4 +466,10 @@
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+/* Admin sidebar black styling */
+.admin-sidebar {
+  background-color: #111111 !important;
+  border-right-color: #262626 !important;
 }

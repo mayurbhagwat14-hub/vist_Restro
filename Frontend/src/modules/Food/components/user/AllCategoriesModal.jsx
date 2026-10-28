@@ -70,12 +70,12 @@ const AllCategoriesModal = ({
                     }}
                     className="flex flex-col items-center gap-3 cursor-pointer group"
                   >
-                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center p-1 transform group-hover:scale-105 transition-all duration-300">
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden shadow-sm border-2 border-white dark:border-neutral-800 ring-1 ring-gray-200 dark:ring-gray-800 bg-gray-50 dark:bg-neutral-900 group-hover:ring-[#5C381E] group-hover:shadow-md transition-all duration-300 flex items-center justify-center">
                       <OptimizedImage
                         src={category.image}
                         alt={category.name}
-                        objectFit="contain"
-                        className="w-full h-full object-contain drop-shadow-sm"
+                        objectFit="cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     </div>
                     <span className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 group-hover:text-primary-orange text-center px-2 line-clamp-1">

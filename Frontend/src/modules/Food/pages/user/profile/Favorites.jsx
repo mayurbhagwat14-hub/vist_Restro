@@ -52,15 +52,15 @@ export default function Favorites() {
             <CardContent className="py-12 text-center">
               <Heart
                 className="h-16 w-16 mx-auto mb-4"
-                style={{ color: "var(--module-theme-color, #F84E04)" }}
+                style={{ color: "var(--module-theme-color, #5C381E)" }}
               />
               <p className="text-muted-foreground text-lg mb-4">You haven't added any items to your collections yet</p>
               <Link to="/user">
                 <Button
                   className="text-white border-0"
                   style={{
-                    background: "linear-gradient(135deg, rgba(var(--module-theme-rgb,248,78,4),0.92), var(--module-theme-color,#F84E04))",
-                    boxShadow: "0 8px 18px rgba(var(--module-theme-rgb,248,78,4),0.25)",
+                    background: "linear-gradient(135deg, rgba(var(--module-theme-rgb,92, 56, 30),0.92), var(--module-theme-color,#5C381E))",
+                    boxShadow: "0 8px 18px rgba(var(--module-theme-rgb,92, 56, 30),0.25)",
                   }}
                 >
                   Explore Items
@@ -106,7 +106,7 @@ export default function Favorites() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 font-semibold text-xs whitespace-nowrap transition-colors rounded-lg ${isSelected
-                    ? "bg-[#F84E04] text-white shadow-sm"
+                    ? "bg-[#5C381E] text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-855"
                   }`}
               >
@@ -126,8 +126,8 @@ export default function Favorites() {
                 <Button
                   className="text-white border-0"
                   style={{
-                    background: "linear-gradient(135deg, rgba(var(--module-theme-rgb,248,78,4),0.92), var(--module-theme-color,#F84E04))",
-                    boxShadow: "0 8px 18px rgba(var(--module-theme-rgb,248,78,4),0.25)",
+                    background: "linear-gradient(135deg, rgba(var(--module-theme-rgb,92, 56, 30),0.92), var(--module-theme-color,#5C381E))",
+                    boxShadow: "0 8px 18px rgba(var(--module-theme-rgb,92, 56, 30),0.25)",
                   }}
                 >
                   Explore Items
@@ -344,7 +344,7 @@ export default function Favorites() {
                       setSelectedProduct(null);
                       toast.success(`${selectedProduct.name} added to cart`);
                     }}
-                    className="flex-1 h-12 text-white font-extrabold text-sm uppercase tracking-wider rounded-xl bg-[#F84E04] hover:bg-[#D94203]"
+                    className="flex-1 h-12 text-white font-extrabold text-sm uppercase tracking-wider rounded-xl bg-[#5C381E] hover:bg-[#482A14]"
                   >
                     Add to Cart &middot; &#8377;{selectedProduct.price}
                   </Button>

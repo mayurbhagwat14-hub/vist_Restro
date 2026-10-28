@@ -16,7 +16,7 @@ export const getPlayStoreUrl = () => {
     return reviewUrl.trim();
   }
 
-  return "https://play.google.com/store/apps/details?id=com.zinzoo.user";
+  return "https://play.google.com/store/apps/details?id=com.vist.user";
 };
 
 /**
@@ -33,8 +33,8 @@ export const getReferralSignupUrl = (code) => {
  * Builds the comprehensive referral share message with app download link
  * and 1-tap registration link.
  */
-export const generateReferralShareMessage = ({ companyName = "ZinZooX", referralCode = "" }) => {
-  const appName = companyName || "ZinZooX";
+export const generateReferralShareMessage = ({ companyName = "VIST Restaurant", referralCode = "" }) => {
+  const appName = companyName || "VIST Restaurant";
   const code = String(referralCode || "").trim().toUpperCase();
   const playStoreUrl = getPlayStoreUrl();
 
@@ -64,7 +64,7 @@ export const executeReferralShare = async ({ companyName, referralCode, toast })
   }
 
   const message = generateReferralShareMessage({ companyName, referralCode: code });
-  const appName = companyName || "ZinZooX";
+  const appName = companyName || "VIST Restaurant";
 
   try {
     if (navigator.share) {

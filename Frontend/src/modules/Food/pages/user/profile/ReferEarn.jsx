@@ -35,7 +35,7 @@ const statusMeta = {
 
 export default function ReferEarn() {
   const { userProfile } = useProfile();
-  const companyName = useCompanyName() || "ZinZooX";
+  const companyName = useCompanyName() || "VIST Restaurant";
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -224,7 +224,7 @@ export default function ReferEarn() {
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 p-3">
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Reward per new user</p>
-                    <p className="text-lg font-bold text-[#F84E04]">{"\u20B9"}{stats.rewardAmount}</p>
+                    <p className="text-lg font-bold text-[#5C381E]">{"\u20B9"}{stats.rewardAmount}</p>
                   </div>
                   <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 p-3">
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Referral earnings</p>

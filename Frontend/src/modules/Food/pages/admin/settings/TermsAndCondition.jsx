@@ -89,7 +89,7 @@ export default function TermsAndCondition() {
     return (
       <div className="h-full overflow-y-auto bg-slate-50 p-4 lg:p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F84E04] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C381E] mx-auto"></div>
           <p className="mt-4 text-slate-600">Loading...</p>
         </div>
       </div>
@@ -117,14 +117,14 @@ export default function TermsAndCondition() {
               <button
                 type="button"
                 onClick={() => setViewMode("edit")}
-                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "edit" ? "bg-[#F84E04] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
+                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "edit" ? "bg-[#5C381E] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
               >
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("preview")}
-                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "preview" ? "bg-[#F84E04] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
+                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "preview" ? "bg-[#5C381E] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
               >
                 Preview
               </button>
@@ -173,7 +173,7 @@ export default function TermsAndCondition() {
             type="button"
             onClick={handleSubmit}
             disabled={saving}
-            className="px-6 py-2.5 bg-[#F84E04] text-white rounded-lg hover:bg-[#D94203] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-[#5C381E] text-white rounded-lg hover:bg-[#482A14] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save Terms & Conditions'}
           </button>

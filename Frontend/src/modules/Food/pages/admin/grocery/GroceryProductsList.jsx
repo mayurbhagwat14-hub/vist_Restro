@@ -614,7 +614,7 @@ export default function GroceryProductsList() {
               <button
                 type="button"
                 onClick={() => setShowBulkDeleteModal(true)}
-                className="px-4 py-2.5 rounded-lg bg-[#F84E04] text-white text-sm font-medium hover:bg-[#D94203] transition-colors inline-flex items-center gap-2"
+                className="px-4 py-2.5 rounded-lg bg-[#5C381E] text-white text-sm font-medium hover:bg-[#482A14] transition-colors inline-flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Delete {selectedIds.length} Items</span>
@@ -1274,7 +1274,7 @@ export default function GroceryProductsList() {
             <button
               onClick={handleBulkDelete}
               disabled={isBulkDeleting}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#F84E04] hover:bg-[#D94203] rounded-lg transition-colors inline-flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#5C381E] hover:bg-[#482A14] rounded-lg transition-colors inline-flex items-center gap-2"
             >
               {isBulkDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
               {isBulkDeleting ? "Deleting..." : "Delete"}

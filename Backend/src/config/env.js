@@ -25,7 +25,9 @@ export const config = {
     otpExpirySeconds: Number(process.env.OTP_EXPIRY_SECONDS || 300),
     otpRateLimit: Number(process.env.OTP_RATE_LIMIT || 3),
     otpRateWindow: Number(process.env.OTP_RATE_WINDOW || 600),
-    useDefaultOtp: String(process.env.USE_DEFAULT_OTP || '').trim().toLowerCase() === 'true',
+    get useDefaultOtp() {
+        return String(process.env.USE_DEFAULT_OTP || '').trim().toLowerCase() === 'true';
+    },
 
     // SMS India Hub
     smsIndiaHubUsername: process.env.SMS_INDIA_HUB_USERNAME,
@@ -53,6 +55,7 @@ export const config = {
     bullmqEnabled: process.env.BULLMQ_ENABLED === 'true',
 
     // Cloudinary
+    useCloudinary: process.env.USE_CLOUDINARY === 'true' || process.env.CLOUDINARY_ENABLED === 'true',
     cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
     cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,

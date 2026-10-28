@@ -264,7 +264,7 @@ export default function ProductDetail() {
                  </div>
               ) : inCart ? (
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2 border border-[#F84E04] rounded-lg bg-white dark:bg-black">
+                  <div className="flex items-center gap-2 border border-[#5C381E] rounded-lg bg-white dark:bg-black">
                     <Button
                       variant="ghost"
                       size="icon"

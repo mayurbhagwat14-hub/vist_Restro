@@ -1,6 +1,6 @@
-﻿import { useState, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { exportToCSV, exportToExcel, exportToPDF, exportToJSON } from "./ordersExportUtils"
-import quickSpicyLogo from "@food/assets/zinzoox-logo.png"
+import quickSpicyLogo from "@food/assets/vist-logo.png"
 import { getCachedSettings, loadBusinessSettings } from "@food/utils/businessSettings"
 import { adminAPI } from "@food/api"
 const debugError = () => { }
@@ -328,13 +328,13 @@ export function useOrdersManagement(orders, statusKey, title, moduleType = "food
       const totalItems = items.reduce((sum, item) => sum + toNumber(item.quantity || 1), 0)
 
       // Generate QR code
-      const feedbackUrl = `https://zinzoo.in/feedback?orderId=${orderId}`
+      const feedbackUrl = `/feedback?orderId=${orderId}`
       const qrDataUrl = await QRCode.toDataURL(feedbackUrl, {
         width: 200, margin: 1, color: { dark: "#000000", light: "#ffffff" }
       })
 
       // Load logo
-      const logoDataUrl = await imageUrlToDataUrl("/zinzoo-logo.png").catch(() => null)
+      const logoDataUrl = await imageUrlToDataUrl("/vist-logo-bronze.png").catch(() => null)
 
       let estimatedHeight = 230 + (items.length * 5)
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [receiptWidth, estimatedHeight] })
@@ -357,12 +357,12 @@ export function useOrdersManagement(orders, statusKey, title, moduleType = "food
         y += imgH + 4
       } else {
         setFont(10, "bold")
-        center("ZIN ZOO X", y + 8)
+        center("VIST RESTAURANT", y + 8)
         y += 12
       }
 
       setFont(12, "bold")
-      center("ZIN ZOO X", y)
+      center("VIST RESTAURANT", y)
       y += 4
 
       setFont(7, "bold")
@@ -380,7 +380,7 @@ export function useOrdersManagement(orders, statusKey, title, moduleType = "food
       y += 3.5
       center("8225874798", y)
       y += 3.5
-      center("www.zinzoo.in", y)
+      center("www.vistrestaurant.com", y)
       y += 4
 
       if (platformGstNumber) {
@@ -409,7 +409,7 @@ export function useOrdersManagement(orders, statusKey, title, moduleType = "food
       solidLine(y); y += 4;
 
       doc.text("Customer", margin, y); doc.text(`: ${customerName}`, margin + 22, y); y += 4;
-      doc.text("Delivery Partner", margin, y); doc.text(`: ZIN ZOO X Rider`, margin + 22, y); y += 4;
+      doc.text("Delivery Partner", margin, y); doc.text(`: VIST Rider`, margin + 22, y); y += 4;
 
       solidLine(y); y += 4;
 
@@ -490,7 +490,7 @@ export function useOrdersManagement(orders, statusKey, title, moduleType = "food
       setFont(6, "bold")
       center("FOLLOW US", y); y += 4;
       setFont(6, "normal")
-      center("Instagram | Facebook | WhatsApp   @zinzoox._01", y); y += 5;
+      center("Instagram | Facebook | WhatsApp   @vistrestaurant", y); y += 5;
 
       setFont(5.5, "normal")
       center("Safe Delivery | Fresh Food | On Time", y); y += 3;

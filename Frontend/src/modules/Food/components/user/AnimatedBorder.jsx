@@ -4,7 +4,7 @@ export default function AnimatedBorder({ children, className = "" }) {
     <div className={`relative ${className}`}>
       <div
         style={{
-          background: "linear-gradient(45deg, #F84E04, #F84E04, #F84E04)",
+          background: "linear-gradient(45deg, #5C381E, #5C381E, #5C381E)",
           backgroundSize: "200% 200%",
         }}
       />

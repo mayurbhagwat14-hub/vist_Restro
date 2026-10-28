@@ -23,7 +23,7 @@ const sendSmsViaIndiaHub = async (phone, otp) => {
 
         // EXACT DLT TEMPLATE provided by user:
         // "Welcome to the ##var## powered by Appzeto.Your OTP for registration is ##var##.BGADEC"
-        const message = `Welcome to the ZinZooX powered by Appzeto.Your OTP for registration is ${otp}.BGADEC`;
+        const message = `Welcome to VIST Restaurant powered by Appzeto.Your OTP for registration is ${otp}.BGADEC`;
 
         // SMS India Hub HTTP GET API — query param names are case-sensitive per SOP
         const url = new URL('http://cloud.smsindiahub.in/vendorsms/pushsms.aspx');
@@ -78,7 +78,7 @@ export const createOrUpdateOtp = async (phone) => {
         const windowMs = (config.otpRateWindow || 600) * 1000;
         const isInWindow = now - existing.lastRequestAt < windowMs;
 
-        if (isInWindow) {
+        if (isInWindow && !config.useDefaultOtp) {
             if (existing.requestCount >= (config.otpRateLimit || 3)) {
                 logger.warn(`Rate limit exceeded for phone ${phone}`);
                 throw new ValidationError(`Too many OTP requests. Please try again after ${Math.ceil(windowMs / 60000)} minutes.`);
@@ -134,6 +134,15 @@ export const createOrUpdateOtp = async (phone) => {
 };
 
 export const verifyOtp = async (phone, otp) => {
+    // If default OTP mode is active, accept 1234 or 123456 immediately
+    if (config.useDefaultOtp && (String(otp).trim() === '1234' || String(otp).trim() === '123456')) {
+        const record = await FoodOtp.findOne({ phone });
+        if (record) {
+            await record.deleteOne();
+        }
+        return { valid: true };
+    }
+
     const record = await FoodOtp.findOne({ phone });
     if (!record) {
         return { valid: false, reason: 'OTP not found' };

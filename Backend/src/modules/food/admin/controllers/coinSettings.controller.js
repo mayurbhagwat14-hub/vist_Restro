@@ -25,8 +25,8 @@ export async function getCoinSettings(req, res, next) {
         let settings = await FoodBusinessSettings.findOne().lean();
         if (!settings) {
             settings = await FoodBusinessSettings.create({
-                companyName: 'Zinzoox',
-                email: 'admin@zinzoox.com'
+                companyName: 'VIST Restaurant',
+                email: 'admin@vistrestaurant.com'
             });
         }
         const payload = buildCoinSettingsPayload(settings?.coinSettings || {}, settings?.coinSettings || COIN_SETTINGS_DEFAULT);
@@ -42,8 +42,8 @@ export async function updateCoinSettings(req, res, next) {
         let settings = await FoodBusinessSettings.findOne();
         if (!settings) {
             settings = new FoodBusinessSettings({
-                companyName: 'Zinzoox',
-                email: 'admin@zinzoox.com'
+                companyName: 'VIST Restaurant',
+                email: 'admin@vistrestaurant.com'
             });
         }
 

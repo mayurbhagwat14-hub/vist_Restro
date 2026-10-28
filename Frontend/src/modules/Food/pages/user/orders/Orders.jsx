@@ -539,14 +539,14 @@ export default function Orders() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] pb-10">
-        <div className="bg-[var(--module-theme-color,#F84E04)] p-4 flex items-center shadow-sm sticky top-0 z-10">
+        <div className="bg-[var(--module-theme-color,#5C381E)] p-4 flex items-center shadow-sm sticky top-0 z-10">
           <Link to="/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-white cursor-pointer" />
           </Link>
           <h1 className="ml-2 text-xl font-bold text-white">Your Orders</h1>
         </div>
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-[#F84E04] animate-spin" />
+          <Loader2 className="w-8 h-8 text-[#5C381E] animate-spin" />
         </div>
       </div>
     )
@@ -555,7 +555,7 @@ export default function Orders() {
   if (orders.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] pb-10">
-        <div className="bg-[var(--module-theme-color,#F84E04)] p-4 flex items-center shadow-sm sticky top-0 z-10">
+        <div className="bg-[var(--module-theme-color,#5C381E)] p-4 flex items-center shadow-sm sticky top-0 z-10">
           <Link to="/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
             <ArrowLeft className="w-6 h-6 text-white cursor-pointer" />
           </Link>
@@ -564,7 +564,7 @@ export default function Orders() {
         <div className="px-4 py-8 text-center">
           <p className="text-gray-600 dark:text-gray-400">You haven't placed any orders yet</p>
           <Link to="/user">
-            <button className="mt-4 text-[#F84E04] font-medium">Start Ordering</button>
+            <button className="mt-4 text-[#5C381E] font-medium">Start Ordering</button>
           </Link>
         </div>
       </div>
@@ -574,7 +574,7 @@ export default function Orders() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-10 font-sans">
       {/* Header */}
-      <div className="bg-[var(--module-theme-color,#F84E04)] p-4 flex items-center shadow-sm sticky top-0 z-10">
+      <div className="bg-[var(--module-theme-color,#5C381E)] p-4 flex items-center shadow-sm sticky top-0 z-10">
         <Link to="/user" className="hover:bg-white/20 p-2 -ml-2 rounded-full transition-colors">
           <ArrowLeft className="w-6 h-6 text-white cursor-pointer" />
         </Link>
@@ -584,7 +584,7 @@ export default function Orders() {
       {/* Search Bar */}
         <div className="p-4 bg-white dark:bg-slate-900 mt-1">
           <div className="flex items-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-sm mb-4">
-            <Search className="w-5 h-5 text-[#F84E04]" />
+            <Search className="w-5 h-5 text-[#5C381E]" />
             <input
               type="text"
               placeholder="Search by restaurant or dish"
@@ -602,7 +602,7 @@ export default function Orders() {
                 onClick={() => setActiveFilter(filterType)}
                 className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
                   activeFilter === filterType
-                    ? 'bg-[#F84E04] text-white shadow-md'
+                    ? 'bg-[#5C381E] text-white shadow-md'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
@@ -683,7 +683,7 @@ export default function Orders() {
                           to={`/user/restaurants/${order.restaurantId}`}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <button className="text-xs text-[#F84E04] font-medium flex items-center mt-1 hover:text-[#D94F0C]">
+                          <button className="text-xs text-[#5C381E] font-medium flex items-center mt-1 hover:text-[#482A14]">
                             View menu <span className="ml-0.5">&gt;</span>
                           </button>
                         </Link>
@@ -728,7 +728,7 @@ export default function Orders() {
                   <span className={`text-xs font-medium ${
                     order.status === 'delivered' ? 'text-green-600' :
                     (order.isRestaurantCancelled || order.status === 'restaurant_cancelled' || order.status === 'cancelled' || order.isUserCancelled) ? 'text-red-500' :
-                    'text-[#F84E04]'
+                    'text-[#5C381E]'
                   }`}>
                     {order.status === 'delivered' ? 'Delivered' :
                      (order.isRestaurantCancelled || order.status === 'restaurant_cancelled') ? 'Restaurant Cancelled' :
@@ -747,7 +747,7 @@ export default function Orders() {
 
       {/* Footer Branding */}
       <div className="flex justify-center mt-8 mb-4">
-        <h1 className="text-4xl font-black text-gray-200 dark:text-zinc-900 tracking-tighter italic capitalize">ZinZoo</h1>
+        <h1 className="text-4xl font-black text-gray-200 dark:text-zinc-900 tracking-tighter italic capitalize">VIST Restaurant</h1>
       </div>
 
 
@@ -781,7 +781,7 @@ export default function Orders() {
                 <button
                   type="button"
                   onClick={handleSystemShareFromModal}
-                  className="w-full rounded-2xl bg-[#F84E04] px-4 py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 hover:bg-[#D94F0C] transition-colors"
+                  className="w-full rounded-2xl bg-[#5C381E] px-4 py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 hover:bg-[#482A14] transition-colors"
                 >
                   <Share2 className="w-4 h-4" />
                   Share via apps

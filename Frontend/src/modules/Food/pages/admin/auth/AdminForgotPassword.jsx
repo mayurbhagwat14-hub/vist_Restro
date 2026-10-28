@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@food/components/ui/button"
 import {
@@ -12,7 +12,7 @@ import {
 import { Input } from "@food/components/ui/input"
 import { Label } from "@food/components/ui/label"
 import { Mail, ArrowLeft, Shield } from "lucide-react"
-import quickSpicyLogo from "@food/assets/zinzoox-logo.png"
+import quickSpicyLogo from "@food/assets/vist-logo.png"
 import { adminAPI } from "@food/api"
 import { useCompanyName } from "@food/hooks/useCompanyName"
 import { loadBusinessSettings } from "@food/utils/businessSettings"
@@ -223,7 +223,7 @@ export default function AdminForgotPassword() {
             <div className="flex w-full items-center gap-4 sm:gap-5">
               <div className="flex h-14 w-28 shrink-0 items-center justify-center rounded-xl bg-gray-900/5 ring-1 ring-neutral-200">
                 <img
-                  src="/zinzoo-logo.png"
+                  src="/vist-logo-bronze.png"
                   alt="Logo"
                   className="h-10 w-24 object-contain"
                   loading="lazy"
@@ -277,7 +277,7 @@ export default function AdminForgotPassword() {
 
                 <Button
                   type="submit"
-                  className="h-12 w-full bg-[#F84E04] text-white transition-colors hover:bg-[#D94203] focus-visible:ring-2 focus-visible:ring-[#F84E04] focus-visible:ring-offset-2 font-bold"
+                  className="h-12 w-full bg-[#5C381E] text-white transition-colors hover:bg-[#482A14] focus-visible:ring-2 focus-visible:ring-[#5C381E] focus-visible:ring-offset-2 font-bold"
                   disabled={isLoading}
                 >
                   {isLoading ? "Sending..." : "Send Verification Code"}
@@ -307,7 +307,7 @@ export default function AdminForgotPassword() {
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
                         onPaste={index === 0 ? handleOtpPaste : undefined}
-                        className="h-14 w-14 text-center text-2xl font-semibold border-2 border-slate-300 bg-white !text-black focus-visible:ring-2 focus-visible:ring-[#F84E04] focus:!text-black"
+                        className="h-14 w-14 text-center text-2xl font-semibold border-2 border-slate-300 bg-white !text-black focus-visible:ring-2 focus-visible:ring-[#5C381E] focus:!text-black"
                         disabled={isLoading}
                       />
                     ))}
@@ -339,7 +339,7 @@ export default function AdminForgotPassword() {
 
                 <Button
                   type="submit"
-                  className="h-12 w-full bg-[#F84E04] text-white transition-colors hover:bg-[#D94203] focus-visible:ring-2 focus-visible:ring-[#F84E04] focus-visible:ring-offset-2 font-bold"
+                  className="h-12 w-full bg-[#5C381E] text-white transition-colors hover:bg-[#482A14] focus-visible:ring-2 focus-visible:ring-[#5C381E] focus-visible:ring-offset-2 font-bold"
                   disabled={isLoading}
                 >
                   {isLoading ? "Verifying..." : "Verify Code"}
@@ -411,7 +411,7 @@ export default function AdminForgotPassword() {
 
                 <Button
                   type="submit"
-                  className="h-12 w-full bg-[#F84E04] text-white transition-colors hover:bg-[#D94203] focus-visible:ring-2 focus-visible:ring-[#F84E04] focus-visible:ring-offset-2 font-bold"
+                  className="h-12 w-full bg-[#5C381E] text-white transition-colors hover:bg-[#482A14] focus-visible:ring-2 focus-visible:ring-[#5C381E] focus-visible:ring-offset-2 font-bold"
                   disabled={isLoading}
                 >
                   {isLoading ? "Resetting..." : "Reset Password"}

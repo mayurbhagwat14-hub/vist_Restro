@@ -129,7 +129,7 @@ export default function SupportCMS() {
     return (
       <div className="h-full overflow-y-auto bg-slate-50 p-4 lg:p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F84E04] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#5C381E] mx-auto"></div>
           <p className="mt-4 text-slate-600">Loading...</p>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function SupportCMS() {
                 value={supportData.email || ""}
                 onChange={(e) => setSupportData(prev => ({ ...prev, email: e.target.value }))}
                 placeholder="support@example.com"
-                className="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-[#F84E04] focus:border-[#F84E04] block w-full p-2.5 outline-none"
+                className="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-[#5C381E] focus:border-[#5C381E] block w-full p-2.5 outline-none"
               />
             </div>
             <div className="space-y-2">
@@ -175,7 +175,7 @@ export default function SupportCMS() {
                 }
                 maxLength={10}
                 placeholder="+91 00000 00000"
-                className="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-[#F84E04] focus:border-[#F84E04] block w-full p-2.5 outline-none"
+                className="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-[#5C381E] focus:border-[#5C381E] block w-full p-2.5 outline-none"
               />
             </div>
           </div>
@@ -191,14 +191,14 @@ export default function SupportCMS() {
               <button
                 type="button"
                 onClick={() => setViewMode("edit")}
-                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "edit" ? "bg-[#F84E04] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
+                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "edit" ? "bg-[#5C381E] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
               >
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("preview")}
-                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "preview" ? "bg-[#F84E04] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
+                className={`px-3 py-1.5 text-sm font-medium ${viewMode === "preview" ? "bg-[#5C381E] text-white" : "bg-white text-slate-700 hover:bg-slate-50"}`}
               >
                 Preview
               </button>
@@ -247,7 +247,7 @@ export default function SupportCMS() {
             type="button"
             onClick={handleSubmit}
             disabled={saving}
-            className="px-6 py-2.5 bg-[#F84E04] text-white rounded-lg hover:bg-[#D94203] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-[#5C381E] text-white rounded-lg hover:bg-[#482A14] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save Support Content'}
           </button>

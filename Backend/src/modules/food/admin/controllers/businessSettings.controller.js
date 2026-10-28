@@ -4,7 +4,7 @@ import { uploadImageBufferDetailed } from '../../../../services/localUpload.serv
 import { broadcastPublicUpdate } from '../../../../config/socket.js';
 
 const POWER_SCANNING_DEFAULT = {
-    user: { themeColor: '#F84E04', fontFamily: 'Poppins' },
+    user: { themeColor: '#5C381E', fontFamily: 'Poppins' },
     restaurant: { themeColor: '#2563EB', fontFamily: 'Poppins' },
     delivery: { themeColor: '#00B761', fontFamily: 'Poppins' }
 };
@@ -67,8 +67,8 @@ export async function getBusinessSettings(req, res, next) {
         if (!settings) {
             // Create default settings if none exist
             settings = await FoodBusinessSettings.create({
-                companyName: 'Zinzoox',
-                email: 'admin@zinzoox.com'
+                companyName: 'VIST Restaurant',
+                email: 'admin@vistrestaurant.com'
             });
         }
 
@@ -101,8 +101,8 @@ export async function getPowerScanningSettings(req, res, next) {
         let settings = await FoodBusinessSettings.findOne().lean();
         if (!settings) {
             settings = await FoodBusinessSettings.create({
-                companyName: 'Zinzoox',
-                email: 'admin@zinzoox.com'
+                companyName: 'VIST Restaurant',
+                email: 'admin@vistrestaurant.com'
             });
         }
         const payload = buildPowerScanningPayload(settings?.powerScanning || {}, settings?.powerScanning || POWER_SCANNING_DEFAULT);
@@ -118,8 +118,8 @@ export async function updatePowerScanningSettings(req, res, next) {
         let settings = await FoodBusinessSettings.findOne();
         if (!settings) {
             settings = new FoodBusinessSettings({
-                companyName: 'Zinzoox',
-                email: 'admin@zinzoox.com'
+                companyName: 'VIST Restaurant',
+                email: 'admin@vistrestaurant.com'
             });
         }
 
@@ -139,8 +139,8 @@ export async function getOrderAcceptanceSettings(req, res, next) {
         let settings = await FoodBusinessSettings.findOne();
         if (!settings) {
             settings = await FoodBusinessSettings.create({
-                companyName: 'Zinzoox',
-                email: 'admin@zinzoox.com'
+                companyName: 'VIST Restaurant',
+                email: 'admin@vistrestaurant.com'
             });
         }
 
@@ -313,7 +313,7 @@ export async function getGlobalServiceSetting(req, res, next) {
     try {
         let settings = await FoodBusinessSettings.findOne().select('globalFoodServiceEnabled').lean();
         if (!settings) {
-            settings = await FoodBusinessSettings.create({ companyName: 'Zinzoox', email: 'admin@zinzoox.com' });
+            settings = await FoodBusinessSettings.create({ companyName: 'VIST Restaurant', email: 'admin@vistrestaurant.com' });
         }
         return sendResponse(res, 200, 'Global service setting fetched', {
             globalFoodServiceEnabled: settings.globalFoodServiceEnabled ?? false
@@ -337,7 +337,7 @@ export async function updateGlobalServiceSetting(req, res, next) {
 
         let settings = await FoodBusinessSettings.findOne();
         if (!settings) {
-            settings = new FoodBusinessSettings({ companyName: 'Zinzoox', email: 'admin@zinzoox.com' });
+            settings = new FoodBusinessSettings({ companyName: 'VIST Restaurant', email: 'admin@vistrestaurant.com' });
         }
         settings.globalFoodServiceEnabled = raw;
         await settings.save();
