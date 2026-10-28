@@ -1224,12 +1224,15 @@ export default function CategoryPage() {
       const railRect = rail.getBoundingClientRect();
       const btnRect = selectedButton.getBoundingClientRect();
 
-      const scrollPos = rail.scrollLeft + (btnRect.left - railRect.left) - (railRect.width / 2) + (btnRect.width / 2);
-
-      rail.scrollTo({
-        left: scrollPos,
-        behavior: "smooth"
-      })
+      // Only auto-scroll if the button is partially or fully offscreen to avoid fighting user touch/drag
+      const isPartiallyOffscreen = btnRect.left < railRect.left || btnRect.right > railRect.right;
+      if (isPartiallyOffscreen) {
+        const scrollPos = rail.scrollLeft + (btnRect.left - railRect.left) - (railRect.width / 2) + (btnRect.width / 2);
+        rail.scrollTo({
+          left: scrollPos,
+          behavior: "smooth"
+        })
+      }
     }, 50)
 
     return () => clearTimeout(timeoutId)
@@ -1558,7 +1561,17 @@ export default function CategoryPage() {
       )}
 
       {/* Sticky Header */}
-      <div className="sticky top-0 md:top-[128px] z-20 bg-[var(--module-theme-color,#5C381E)] md:bg-[#FAF5ED] md:dark:bg-[#120E0C] shadow-sm border-b border-[#EADBCE] dark:border-white/10 transition-colors">
+      {/* Sticky Header with Hardware Acceleration to eliminate rubber-band vibration */}
+      <div
+        className="sticky top-0 md:top-[128px] z-20 bg-[var(--module-theme-color,#5C381E)] md:bg-[#FAF5ED] md:dark:bg-[#120E0C] shadow-xs border-b border-[#EADBCE] dark:border-white/10"
+        style={{
+          transform: "translate3d(0, 0, 0)",
+          WebkitTransform: "translate3d(0, 0, 0)",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          willChange: "transform",
+        }}
+      >
         <div className="max-w-7xl mx-auto">
           {/* Compact Mobile Search Bar with Back Button */}
           <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-white/15">
@@ -1570,7 +1583,7 @@ export default function CategoryPage() {
                   navigate('/food/user')
                 }
               }}
-              className="w-8 h-8 flex items-center justify-center hover:bg-white/20 active:scale-95 rounded-full transition-all flex-shrink-0"
+              className="w-8 h-8 flex items-center justify-center hover:bg-white/20 active:scale-95 rounded-full transition-transform flex-shrink-0"
               aria-label="Go back"
             >
               <ArrowLeft className="h-4 w-4 text-white" />
@@ -1587,13 +1600,16 @@ export default function CategoryPage() {
             </div>
           </div>
 
-          {/* Compact Category Navigation Bar */}
+          {/* Compact Category Navigation Bar - touch-pan-x and overscroll-x-contain prevent rubber-band bounce */}
           <div
             ref={categoryScrollRef}
-            className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-3 sm:px-4 py-2 bg-[#FAF5ED]/95 dark:bg-[#120E0C]/95 backdrop-blur-md"
+            className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-3 sm:px-4 py-2 bg-[#FAF5ED] dark:bg-[#120E0C] touch-pan-x overscroll-x-contain select-none"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
+              overscrollBehaviorX: "contain",
+              touchAction: "pan-x",
             }}
           >
             {showCategorySkeleton ? (
@@ -1608,19 +1624,19 @@ export default function CategoryPage() {
                     key={cat.id}
                     onClick={() => handleCategorySelect(cat)}
                     data-category-selected={isSelected ? "true" : "false"}
-                    className="group flex flex-col items-center gap-1 flex-shrink-0 w-[68px] sm:w-[76px] px-0.5 py-0.5 rounded-xl transition-all cursor-pointer text-center"
+                    className="group flex flex-col items-center gap-1 flex-shrink-0 w-[68px] sm:w-[76px] px-0.5 py-0.5 rounded-xl cursor-pointer text-center select-none"
                   >
                     {isAllCategory ? (
-                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border transition-all flex items-center justify-center ${isSelected
-                          ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] bg-[#EDE4D8] dark:bg-[#5C381E]/30 scale-105 shadow-xs'
-                          : 'border-[#EADBCE] dark:border-neutral-700 bg-[#FFFDF9] dark:bg-[#1a1410] group-hover:border-[#C5A059]'
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border transition-colors duration-150 flex items-center justify-center ${isSelected
+                        ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] bg-[#EDE4D8] dark:bg-[#5C381E]/30 shadow-xs'
+                        : 'border-[#EADBCE] dark:border-neutral-700 bg-[#FFFDF9] dark:bg-[#1a1410] group-hover:border-[#C5A059]'
                         }`}>
                         <Grid2x2 className={`h-4 w-4 sm:h-5 sm:w-5 ${isSelected ? 'text-[#5C381E] dark:text-[#E6C687]' : 'text-[#7C6E65] dark:text-gray-400'}`} />
                       </div>
                     ) : cat.image ? (
-                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border transition-all ${isSelected
-                          ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] shadow-xs scale-105'
-                          : 'border-[#EADBCE] dark:border-neutral-700 group-hover:border-[#C5A059]'
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border transition-colors duration-150 ${isSelected
+                        ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] shadow-xs'
+                        : 'border-[#EADBCE] dark:border-neutral-700 group-hover:border-[#C5A059]'
                         }`}>
                         <img
                           src={cat.image}
@@ -1633,9 +1649,9 @@ export default function CategoryPage() {
                       </div>
                     ) : (
                       <div
-                        className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border transition-all ${isSelected
-                            ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] bg-[#EDE4D8] dark:bg-[#5C381E]/30 scale-105 shadow-xs'
-                            : 'border-[#EADBCE] dark:border-neutral-700 bg-[#FFFDF9] dark:bg-[#1a1410] group-hover:border-[#C5A059]'
+                        className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border transition-colors duration-150 ${isSelected
+                          ? 'border-[#5C381E] ring-2 ring-[#5C381E]/40 ring-offset-1 ring-offset-[#FAF5ED] dark:ring-offset-[#120E0C] bg-[#EDE4D8] dark:bg-[#5C381E]/30 shadow-xs'
+                          : 'border-[#EADBCE] dark:border-neutral-700 bg-[#FFFDF9] dark:bg-[#1a1410] group-hover:border-[#C5A059]'
                           }`}
                         aria-label={`${cat.name} category`}
                       >
@@ -1645,13 +1661,13 @@ export default function CategoryPage() {
                       </div>
                     )}
                     <div className="h-7 sm:h-8 flex items-center justify-center w-full px-0.5">
-                      <span className={`text-[10px] sm:text-[11px] font-medium leading-tight line-clamp-2 w-full text-center capitalize transition-colors tracking-tight ${isSelected ? 'text-[#5C381E] dark:text-[#E6C687] font-bold' : 'text-[#7C6E65] dark:text-gray-400 group-hover:text-[#5C381E]'
+                      <span className={`text-[10px] sm:text-[11px] font-medium leading-tight line-clamp-2 w-full text-center capitalize transition-colors duration-150 tracking-tight ${isSelected ? 'text-[#5C381E] dark:text-[#E6C687] font-bold' : 'text-[#7C6E65] dark:text-gray-400 group-hover:text-[#5C381E]'
                         }`}>
                         {cat.name?.toLowerCase?.() || cat.name}
                       </span>
                     </div>
                     {/* Compact centered indicator pill */}
-                    <span className={`h-0.5 rounded-full transition-all duration-300 ${isSelected ? 'w-4 bg-[#5C381E] dark:bg-[#E6C687]' : 'w-0 bg-transparent'
+                    <span className={`h-0.5 rounded-full transition-all duration-200 ${isSelected ? 'w-4 bg-[#5C381E] dark:bg-[#E6C687]' : 'w-0 bg-transparent'
                       }`} />
                   </button>
                 )

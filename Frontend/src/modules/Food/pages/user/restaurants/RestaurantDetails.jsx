@@ -2111,23 +2111,37 @@ function RestaurantDetailsContent() {
   return (
     <AnimatedPage
       id="scrollingelement"
-      className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col overflow-x-hidden"
+      className="min-h-screen bg-white dark:bg-[#1a1a1a] flex flex-col"
     >
-      {/* Header - Back, Search (sticky to avoid sliding out of view) */}
-      <div className="sticky top-0 md:top-[128px] z-40 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pt-3 md:pt-4 lg:pt-5 pb-2 md:pb-3 border-b border-gray-100 dark:border-gray-800 shadow-xs transition-colors">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Back Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full h-10 w-10 border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-[#1a1a1a]"
-            onClick={goBack}
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-900 dark:text-white" />
-          </Button>
+      {/* Sticky Header - Back, Restaurant Name, Search */}
+      <div className="sticky top-0 z-40 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-md px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-2.5 sm:py-3 border-b border-gray-100 dark:border-gray-800 shadow-sm transition-colors">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          {/* Left: Back Button + Restaurant Name */}
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full h-10 w-10 shrink-0 border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-[#1a1a1a]"
+              onClick={goBack}
+              aria-label="Go back"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-900 dark:text-white" />
+            </Button>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate leading-tight">
+                {restaurant?.name || "Restaurant"}
+              </h2>
+              {restaurant?.deliveryTime && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <Clock className="h-3 w-3 shrink-0" />
+                  <span className="truncate">{restaurant.deliveryTime}</span>
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Right side: Search pill + menu */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             {!showSearch ? (
               <Button
                 variant="outline"

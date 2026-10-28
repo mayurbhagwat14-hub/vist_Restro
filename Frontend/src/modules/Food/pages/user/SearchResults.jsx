@@ -869,10 +869,13 @@ export default function SearchResults() {
           {/* Browse Category Section */}
           <div
             ref={categoryScrollRef}
-            className="flex gap-3 sm:gap-4 lg:gap-5 overflow-x-auto scrollbar-hide px-4 sm:px-6 md:px-8 lg:px-10 py-3 md:py-4 bg-white dark:bg-[#1a1a1a] border-b border-gray-100 dark:border-gray-800"
+            className="flex gap-3 sm:gap-4 lg:gap-5 overflow-x-auto scrollbar-hide px-4 sm:px-6 md:px-8 lg:px-10 py-3 md:py-4 bg-white dark:bg-[#1a1a1a] border-b border-gray-100 dark:border-gray-800 touch-pan-x overscroll-x-contain select-none"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
+              overscrollBehaviorX: "contain",
+              touchAction: "pan-x",
             }}
           >
             {categories.map((cat) => {

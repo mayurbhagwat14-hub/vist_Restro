@@ -56,27 +56,27 @@ export default function CollectionDetail() {
 
   if (collection.items.length === 0) {
     return (
-      <AnimatedPage className="min-h-screen bg-gradient-to-b from-yellow-50/30 via-white to-orange-50/20 p-4">
+      <AnimatedPage className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 p-4 transition-colors">
         <div className="max-w-4xl mx-auto space-y-6">
           <ScrollReveal>
             <div className="flex items-center gap-3 sm:gap-4">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="rounded-full h-8 w-8 sm:h-10 sm:w-10"
+                className="rounded-full h-8 w-8 sm:h-10 sm:w-10 hover:bg-[#EADBCE]/50 dark:hover:bg-white/10"
                 onClick={goBack}
               >
-                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-[#2C1810] dark:text-white" />
               </Button>
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold">{collection.name}</h1>
+              <h1 className="font-serif text-lg sm:text-xl md:text-2xl font-bold text-[#2C1810] dark:text-white">{collection.name}</h1>
             </div>
           </ScrollReveal>
-          <Card>
+          <Card className="bg-[#FFFDF9] dark:bg-[#1A1410] border border-[#EADBCE] dark:border-white/10 shadow-xs">
             <CardContent className="py-12 text-center">
-              <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-lg mb-4">This collection is empty</p>
-              <Link to="/user">
-                <Button className="bg-gradient-to-r bg-primary-orange hover:opacity-90 text-white">
+              <Heart className="h-16 w-16 mx-auto text-[#C5A059] mb-4 opacity-60" />
+              <p className="text-[#7C6E65] dark:text-gray-400 text-lg mb-4 font-medium">This collection is empty</p>
+              <Link to="/food/user">
+                <Button className="bg-[#5C381E] hover:bg-[#482A14] text-[#FAF5ED] font-bold rounded-xl shadow-xs">
                   Explore Restaurants
                 </Button>
               </Link>
@@ -88,7 +88,7 @@ export default function CollectionDetail() {
   }
 
   return (
-    <AnimatedPage className="min-h-screen bg-gradient-to-b from-yellow-50/30 via-white to-orange-50/20 p-4">
+    <AnimatedPage className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 p-4 transition-colors">
       <div className="max-w-6xl mx-auto space-y-6">
         <ScrollReveal>
           <div className="flex items-center justify-between mb-4">
@@ -96,14 +96,14 @@ export default function CollectionDetail() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="rounded-full h-8 w-8 sm:h-10 sm:w-10"
+                className="rounded-full h-8 w-8 sm:h-10 sm:w-10 hover:bg-[#EADBCE]/50 dark:hover:bg-white/10"
                 onClick={goBack}
               >
-                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-[#2C1810] dark:text-white" />
               </Button>
               <div>
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold">{collection.name}</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="font-serif text-lg sm:text-xl md:text-2xl font-bold text-[#2C1810] dark:text-white">{collection.name}</h1>
+                <p className="text-[#7C6E65] dark:text-gray-400 mt-1 text-xs sm:text-sm font-medium">
                   {collection.restaurants} {collection.restaurants === 1 ? "restaurant" : "restaurants"}
                 </p>
               </div>
@@ -114,13 +114,13 @@ export default function CollectionDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
           {collection.items.map((restaurant, index) => (
             <ScrollReveal key={restaurant.slug} delay={index * 0.1}>
-              <Link to={`/user/restaurants/${restaurant.slug}`}>
-                <Card className="overflow-hidden h-full p-0 gap-0">
+              <Link to={`/food/user/restaurants/${restaurant.slug}`}>
+                <Card className="overflow-hidden h-full p-0 gap-0 bg-[#FFFDF9] dark:bg-[#1A1410] border border-[#EADBCE] dark:border-white/10 hover:shadow-md hover:border-[#C5A059]/40 transition-all rounded-2xl">
                   <div className="h-48 w-full relative overflow-hidden">
                     <img
                       src={restaurant.image}
                       alt={restaurant.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
                       onError={(e) => {
                         e.target.src = `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop&q=80`
@@ -134,27 +134,27 @@ export default function CollectionDetail() {
                         className="rounded-full bg-white/90 backdrop-blur-sm hover:bg-white text-red-500"
                         onClick={(e) => handleRemoveItem(e, restaurant.slug)}
                       >
-                        <Trash2 className="h-5 w-5" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-bold line-clamp-1 flex-1">{restaurant.name}</h3>
-                      <div className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded-lg ml-2">
+                      <h3 className="font-serif text-base sm:text-lg font-bold line-clamp-1 flex-1 text-[#2C1810] dark:text-white">{restaurant.name}</h3>
+                      <div className="flex items-center gap-1 bg-[#3B7A27] text-white px-2 py-0.5 rounded-md ml-2 text-xs font-bold">
                         <Star className="h-3 w-3 fill-white" />
-                        <span className="text-sm font-bold">{restaurant.rating || "4.5"}</span>
+                        <span>{restaurant.rating || "4.5"}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                      <Clock className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-xs font-medium text-[#7C6E65] dark:text-gray-400 mb-2">
+                      <Clock className="h-3.5 w-3.5 text-[#C5A059]" />
                       <span>{restaurant.deliveryTime || "25-30 mins"}</span>
-                      <span>�</span>
-                      <MapPin className="h-4 w-4" />
+                      <span>•</span>
+                      <MapPin className="h-3.5 w-3.5 text-[#C5A059]" />
                       <span>{restaurant.distance || "2.5 km"}</span>
                     </div>
                     {restaurant.cuisine && (
-                      <p className="text-sm text-muted-foreground line-clamp-1">{restaurant.cuisine}</p>
+                      <p className="text-xs text-[#7C6E65] dark:text-gray-400 line-clamp-1">{restaurant.cuisine}</p>
                     )}
                   </CardContent>
                 </Card>
