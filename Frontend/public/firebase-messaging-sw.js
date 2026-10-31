@@ -335,3 +335,11 @@ self.addEventListener("notificationclick", (event) => {
     }),
   );
 });
+
+
+// Eagerly initialize Firebase in background worker so push notifications work even if tab is closed
+try {
+  initializeFirebaseInServiceWorker(DEFAULT_FIREBASE_CONFIG);
+} catch (err) {
+  // Already initialized or compat error
+}

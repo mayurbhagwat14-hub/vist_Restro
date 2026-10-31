@@ -18,6 +18,8 @@ const OWNER_MODELS = {
     USER: FoodUser,
     RESTAURANT: FoodRestaurant,
     DELIVERY_PARTNER: FoodDeliveryPartner,
+    DELIVERY: FoodDeliveryPartner,
+    RIDER: FoodDeliveryPartner,
     ADMIN: FoodAdmin
 };
 const OWNER_TOKEN_FIELDS = {
@@ -92,8 +94,8 @@ const getServiceAccountFromEnv = () => {
 const getFirebaseProjectId = () => {
     const account = getServiceAccountFromEnv();
     const projectId =
+        sanitizeString(account?.project_id) ||
         sanitizeString(config.firebaseProjectId) ||
-        sanitizeString(account.project_id) ||
         sanitizeString(process.env.FIREBASE_PROJECT_ID);
     if (!projectId) {
         throw new Error('Firebase project ID is not configured.');
