@@ -31,20 +31,8 @@ function isNativeLikeShell() {
   if (typeof window === 'undefined') return false
 
   const protocol = String(window.location?.protocol || '').toLowerCase()
-  const userAgent = String(window.navigator?.userAgent || '').toLowerCase()
-  const referrer = String(document.referrer || '').toLowerCase()
-
-  return (
-    Boolean(window.flutter_inappwebview) ||
-    Boolean(window.ReactNativeWebView) ||
-    userAgent.includes('flutter') ||
-    userAgent.includes('inappwebview') ||
-    userAgent.includes('crosswalk') ||
-    referrer.startsWith('android-app://') ||
-    protocol === 'file:' ||
-    userAgent.includes(' wv') ||
-    userAgent.includes('; wv')
-  )
+  // Only file: protocol requires native hash routing (e.g. bundled local assets)
+  return protocol === 'file:'
 }
 
 function resolveNativeInitialRoute() {
@@ -164,8 +152,24 @@ import { AppProviders } from './app/providers.jsx'
 const rootElement = document.getElementById('root')
 if (!rootElement) throw new Error('Root element not found')
 
-createRoot(rootElement).render(
-  <AppProviders>
-    <App />
-  </AppProviders>
-)
+try {
+  createRoot(rootElement).render(
+    <AppProviders>
+      <App />
+    </AppProviders>
+  )
+} catch (bootErr) {
+  console.error("Critical frontend boot error:", bootErr)
+  rootElement.innerHTML = `
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;background:#FAF5ED;color:#2C1810;">
+      <div style="width:64px;height:64px;border-radius:50%;background:#FFFDF9;border:2px solid #C5A059;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+        <span style="font-size:24px;">⚠️</span>
+      </div>
+      <h2 style="font-size:20px;font-weight:700;margin:0 0 8px 0;font-family:serif;">Unable to load page</h2>
+      <p style="font-size:14px;color:#7A6B63;margin:0 0 20px 0;max-width:320px;">A loading error occurred. Please tap below to refresh the page.</p>
+      <button onclick="window.location.reload()" style="background:#5C381E;color:#FAF5ED;border:none;padding:12px 28px;border-radius:9999px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(44,24,16,0.15);">
+        Reload Page
+      </button>
+    </div>
+  `
+}
