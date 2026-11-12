@@ -66,7 +66,7 @@ export default function HomeHeader({
   }, [location]);
 
   return (
-    <div className="relative pt-3 pb-2.5 px-4 transition-all duration-300">
+    <div className="relative pt-3 pb-2.5 px-4 transition-all duration-300 bg-[#FAF5ED] dark:bg-[#120E0C]">
       {/* Concept 2 Row 1: Brand (Left) | Location (Center) | Actions (Right) */}
       <div className="flex items-center justify-between gap-2">
         {/* Left: Brand Crest & Wordmark */}

@@ -988,7 +988,7 @@ export default function PageNavbar({
 
   return (
     <nav
-      className={`relative ${zIndexClass} w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 bg-transparent !bg-transparent shadow-none border-0`}
+      className={`sticky top-0 ${zIndexClass} w-full px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 bg-[#FAF5ED] dark:bg-[#120E0C] border-b border-[#EADBCE]/80 dark:border-neutral-800 shadow-xs backdrop-blur-md`}
       onClick={onNavClick}
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">

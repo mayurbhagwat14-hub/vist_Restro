@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom"
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom"
 import { Smartphone, ArrowRight, ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import AnimatedPage from "@food/components/user/AnimatedPage"
 import { authAPI } from "@food/api"
@@ -339,6 +339,38 @@ export default function SignIn() {
             >
               Sign Up
             </button>
+          </div>
+
+          {/* Legal / Policy Options: Terms, Privacy, Refund */}
+          <div
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+            className="mt-6 pt-4 border-t border-[#E5DDD0]/70 text-center relative z-10"
+          >
+            <p className="text-[12px] text-[#8E7B6B] mb-2 select-none">
+              By continuing, you agree to our
+            </p>
+            <div className="flex items-center justify-center gap-2 flex-wrap text-[12px] sm:text-[12.5px] font-semibold text-[#522807]">
+              <Link
+                to="/food/user/profile/terms"
+                className="hover:underline hover:text-[#6E3B13] transition-colors py-0.5"
+              >
+                Terms & Conditions
+              </Link>
+              <span className="text-[#C4A882] select-none">•</span>
+              <Link
+                to="/food/user/profile/privacy"
+                className="hover:underline hover:text-[#6E3B13] transition-colors py-0.5"
+              >
+                Privacy Policy
+              </Link>
+              <span className="text-[#C4A882] select-none">•</span>
+              <Link
+                to="/food/user/profile/refund"
+                className="hover:underline hover:text-[#6E3B13] transition-colors py-0.5"
+              >
+                Refund Policy
+              </Link>
+            </div>
           </div>
 
         </div>

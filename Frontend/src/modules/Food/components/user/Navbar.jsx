@@ -88,7 +88,7 @@ export default function Navbar() {
   const userPoints = 99
 
   return (
-    <nav className="z-50 w-full backdrop-blur-md bg-gradient-to-b from-page-bg/80 via-page-bg/50 to-page-bg/20 border-b border-gray-200/50">
+    <nav className="z-50 w-full sticky top-0 bg-[#FAF5ED] dark:bg-[#120E0C] border-b border-[#EADBCE] dark:border-neutral-800 shadow-sm">
       <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex h-16 sm:h-18 md:h-20 items-center justify-between gap-2 sm:gap-3 md:gap-4">
           {/* Location Section */}

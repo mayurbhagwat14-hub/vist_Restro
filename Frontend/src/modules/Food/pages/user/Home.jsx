@@ -2776,7 +2776,7 @@ export default function Home() {
 
         <div className="relative overflow-x-clip bg-[#F9F5EE] dark:bg-[#120E0C] min-h-screen text-[#2C1810] dark:text-neutral-100 transition-colors duration-300">
           {/* Brand Top Section (Concept 2: Seamless Warm Header) */}
-          <div className="md:hidden relative bg-[#F9F5EE] dark:bg-[#120E0C] border-b border-[#EADBCE]/50 dark:border-neutral-800/50">
+          <div className="md:hidden sticky top-0 z-40 bg-[#FAF5ED] dark:bg-[#120E0C] border-b border-[#EADBCE]/70 dark:border-neutral-800/70 shadow-xs backdrop-blur-md">
             <div className="relative z-10">
               <HomeHeader
                 activeTab={activeTab}

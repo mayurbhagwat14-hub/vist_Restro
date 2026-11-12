@@ -243,7 +243,7 @@ export default function DesktopNavbar({ showLogo = true }) {
             className="hidden md:flex flex-col fixed top-0 left-0 right-0 z-50 py-2 transition-all duration-300 bg-white dark:bg-[#1a1a1a] border-b border-gray-200 dark:border-gray-800 shadow-sm"
         >
             {/* Top Row: Location - Search - Icons */}
-            <div className="w-full border-b border-gray-100 dark:border-gray-800">
+            <div className="w-full border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-[#1a1a1a]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16 gap-4">
                         {/* Left: Logo & Location */}
