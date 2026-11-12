@@ -328,6 +328,9 @@ export default function UserRouter() {
               </ProtectedRoute>
             }
           />
+
+          {/* Catch-all fallback inside UserRouter so invalid/unmapped URLs never render a blank page */}
+          <Route path="*" element={<Navigate to="/food/user" replace />} />
         </Route>
       </Routes>
     </Suspense>

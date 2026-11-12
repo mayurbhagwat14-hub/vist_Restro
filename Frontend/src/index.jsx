@@ -142,6 +142,19 @@ window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault()
     return
   }
+
+  // Auto-recover from dynamic import chunk load failures after new builds/deploys
+  if (
+    errorMsg.includes('dynamically imported module') ||
+    errorMsg.includes('Importing a module script failed')
+  ) {
+    event.preventDefault()
+    const reloadKey = 'vist_chunk_retry_' + window.location.pathname
+    if (!sessionStorage.getItem(reloadKey)) {
+      sessionStorage.setItem(reloadKey, '1')
+      window.location.reload()
+    }
+  }
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

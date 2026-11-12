@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import AppRoutes from './routes'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 // VIST Restaurant client-side entry point application container
 function App() {
@@ -65,7 +66,11 @@ function App() {
     };
   }, []);
 
-  return <AppRoutes />
+  return (
+    <ErrorBoundary>
+      <AppRoutes />
+    </ErrorBoundary>
+  )
 }
 
 export default App
