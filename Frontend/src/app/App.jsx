@@ -6,16 +6,24 @@ function App() {
   useEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") return;
 
-    let portraitHeight = window.innerHeight;
-    const handleResize = () => {
-      const screenHeight = window.screen.height || window.innerHeight;
-      const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      const baselineHeight = Math.max(portraitHeight, screenHeight * 0.8);
-      const shrinkAmount = baselineHeight - currentHeight;
+    const isTextInputFocused = () => {
+      const el = document.activeElement;
+      if (!el) return false;
+      const tag = el.tagName?.toLowerCase();
+      const type = el.type?.toLowerCase();
+      return tag === "textarea" || (tag === "input" && ["text", "password", "email", "number", "search", "tel", "url"].includes(type || "text"));
+    };
 
-      if (shrinkAmount > 150) {
+    const handleResize = () => {
+      if (!isTextInputFocused()) {
+        document.body.classList.remove('keyboard-open');
+        return;
+      }
+      const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      const screenHeight = window.screen.height || window.innerHeight;
+      if (currentHeight < screenHeight * 0.7) {
         document.body.classList.add('keyboard-open');
-      } else if (shrinkAmount < 100) {
+      } else {
         document.body.classList.remove('keyboard-open');
       }
     };
@@ -32,8 +40,10 @@ function App() {
 
     const handleFocusOut = () => {
       setTimeout(() => {
-        document.body.classList.remove('keyboard-open');
-      }, 200);
+        if (!isTextInputFocused()) {
+          document.body.classList.remove('keyboard-open');
+        }
+      }, 150);
     };
 
     document.addEventListener("focusin", handleFocusIn);

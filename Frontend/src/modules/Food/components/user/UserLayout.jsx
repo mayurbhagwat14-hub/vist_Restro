@@ -197,36 +197,26 @@ export default function UserLayout() {
   // Note: Authentication checks and redirects are handled by ProtectedRoute components
   // UserLayout should not interfere with authentication redirects
 
-  // Show bottom navigation only on home page, dining page, under-250 page, and profile page
   const path = location.pathname.startsWith("/food")
     ? location.pathname.substring(5) || "/"
     : location.pathname
   const normalizedPath =
     path.length > 1 ? path.replace(/\/+$/, "") : path
 
-  const isProfileRoot =
-    normalizedPath === "/profile" ||
-    normalizedPath === "/user/profile"
+  // Auth pages & checkout flows should not have bottom nav
+  const isAuthPage = normalizedPath.includes("/auth")
+  const isCheckoutOrAddressPage =
+    normalizedPath.includes("/checkout") ||
+    normalizedPath.includes("/address-selector") ||
+    normalizedPath.includes("/select-address")
+  const isInvoicePage = normalizedPath.includes("/invoice")
 
-  const showBottomNav = normalizedPath === "/" ||
-    normalizedPath === "/user" ||
-    normalizedPath === "/dining" ||
-    normalizedPath === "/user/dining" ||
-    normalizedPath === "/under-250" ||
-    normalizedPath === "/user/under-250" ||
-    normalizedPath === "/accessories" ||
-    normalizedPath === "/user/accessories" ||
-    normalizedPath === "/services" ||
-    normalizedPath === "/user/services" ||
-    normalizedPath === "/categories" ||
-    normalizedPath === "/user/categories" ||
-    isProfileRoot ||
-    normalizedPath === "" // Handle empty string case for root relative to /food
+  // Bottom navigation remains visible across all browsing & account pages
+  const showBottomNav = !isAuthPage && !isCheckoutOrAddressPage && !isInvoicePage
 
   const isUnder250 = normalizedPath === "/under-250" || normalizedPath === "/user/under-250"
 
   // Desktop Navbar visibility rule (exclude auth, checkout, profile subpages, and orders pages)
-  const isAuthPage = normalizedPath.includes("/auth")
   const isCartOrCheckoutPage =
     normalizedPath.includes("/cart") ||
     normalizedPath.includes("/checkout") ||
@@ -272,7 +262,7 @@ export default function UserLayout() {
                 <div className="hidden md:block">
                   {showDesktopNavbar && <DesktopNavbar />}
                 </div>
-                <main className={`${showDesktopNavbar ? "md:pt-32" : ""} ${showBottomNav ? "pb-20 md:pb-0" : ""}`}>
+                <main className={`${showDesktopNavbar ? "md:pt-32" : ""} ${showBottomNav ? "pb-24 md:pb-0" : ""}`}>
                   <Outlet />
                 </main>
                 {showBottomNav && <BottomNavigation />}

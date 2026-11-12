@@ -84,7 +84,7 @@ export default function CMSPage({ endpoint, title: defaultTitle, module = "USER"
   return (
     <AnimatedPage className="min-h-screen bg-white dark:bg-[#0a0a0a] pb-10">
       {/* Premium Sticky Header */}
-      <div className="sticky top-0 z-50 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-900">
+      <div className="sticky top-0 z-50 bg-white dark:bg-[#0a0a0a] shadow-xs border-b border-gray-100 dark:border-gray-900">
         <div className="max-w-4xl mx-auto px-4 h-16 md:h-20 flex items-center gap-4">
           <Button 
             variant="ghost" 

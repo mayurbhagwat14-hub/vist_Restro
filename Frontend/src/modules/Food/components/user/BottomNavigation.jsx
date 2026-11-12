@@ -109,7 +109,7 @@ export default function BottomNavigation() {
   const isCategories = pathname.includes("/categories") || (pathname === categoryPath && !isHome);
 
   const activeHome = isHome && !pathname.includes("/categories");
-  const activeCat = pathname.includes("/categories");
+  const activeCat = pathname.includes("/categories") || pathname.includes("/category/");
   const activeOrders = pathname.includes("/user/orders") || (pathname.includes("/auth/login") && location.search.includes("orders"));
   const activeProfile = pathname.includes("/user/profile") || (pathname.includes("/auth/login") && location.search.includes("profile"));
 

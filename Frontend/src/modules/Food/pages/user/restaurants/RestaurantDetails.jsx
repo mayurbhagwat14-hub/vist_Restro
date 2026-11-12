@@ -2114,7 +2114,7 @@ function RestaurantDetailsContent() {
       className="min-h-screen bg-[#FAF5ED] dark:bg-[#120E0C] text-[#2C1810] dark:text-neutral-100 flex flex-col transition-colors"
     >
       {/* Sticky Header - Back, Restaurant Name, Search */}
-      <div className="sticky top-0 z-40 bg-[#FAF5ED]/95 dark:bg-[#120E0C]/95 backdrop-blur-md px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-2.5 sm:py-3 border-b border-[#EADBCE] dark:border-white/10 shadow-xs transition-colors">
+      <div className="sticky top-0 z-40 bg-[#FAF5ED] dark:bg-[#120E0C] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-2.5 sm:py-3 border-b border-[#EADBCE] dark:border-white/10 shadow-xs transition-colors">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           {/* Left: Back Button + Restaurant Name */}
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">

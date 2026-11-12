@@ -10,7 +10,7 @@ import { getCachedSettings, loadBusinessSettings } from "@food/utils/businessSet
 import quickSpicyLogo from "@food/assets/vist-logo.png"
 
 export default function PageNavbar({
-  textColor = "white",
+  textColor = "dark",
   zIndex = 20,
   showProfile = false,
   showLogo = true,
@@ -980,7 +980,7 @@ export default function PageNavbar({
     openLocationSelector()
   }
 
-  const textColorClass = textColor === "white" ? "text-white" : "text-black"
+  const textColorClass = textColor === "white" ? "text-white" : "text-[#2C1810] dark:text-neutral-100"
   const iconFill = textColor === "white" ? "white" : "black"
   const ringColor = textColor === "white" ? "ring-white/30" : "ring-gray-800/30"
 
