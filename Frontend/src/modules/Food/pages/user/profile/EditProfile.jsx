@@ -118,13 +118,23 @@ export default function EditProfile() {
   // Load from localStorage or use context
   const storedProfile = loadProfileFromStorage()
   const draftProfile = loadEditProfileDraft()
-  const realProfile = storedProfile || userProfile || {}
+  const realProfile = userProfile || storedProfile || {}
+
+  // Only use draft if it genuinely belongs to the currently logged in user
+  const isDraftMatchingUser = Boolean(
+    draftProfile &&
+    ((realProfile._id && (draftProfile._id === realProfile._id || draftProfile.id === realProfile._id)) ||
+     (realProfile.phone && normalizePhoneToTenDigits(draftProfile.phone || draftProfile.mobile) === normalizePhoneToTenDigits(realProfile.phone)))
+  )
+  const safeDraft = isDraftMatchingUser ? draftProfile : null
+
   const initialProfile = {
     ...realProfile,
-    ...(draftProfile || {}),
-    // Ensure genuine profile dateOfBirth/anniversary takes precedence over empty draft
-    dateOfBirth: realProfile.dateOfBirth || draftProfile?.dateOfBirth || "",
-    anniversary: realProfile.anniversary || draftProfile?.anniversary || "",
+    ...(safeDraft || {}),
+    // Mobile strictly belongs to the currently authenticated user
+    mobile: normalizePhoneToTenDigits(realProfile.phone || realProfile.mobile || ""),
+    dateOfBirth: realProfile.dateOfBirth || safeDraft?.dateOfBirth || "",
+    anniversary: realProfile.anniversary || safeDraft?.anniversary || "",
   }
 
   const initialFormData = buildFormDataFromProfile(initialProfile)
@@ -148,14 +158,14 @@ export default function EditProfile() {
 
   // Update form data when profile changes
   useEffect(() => {
-    const profile = loadProfileFromStorage() || userProfile || {}
+    const profile = userProfile || loadProfileFromStorage() || {}
     const parsedData = buildFormDataFromProfile(profile)
     setInitialData(parsedData)
 
     setFormData((prev) => ({
       ...prev,
-      name: prev.name || parsedData.name,
-      mobile: prev.mobile || parsedData.mobile,
+      name: parsedData.name || prev.name,
+      mobile: parsedData.mobile, // Always strictly reflect authenticated user's phone
       email: prev.email || parsedData.email,
       dateOfBirth: parsedData.dateOfBirth || prev.dateOfBirth,
       anniversary: parsedData.anniversary || prev.anniversary,

@@ -196,6 +196,21 @@ export function clearModuleAuth(module) {
   if (module === "restaurant") {
     clearRestaurantSessionCache();
   }
+  if (module === "user") {
+    const userKeys = [
+      "user_user",
+      "userProfile",
+      "user_edit_profile_draft",
+      "userAddresses",
+      "userFavorites",
+      "userDishFavorites",
+      "userPaymentMethods",
+      "userVegMode",
+      "food_user_notifications",
+      "vist_user_profile"
+    ];
+    userKeys.forEach((key) => localStorage.removeItem(key));
+  }
   // Also clear any sessionStorage data
   sessionStorage.removeItem(`${module}AuthData`);
 }
@@ -288,6 +303,9 @@ export function setAuthData(module, token, user, refreshToken = null) {
     // Prevent stale restaurant profile data from previous account after re-login.
     if (module === "restaurant") {
       clearRestaurantSessionCache();
+    }
+    if (module === "user") {
+      localStorage.removeItem("user_edit_profile_draft");
     }
 
     localStorage.setItem(tokenKey, token);
