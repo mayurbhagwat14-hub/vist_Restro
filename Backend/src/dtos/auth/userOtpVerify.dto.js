@@ -27,6 +27,7 @@ const schema = z.object({
     z.enum(["web", "mobile"]).optional(),
   ),
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100).optional(),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (expected YYYY-MM-DD)").optional(),
 });
 
 export const validateUserOtpVerifyDto = (body) => {

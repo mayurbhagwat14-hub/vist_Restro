@@ -36,7 +36,7 @@ export const requestUserOtpController = async (req, res, next) => {
 
 export const verifyUserOtpController = async (req, res, next) => {
   try {
-    const { phone, otp, referralCode, fcmToken, platform, name } = validateUserOtpVerifyDto(
+    const { phone, otp, referralCode, fcmToken, platform, name, dateOfBirth } = validateUserOtpVerifyDto(
       req.body,
     );
     const result = await verifyUserOtpAndLogin(
@@ -46,6 +46,7 @@ export const verifyUserOtpController = async (req, res, next) => {
       fcmToken,
       platform,
       name,
+      dateOfBirth,
     );
     return sendResponse(res, 200, "Login successful", result);
   } catch (error) {

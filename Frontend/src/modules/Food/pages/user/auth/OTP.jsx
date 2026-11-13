@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { ArrowLeft, Loader2, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react"
+import { ArrowLeft, Loader2, AlertCircle, CheckCircle2, ArrowRight, Calendar } from "lucide-react"
 import AnimatedPage from "@food/components/user/AnimatedPage"
 import apiClient, { authAPI } from "@food/api"
 import { setAuthData as setUserAuthData, scheduleProactiveRefresh, isModuleAuthenticated } from "@food/utils/auth"
@@ -133,6 +133,8 @@ export default function OTP() {
   const [showNameInput, setShowNameInput] = useState(false)
   const [name, setName] = useState("")
   const [nameError, setNameError] = useState("")
+  const [dateOfBirth, setDateOfBirth] = useState("")
+  const [dobError, setDobError] = useState("")
   const [verifiedData, setVerifiedData] = useState(null)
   const [contactInfo, setContactInfo] = useState("")
   const inputRefs = useRef([])
@@ -284,10 +286,18 @@ export default function OTP() {
       }
 
       const hasName = user.name && String(user.name).trim().length > 0 && String(user.name).toLowerCase() !== "null"
-      const needsName = data.isNewUser === true || !hasName
+      const hasDob = user.dateOfBirth && String(user.dateOfBirth).trim().length > 0
+      const needsProfile = data.isNewUser === true || !hasName || !hasDob
 
-      if (needsName) {
+      if (needsProfile) {
         setVerifiedData(data)
+        if (hasName) setName(String(user.name).trim())
+        if (hasDob) {
+          const parsed = new Date(user.dateOfBirth)
+          if (!isNaN(parsed.getTime())) {
+            setDateOfBirth(parsed.toISOString().split("T")[0])
+          }
+        }
         setShowNameInput(true)
         setIsLoading(false)
         submittingRef.current = false
@@ -315,23 +325,41 @@ export default function OTP() {
     }
   }
 
-  const handleSaveName = async (e) => {
-    e.preventDefault()
+  const handleSaveProfile = async (e) => {
+    if (e) e.preventDefault()
     const trimmed = name.trim()
+    let hasValidationError = false
+
     if (!trimmed) {
-      setNameError("Please enter your name")
-      return
-    }
-    if (trimmed.length < 2) {
+      setNameError("Please enter your full name")
+      hasValidationError = true
+    } else if (trimmed.length < 2) {
       setNameError("Name must be at least 2 characters")
-      return
-    }
-    if (!FULL_NAME_REGEX.test(trimmed)) {
+      hasValidationError = true
+    } else if (!FULL_NAME_REGEX.test(trimmed)) {
       setNameError("Name can only contain letters and spaces")
-      return
+      hasValidationError = true
+    } else {
+      setNameError("")
     }
 
-    setNameError("")
+    if (!dateOfBirth) {
+      setDobError("Please select your date of birth")
+      hasValidationError = true
+    } else {
+      const selectedDate = new Date(dateOfBirth)
+      const today = new Date()
+      today.setHours(23, 59, 59, 999)
+      if (isNaN(selectedDate.getTime()) || selectedDate > today) {
+        setDobError("Please enter a valid date in the past")
+        hasValidationError = true
+      } else {
+        setDobError("")
+      }
+    }
+
+    if (hasValidationError) return
+
     setIsLoading(true)
 
     try {
@@ -340,28 +368,33 @@ export default function OTP() {
       const user = verifiedData.user
       const normalizedName = trimmed.replace(/\s+/g, " ")
 
+      const profilePayload = {
+        name: normalizedName,
+        dateOfBirth: dateOfBirth,
+      }
+
       try {
         await apiClient.put(
           "/auth/profile",
-          { name: normalizedName },
+          profilePayload,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         )
       } catch (putErr) {
         // Fallback to /food/user/profile
         await apiClient.patch(
           "/food/user/profile",
-          { name: normalizedName },
+          profilePayload,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         )
       }
 
-      setUserAuthData("user", accessToken, { ...user, name: normalizedName }, refreshToken)
+      setUserAuthData("user", accessToken, { ...user, name: normalizedName, dateOfBirth }, refreshToken)
       scheduleProactiveRefresh("user")
       window.dispatchEvent(new Event("userAuthChanged"))
       setSuccess(true)
       setTimeout(() => navigate(redirectTo, { replace: true }), 400)
     } catch (err) {
-      setError("Failed to save name. Please try again.")
+      setError("Failed to save profile. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -560,18 +593,19 @@ export default function OTP() {
               </button>
             </>
           ) : (
-            /* First Time User: Enter Name */
-            <form onSubmit={handleSaveName} className="w-full relative z-10 space-y-4">
+            /* First Time / Incomplete User: Enter Name & Date of Birth */
+            <form onSubmit={handleSaveProfile} className="w-full relative z-10 space-y-3.5">
               <h2 className="page-serif-heading font-serif-editorial text-[26px] sm:text-[28px] leading-tight text-[#3D210F] text-center mb-1">
                 Welcome to VISIT!
               </h2>
               <p
                 style={{ fontFamily: "'Outfit', sans-serif" }}
-                className="text-[13px] sm:text-[13.5px] text-[#7E6D5E] text-center mb-4 leading-relaxed"
+                className="text-[13px] sm:text-[13.5px] text-[#7E6D5E] text-center mb-3 leading-relaxed"
               >
-                Please enter your name so we can personalize your experience.
+                Please share your details to personalize your dining experience.
               </p>
 
+              {/* Full Name */}
               <div className="w-full bg-[#FFFFFF] border border-[#E5DDD0] focus-within:border-[#6E3B13] focus-within:ring-2 focus-within:ring-[#6E3B13]/12 rounded-full px-5 py-3 shadow-[0_2px_8px_rgba(74,44,17,0.04)]">
                 <label className="block text-[10px] font-medium text-[#8E7B6B] uppercase tracking-wider mb-0.5">
                   Full Name
@@ -585,21 +619,53 @@ export default function OTP() {
                     setNameError("")
                   }}
                   className="w-full bg-transparent border-none p-0 outline-none font-semibold text-base text-[#2E180C] placeholder-[#B5A698] focus:ring-0"
-                  autoFocus
+                  autoFocus={!name}
                 />
               </div>
 
               {nameError && (
-                <div className="flex items-center gap-1.5 text-xs text-red-600 pl-2">
-                  <AlertCircle className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-1.5 text-xs text-red-600 pl-4 -mt-2">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{nameError}</span>
+                </div>
+              )}
+
+              {/* Date of Birth */}
+              <div className="w-full bg-[#FFFFFF] border border-[#E5DDD0] focus-within:border-[#6E3B13] focus-within:ring-2 focus-within:ring-[#6E3B13]/12 rounded-full px-5 py-3 shadow-[0_2px_8px_rgba(74,44,17,0.04)]">
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className="block text-[10px] font-medium text-[#8E7B6B] uppercase tracking-wider">
+                    Date of Birth
+                  </label>
+                  <span className="text-[10px] text-[#A6885A] font-medium tracking-tight">
+                    for birthday surprises 🎁
+                  </span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <Calendar className="w-4 h-4 text-[#8E7B6B] shrink-0" />
+                  <input
+                    type="date"
+                    max={new Date().toISOString().split("T")[0]}
+                    value={dateOfBirth}
+                    onChange={(e) => {
+                      setDateOfBirth(e.target.value)
+                      setDobError("")
+                    }}
+                    className="w-full bg-transparent border-none p-0 outline-none font-semibold text-sm sm:text-base text-[#2E180C] focus:ring-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {dobError && (
+                <div className="flex items-center gap-1.5 text-xs text-red-600 pl-4 -mt-2">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{dobError}</span>
                 </div>
               )}
 
               <button
                 type="submit"
-                disabled={isLoading || !name.trim()}
-                className="w-full h-[52px] sm:h-[54px] rounded-full text-white font-medium text-[15px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(74,44,17,0.18)] hover:shadow-[0_6px_20px_rgba(74,44,17,0.24)] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                disabled={isLoading || !name.trim() || !dateOfBirth}
+                className="w-full h-[52px] sm:h-[54px] rounded-full text-white font-medium text-[15px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(74,44,17,0.18)] hover:shadow-[0_6px_20px_rgba(74,44,17,0.24)] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer pt-0 mt-3"
                 style={{
                   backgroundColor: "#5C381E",
                 }}

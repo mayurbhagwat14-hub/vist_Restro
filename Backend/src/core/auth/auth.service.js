@@ -44,6 +44,7 @@ export const verifyUserOtpAndLogin = async (
   fcmToken,
   platform,
   name,
+  dateOfBirth,
 ) => {
   console.log(
     `[FCM-LOGIN] User login platform received: rawPlatform=${String(platform ?? "") || "<empty>"}, hasToken=${Boolean(fcmToken)}`,
@@ -57,16 +58,19 @@ export const verifyUserOtpAndLogin = async (
   let userDoc = await FoodUser.findOne({ phone });
   
   // Ensure user exists and mark as verified on successful OTP.
-  // Check if user is new or hasn't provided a name yet
+  // Check if user is new or hasn't provided a name or DOB yet
   const needsNamePrompt = !userDoc || !userDoc.name || String(userDoc.name).trim() === "" || String(userDoc.name).toLowerCase() === "null";
   const isNewUser = !userDoc;
   const trimmedName = typeof name === "string" ? name.trim() : "";
+  const parsedDob = dateOfBirth ? new Date(dateOfBirth) : null;
+  const validDob = parsedDob && !isNaN(parsedDob.getTime()) ? parsedDob : null;
 
   if (!userDoc) {
     userDoc = await FoodUser.create({
       phone,
       isVerified: true,
       ...(trimmedName ? { name: trimmedName } : {}),
+      ...(validDob ? { dateOfBirth: validDob } : {}),
     });
   } else {
     let needsSave = false;
@@ -76,6 +80,10 @@ export const verifyUserOtpAndLogin = async (
     }
     if (trimmedName && !userDoc.name) {
       userDoc.name = trimmedName;
+      needsSave = true;
+    }
+    if (validDob && !userDoc.dateOfBirth) {
+      userDoc.dateOfBirth = validDob;
       needsSave = true;
     }
     if (needsSave) await userDoc.save();
