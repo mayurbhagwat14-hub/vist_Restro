@@ -39,7 +39,7 @@ const notificationBroadcastSchema = new mongoose.Schema(
         },
         targetType: {
             type: String,
-            enum: ['ALL', 'USER', 'RESTAURANT', 'DELIVERY', 'CUSTOM'],
+            enum: ['ALL', 'USER', 'RESTAURANT', 'DELIVERY', 'CUSTOM', 'BIRTHDAY', 'ANNIVERSARY'],
             required: true,
             index: true
         },

@@ -14,7 +14,9 @@ const TARGET_TYPE_MAP = {
     USER: 'USER',
     RESTAURANT: 'RESTAURANT',
     DELIVERY: 'DELIVERY',
-    CUSTOM: 'CUSTOM'
+    CUSTOM: 'CUSTOM',
+    BIRTHDAY: 'BIRTHDAY',
+    ANNIVERSARY: 'ANNIVERSARY'
 };
 
 const OWNER_LABEL_MAP = {
@@ -134,6 +136,78 @@ const resolveCustomTargets = async ({ targets = [], targetIds = [] } = {}) => {
     }));
 };
 
+export const getOccasionRecipients = async ({ type = 'birthday', date } = {}) => {
+    const occasionType = String(type || 'birthday').toLowerCase();
+    const isAnniversary = occasionType === 'anniversary';
+    const dateField = isAnniversary ? 'anniversary' : 'dateOfBirth';
+
+    let targetDay, targetMonth;
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        const parts = date.split('-').map(Number);
+        targetDay = parts[2];
+        targetMonth = parts[1];
+    } else {
+        const now = new Date();
+        targetDay = now.getDate();
+        targetMonth = now.getMonth() + 1;
+    }
+
+    const candidates = await FoodUser.find({
+        isActive: true,
+        [dateField]: { $exists: true, $ne: null }
+    })
+    .select('_id name phone email fcmTokens fcmTokenMobile dateOfBirth anniversary')
+    .lean();
+
+    const matchingUsers = candidates.filter((u) => {
+        const raw = u[dateField];
+        if (!raw) return false;
+        const d = new Date(raw);
+        if (Number.isNaN(d.getTime())) return false;
+        const utcMatch = d.getUTCDate() === targetDay && (d.getUTCMonth() + 1) === targetMonth;
+        const localMatch = d.getDate() === targetDay && (d.getMonth() + 1) === targetMonth;
+        return utcMatch || localMatch;
+    });
+
+    const mapped = matchingUsers.map((u) => {
+        const hasMobileFcm = Array.isArray(u.fcmTokenMobile) && u.fcmTokenMobile.length > 0;
+        const hasWebFcm = Array.isArray(u.fcmTokens) && u.fcmTokens.length > 0;
+        const rawDate = u[dateField];
+        let dateString = '';
+        if (rawDate) {
+            const d = new Date(rawDate);
+            if (!Number.isNaN(d.getTime())) {
+                dateString = d.toISOString().split('T')[0];
+            }
+        }
+
+        return {
+            ownerType: 'USER',
+            ownerId: String(u._id),
+            _id: String(u._id),
+            name: String(u.name || 'User').trim(),
+            label: String(u.name || u.phone || 'User').trim(),
+            phone: u.phone || '',
+            email: u.email || '',
+            subLabel: [u.phone, u.email].filter(Boolean).join(' • '),
+            date: dateString,
+            hasFcm: hasMobileFcm || hasWebFcm,
+            hasMobileFcm,
+            hasWebFcm,
+            fcmCount: (u.fcmTokens?.length || 0) + (u.fcmTokenMobile?.length || 0)
+        };
+    });
+
+    return {
+        type: occasionType,
+        day: targetDay,
+        month: targetMonth,
+        count: mapped.length,
+        usersWithFcmCount: mapped.filter((u) => u.hasFcm).length,
+        users: mapped
+    };
+};
+
 const resolveTargets = async ({ targetType, targetIds = [], targets = [] } = {}) => {
     if (targetType === 'ALL') {
         const [users, restaurants, deliveryPartners] = await Promise.all([
@@ -148,6 +222,22 @@ const resolveTargets = async ({ targetType, targetIds = [], targets = [] } = {})
     if (targetType === 'RESTAURANT') return loadTargetsByOwnerType('RESTAURANT');
     if (targetType === 'DELIVERY') return loadTargetsByOwnerType('DELIVERY_PARTNER');
     if (targetType === 'CUSTOM') return resolveCustomTargets({ targets, targetIds });
+
+    if (targetType === 'BIRTHDAY' || targetType === 'ANNIVERSARY') {
+        if (Array.isArray(targets) && targets.length > 0) {
+            return dedupeTargets(targets);
+        }
+        if (Array.isArray(targetIds) && targetIds.length > 0) {
+            const users = await FoodUser.find({ _id: { $in: targetIds }, isActive: true }).select('_id name phone email').lean();
+            return users.map((row) => ({
+                ownerType: 'USER',
+                ownerId: String(row._id),
+                ...buildUserLabel(row)
+            }));
+        }
+        const occasionData = await getOccasionRecipients({ type: targetType.toLowerCase() });
+        return occasionData.users;
+    }
 
     throw new ValidationError('Unsupported targetType');
 };
@@ -227,7 +317,7 @@ export const createBroadcastNotification = async ({ body = {}, adminId } = {}) =
         title,
         message,
         targetType,
-        targetIds: targetType === 'CUSTOM' ? targetIds : [],
+        targetIds: ['CUSTOM', 'BIRTHDAY', 'ANNIVERSARY'].includes(targetType) ? targetIds : [],
         targets: resolvedTargets.map((target) => ({
             ownerType: target.ownerType,
             ownerId: toObjectId(target.ownerId, 'ownerId'),
@@ -294,6 +384,10 @@ export const getBroadcastNotifications = async ({ page = 1, limit = 10 } = {}) =
             targetLabel:
                 item.targetType === 'CUSTOM'
                     ? `${Number(item.targetCount || item.targets?.length || 0)} selected recipients`
+                    : item.targetType === 'BIRTHDAY'
+                    ? `🎂 Birthday (${Number(item.targetCount || item.targets?.length || 0)} users)`
+                    : item.targetType === 'ANNIVERSARY'
+                    ? `💍 Anniversary (${Number(item.targetCount || item.targets?.length || 0)} users)`
                     : OWNER_LABEL_MAP[item.targetType] || item.targetType
         })),
         pagination: {

@@ -525,6 +525,11 @@ export const adminAPI = {
       params,
       contextModule: "admin",
     }),
+  getOccasionRecipients: (params = {}) =>
+    apiClient.get("/food/admin/notifications/broadcast/occasion-recipients", {
+      params,
+      contextModule: "admin",
+    }),
   deleteBroadcastNotification: (id) =>
     apiClient.delete(`/food/admin/notifications/broadcast/${String(id)}`, {
       contextModule: "admin",

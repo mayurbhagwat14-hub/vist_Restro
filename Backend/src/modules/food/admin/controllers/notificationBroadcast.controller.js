@@ -2,8 +2,21 @@ import { sendResponse, sendError } from '../../../../utils/response.js';
 import {
     createBroadcastNotification,
     getBroadcastNotifications,
-    deleteBroadcastNotification
+    deleteBroadcastNotification,
+    getOccasionRecipients
 } from '../services/notificationBroadcast.service.js';
+
+export const getOccasionRecipientsController = async (req, res) => {
+    try {
+        const data = await getOccasionRecipients({
+            type: req.query?.type,
+            date: req.query?.date
+        });
+        return sendResponse(res, 200, 'Occasion recipients fetched successfully', data);
+    } catch (error) {
+        return sendError(res, error.statusCode || 500, error.message || 'Failed to fetch occasion recipients');
+    }
+};
 
 export const createBroadcastNotificationController = async (req, res) => {
     try {

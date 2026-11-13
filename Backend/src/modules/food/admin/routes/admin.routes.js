@@ -123,6 +123,7 @@ router.delete('/notifications/clear-all', adminNotificationController.clearAllNo
 // ----- Broadcast Notifications -----
 router.post('/notifications/broadcast', notificationBroadcastController.createBroadcastNotificationController);
 router.get('/notifications/broadcast', notificationBroadcastController.getBroadcastNotificationsController);
+router.get('/notifications/broadcast/occasion-recipients', notificationBroadcastController.getOccasionRecipientsController);
 router.delete('/notifications/broadcast/:id', notificationBroadcastController.deleteBroadcastNotificationController);
 
 // ----- Customers -----
