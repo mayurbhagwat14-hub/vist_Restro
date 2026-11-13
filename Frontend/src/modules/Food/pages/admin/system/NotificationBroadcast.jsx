@@ -1,56 +1,53 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  BellRing,
-  Cake,
+  Bell,
   Calendar,
+  Check,
   CheckCheck,
-  Gift,
-  Heart,
   Loader2,
+  Phone,
   RefreshCw,
   Search,
   Send,
-  Smartphone,
-  Sparkles,
   Trash2,
   User,
 } from "lucide-react";
 import { adminAPI } from "@food/api";
 
 const TARGET_OPTIONS = [
-  { value: "ALL", label: "All" },
-  { value: "USER", label: "Users" },
-  { value: "CUSTOM", label: "Particular Persons (By Phone)" },
+  { value: "ALL", label: "All Users & Partners" },
+  { value: "USER", label: "All Customers" },
+  { value: "CUSTOM", label: "Specific Customers (By Phone)" },
 ];
 
 const BIRTHDAY_TEMPLATES = [
   {
-    label: "🎉 20% Birthday Discount",
-    title: "🎉 Happy Birthday from VIST!",
-    message: "Wishing you a joyful Happy Birthday! 🎂 Treat yourself to your favorite food today with 20% OFF using code BDAY20!",
+    label: "20% Birthday Discount",
+    title: "Happy Birthday from VIST Restaurant",
+    message: "Wishing you a very Happy Birthday! Enjoy 20% off on your order today with coupon code BDAY20. Treat yourself to a memorable dining experience.",
   },
   {
-    label: "🎂 Special Celebration Treat",
-    title: "🎂 A Special Birthday Treat For You!",
-    message: "Happy Birthday! May your day be filled with happiness, sweet memories, and delicious food. Enjoy a special dining treat on us!",
+    label: "Celebration Dining Offer",
+    title: "A Special Birthday Treat For You",
+    message: "Warm birthday greetings from team VIST! Celebrate your special day with exclusive savings on your favorite delicacies.",
   },
   {
-    label: "🎁 Free Dessert / Starter",
-    title: "🎁 Birthday Sweet Surprise!",
-    message: "It's your special day! Order today and enjoy a complimentary dessert or surprise starter with your feast. Celebrate with VIST!",
+    label: "Complimentary Dessert Offer",
+    title: "Your Birthday Celebration Surprise",
+    message: "Happy Birthday! Make your celebration extraordinary with a special complimentary dessert on your order today.",
   },
 ];
 
 const ANNIVERSARY_TEMPLATES = [
   {
-    label: "💍 Romantic Dinner Milestone",
-    title: "💍 Happy Anniversary from VIST!",
-    message: "Wishing you a very Happy Anniversary! 🥂 Celebrate your love and togetherness with a delicious dinner feast today.",
+    label: "Anniversary Special Dining",
+    title: "Happy Anniversary from VIST Restaurant",
+    message: "Warmest anniversary wishes from all of us! Celebrate your milestone moment with a delightful dining experience today.",
   },
   {
-    label: "❤️ Special Milestone Treat",
-    title: "❤️ Happy Anniversary! Celebrate Love",
-    message: "Cheers to another year of love! Make your anniversary celebration unforgettable with special discounts on your favorite dishes today.",
+    label: "Celebration Discount Offer",
+    title: "Celebrating Your Special Milestone",
+    message: "Happy Anniversary! Cheers to togetherness. Enjoy exclusive festive savings on your meal today.",
   },
 ];
 
@@ -161,7 +158,7 @@ export default function NotificationBroadcast() {
         ownerId: String(item?._id || item?.id || ""),
         phone: String(item?.phone || "").trim(),
         name: String(item?.name || "Customer").trim(),
-        label: String(item?.phone || item?.name || "User").trim(),
+        label: String(item?.phone || item?.name || "Customer").trim(),
         subLabel: [item?.name, item?.email].filter(Boolean).join(" • "),
       }));
       setAllStandardRecipients(customers);
@@ -191,7 +188,6 @@ export default function NotificationBroadcast() {
       });
 
       setOccasionUsers(sortedUsers);
-      // Select all by default
       setSelectedOccasionUserIds(sortedUsers.map((u) => u._id));
     } catch {
       setOccasionUsers([]);
@@ -217,7 +213,6 @@ export default function NotificationBroadcast() {
     }
   }, [activeTab, standardForm.targetType, allStandardRecipients.length]);
 
-  // Template switch helper
   const handleSelectTemplate = (template) => {
     setOccasionForm({
       title: template.title,
@@ -225,7 +220,6 @@ export default function NotificationBroadcast() {
     });
   };
 
-  // Switch occasion type
   const handleOccasionTypeChange = (type) => {
     setOccasionType(type);
     const templates = type === "BIRTHDAY" ? BIRTHDAY_TEMPLATES : ANNIVERSARY_TEMPLATES;
@@ -247,7 +241,6 @@ export default function NotificationBroadcast() {
     );
   }, [occasionUsers, occasionSearch]);
 
-  // Occasion user selection helpers
   const handleToggleOccasionUser = (id) => {
     setSelectedOccasionUserIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -302,7 +295,7 @@ export default function NotificationBroadcast() {
       return;
     }
     if (selectedOccasionUserIds.length === 0) {
-      setFeedbackBanner({ type: "error", message: "Please select at least one recipient phone number to send greetings." });
+      setFeedbackBanner({ type: "error", message: "Please select at least one recipient." });
       return;
     }
 
@@ -326,10 +319,9 @@ export default function NotificationBroadcast() {
       });
 
       const pushCount = selectedUsers.filter((u) => u.hasFcm).length;
-      const phoneList = selectedUsers.map((u) => u.phone).filter(Boolean).join(", ");
       setFeedbackBanner({
         type: "success",
-        message: `Successfully dispatched ${occasionType === "BIRTHDAY" ? "Birthday" : "Anniversary"} greeting to ${selectedOccasionUserIds.length} recipient(s) (${pushCount} received instant FCM push popup on phone)! Targets: ${phoneList}`,
+        message: `Notification dispatched to ${selectedOccasionUserIds.length} recipient(s) (${pushCount} received mobile push popup).`,
       });
 
       window.dispatchEvent(new Event("adminBroadcastUpdated"));
@@ -337,7 +329,7 @@ export default function NotificationBroadcast() {
     } catch (err) {
       setFeedbackBanner({
         type: "error",
-        message: err?.response?.data?.message || err.message || "Failed to send greeting broadcast.",
+        message: err?.response?.data?.message || err.message || "Failed to send notification.",
       });
     } finally {
       setSubmitting(false);
@@ -382,7 +374,7 @@ export default function NotificationBroadcast() {
       setStandardSearch("");
       setFeedbackBanner({
         type: "success",
-        message: "Broadcast notification sent successfully!",
+        message: "Broadcast notification dispatched successfully.",
       });
       window.dispatchEvent(new Event("adminBroadcastUpdated"));
       await loadHistory();
@@ -417,16 +409,16 @@ export default function NotificationBroadcast() {
       {/* Feedback Banner */}
       {feedbackBanner && (
         <div
-          className={`p-4 rounded-2xl flex items-center justify-between text-sm font-semibold ${
+          className={`px-4 py-3 rounded-xl flex items-center justify-between text-sm font-medium ${
             feedbackBanner.type === "success"
-              ? "bg-[#FAF5ED] text-[#5C381E] border-2 border-[#5C381E]/30"
-              : "bg-red-50 text-red-800 border-2 border-red-200"
+              ? "bg-[#FAF5ED] text-[#5C381E] border border-[#5C381E]/30"
+              : "bg-red-50 text-red-800 border border-red-200"
           }`}
         >
           <span>{feedbackBanner.message}</span>
           <button
             onClick={() => setFeedbackBanner(null)}
-            className="text-xs font-bold underline ml-4 hover:opacity-75"
+            className="text-xs font-semibold underline ml-4 hover:opacity-80"
           >
             Dismiss
           </button>
@@ -434,44 +426,42 @@ export default function NotificationBroadcast() {
       )}
 
       {/* Main Header & Mode Switcher */}
-      <div className="bg-white rounded-3xl border border-neutral-200 shadow-sm p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#5C381E]/10 text-[#5C381E] flex items-center justify-center">
-              <BellRing className="w-6 h-6" />
+      <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#FAF5ED] text-[#5C381E] flex items-center justify-center border border-[#5C381E]/20">
+              <Bell className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-neutral-900">Notification Broadcast & Greetings</h1>
-              <p className="text-sm text-neutral-500 mt-1">
-                Send push notifications & in-app alerts identified by user phone numbers.
+              <h1 className="text-xl font-bold text-neutral-900 tracking-tight">Notification Broadcast</h1>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Send push notifications and greetings to customers by phone number.
               </p>
             </div>
           </div>
 
-          {/* Navigation Tabs (VIST Brand Theme) */}
-          <div className="inline-flex rounded-2xl bg-[#FAF5ED] p-1.5 border border-[#5C381E]/20 self-start md:self-auto">
+          {/* Clean Segmented Control Tabs */}
+          <div className="inline-flex rounded-xl bg-neutral-100 p-1 border border-neutral-200/80 self-start sm:self-auto text-xs font-medium">
             <button
               type="button"
               onClick={() => setActiveTab("OCCASION")}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              className={`px-4 py-2 rounded-lg transition-all ${
                 activeTab === "OCCASION"
-                  ? "bg-[#5C381E] text-white shadow-sm"
-                  : "text-[#5C381E] hover:bg-[#5C381E]/10"
+                  ? "bg-white text-[#5C381E] font-semibold shadow-xs"
+                  : "text-neutral-600 hover:text-neutral-900"
               }`}
             >
-              <Cake className="w-4 h-4" />
               Birthday & Anniversary
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("STANDARD")}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              className={`px-4 py-2 rounded-lg transition-all ${
                 activeTab === "STANDARD"
-                  ? "bg-[#5C381E] text-white shadow-sm"
+                  ? "bg-white text-[#5C381E] font-semibold shadow-xs"
                   : "text-neutral-600 hover:text-neutral-900"
               }`}
             >
-              <Send className="w-4 h-4" />
               General Broadcast
             </button>
           </div>
@@ -480,57 +470,55 @@ export default function NotificationBroadcast() {
         {/* TAB 1: OCCASION BROADCAST (BIRTHDAY & ANNIVERSARY) */}
         {activeTab === "OCCASION" && (
           <div className="space-y-6">
-            {/* Occasion Controls Bar */}
-            <div className="bg-[#FAF5ED] border border-[#5C381E]/20 rounded-2xl p-5 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Occasion Filter Toolbar */}
+            <div className="bg-neutral-50/70 border border-neutral-200 rounded-xl p-4 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 {/* Occasion Type Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#5C381E]">Occasion:</span>
-                  <div className="inline-flex rounded-xl bg-white border border-[#5C381E]/30 p-1">
+                  <span className="text-xs font-semibold text-neutral-600">Occasion:</span>
+                  <div className="inline-flex rounded-lg bg-white border border-neutral-200 p-0.5 text-xs">
                     <button
                       type="button"
                       onClick={() => handleOccasionTypeChange("BIRTHDAY")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                      className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
                         occasionType === "BIRTHDAY"
-                          ? "bg-[#5C381E] text-white shadow-sm"
-                          : "text-[#5C381E] hover:bg-[#FAF5ED]"
+                          ? "bg-[#5C381E] text-white"
+                          : "text-neutral-700 hover:bg-neutral-100"
                       }`}
                     >
-                      <Cake className="w-3.5 h-3.5" />
-                      🎂 Birthday
+                      Birthday
                     </button>
                     <button
                       type="button"
                       onClick={() => handleOccasionTypeChange("ANNIVERSARY")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                      className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
                         occasionType === "ANNIVERSARY"
-                          ? "bg-[#5C381E] text-white shadow-sm"
-                          : "text-[#5C381E] hover:bg-[#FAF5ED]"
+                          ? "bg-[#5C381E] text-white"
+                          : "text-neutral-700 hover:bg-neutral-100"
                       }`}
                     >
-                      <Heart className="w-3.5 h-3.5" />
-                      💍 Anniversary
+                      Anniversary
                     </button>
                   </div>
                 </div>
 
                 {/* Target Date Picker */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#5C381E]">Date:</span>
-                  <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-neutral-600">Date:</span>
+                  <div className="flex items-center gap-1.5">
                     <input
                       type="date"
                       value={occasionDate}
                       onChange={(e) => setOccasionDate(e.target.value)}
-                      className="rounded-xl border border-[#5C381E]/30 bg-white px-3 py-1.5 text-xs font-bold text-neutral-800 outline-none focus:ring-2 focus:ring-[#5C381E]/30"
+                      className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1 text-xs font-medium text-neutral-800 outline-none focus:border-[#5C381E]"
                     />
                     <button
                       type="button"
                       onClick={() => setOccasionDate(getTodayString())}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                         occasionDate === getTodayString()
                           ? "bg-[#5C381E] text-white border-[#5C381E]"
-                          : "bg-white text-[#5C381E] border-[#5C381E]/30 hover:bg-[#FAF5ED]"
+                          : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-100"
                       }`}
                     >
                       Today
@@ -538,10 +526,10 @@ export default function NotificationBroadcast() {
                     <button
                       type="button"
                       onClick={() => setOccasionDate(getTomorrowString())}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                         occasionDate === getTomorrowString()
                           ? "bg-[#5C381E] text-white border-[#5C381E]"
-                          : "bg-white text-[#5C381E] border-[#5C381E]/30 hover:bg-[#FAF5ED]"
+                          : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-100"
                       }`}
                     >
                       Tomorrow
@@ -550,7 +538,7 @@ export default function NotificationBroadcast() {
                       type="button"
                       onClick={loadOccasionRecipients}
                       title="Refresh recipient list"
-                      className="p-1.5 rounded-xl border border-[#5C381E]/30 bg-white text-[#5C381E] hover:bg-[#FAF5ED]"
+                      className="p-1 rounded-lg border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 ${occasionLoading ? "animate-spin text-[#5C381E]" : ""}`} />
                     </button>
@@ -558,56 +546,41 @@ export default function NotificationBroadcast() {
                 </div>
               </div>
 
-              {/* Stat Indicators */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-[#5C381E]/15">
-                <div className="bg-white rounded-xl p-3 border border-[#5C381E]/20 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-neutral-500 font-medium">Matching Phone Numbers</div>
-                    <div className="text-lg font-bold text-neutral-900">{totalOccasionCount} users</div>
-                  </div>
-                  <Gift className="w-5 h-5 text-[#5C381E]" />
+              {/* Status Counters */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-neutral-200/60 text-xs">
+                <div className="bg-white rounded-lg p-2.5 border border-neutral-200 flex items-center justify-between">
+                  <span className="text-neutral-500">Matching Customers</span>
+                  <span className="font-bold text-neutral-900">{totalOccasionCount}</span>
                 </div>
-                <div className="bg-white rounded-xl p-3 border border-emerald-200 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-emerald-700 font-medium">Mobile Push Ready</div>
-                    <div className="text-lg font-bold text-emerald-600">{fcmActiveCount} devices</div>
-                  </div>
-                  <Smartphone className="w-5 h-5 text-emerald-600" />
+                <div className="bg-white rounded-lg p-2.5 border border-neutral-200 flex items-center justify-between">
+                  <span className="text-emerald-700 font-medium">Push Ready</span>
+                  <span className="font-bold text-emerald-700">{fcmActiveCount}</span>
                 </div>
-                <div className="bg-white rounded-xl p-3 border border-[#5C381E]/20 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-neutral-500 font-medium">Selected to Send</div>
-                    <div className="text-lg font-bold text-[#5C381E]">
-                      {selectedOccasionUserIds.length} users ({selectedFcmCount} push)
-                    </div>
-                  </div>
-                  <CheckCheck className="w-5 h-5 text-[#5C381E]" />
+                <div className="bg-white rounded-lg p-2.5 border border-neutral-200 flex items-center justify-between">
+                  <span className="text-[#5C381E] font-medium">Selected to Send</span>
+                  <span className="font-bold text-[#5C381E]">{selectedOccasionUserIds.length}</span>
                 </div>
               </div>
             </div>
 
             {/* Recipient Selection Section - Primary Identifier: Phone Number */}
-            <div className="border border-neutral-200 rounded-2xl p-4 bg-neutral-50/60 space-y-3">
+            <div className="border border-neutral-200 rounded-xl p-4 bg-white space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-                    <span>Recipients Identified by Mobile Number</span>
-                    <span className="text-xs font-normal text-neutral-500">
-                      ({selectedOccasionUserIds.length} of {totalOccasionCount} selected)
-                    </span>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-700">
+                    Recipients ({selectedOccasionUserIds.length} selected)
                   </h3>
                   <p className="text-[11px] text-neutral-500 mt-0.5">
-                    Green badge users will get instant mobile popup. In-App users will receive notification in-app.
+                    Users are identified by mobile number. Push notifications arrive on devices marked "Push Ready".
                   </p>
                 </div>
 
-                {/* Selection Action Buttons */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <button
                     type="button"
                     onClick={handleSelectAllOccasion}
                     disabled={totalOccasionCount === 0}
-                    className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-100 disabled:opacity-50"
+                    className="px-2.5 py-1 text-xs font-medium rounded-md bg-neutral-100 text-neutral-700 hover:bg-neutral-200 disabled:opacity-50"
                   >
                     Select All
                   </button>
@@ -615,49 +588,43 @@ export default function NotificationBroadcast() {
                     type="button"
                     onClick={handleSelectOnlyFcmOccasion}
                     disabled={fcmActiveCount === 0}
-                    className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                    className="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50"
                   >
-                    Select Push Ready Only ({fcmActiveCount})
+                    Push Ready ({fcmActiveCount})
                   </button>
                   <button
                     type="button"
                     onClick={handleDeselectAllOccasion}
                     disabled={selectedOccasionUserIds.length === 0}
-                    className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white border border-neutral-300 text-neutral-500 hover:bg-neutral-100 disabled:opacity-50"
+                    className="px-2.5 py-1 text-xs font-medium rounded-md bg-neutral-100 text-neutral-600 hover:bg-neutral-200 disabled:opacity-50"
                   >
-                    Clear All
+                    Clear
                   </button>
                 </div>
               </div>
 
-              {/* Search bar inside recipient selector - Search by Phone Number */}
+              {/* Search by Phone Number */}
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-2.5 text-neutral-400" />
                 <input
                   type="text"
-                  placeholder="Search by phone number (e.g. 8766556836) or name..."
+                  placeholder="Filter by phone number or name..."
                   value={occasionSearch}
                   onChange={(e) => setOccasionSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-neutral-200 bg-white outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E]"
+                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-neutral-200 bg-neutral-50/50 outline-none focus:border-[#5C381E] focus:bg-white"
                 />
               </div>
 
-              {/* Recipient User Checklist with Phone Number as Primary Identifier */}
-              <div className="max-h-72 overflow-y-auto rounded-xl border border-neutral-200 bg-white divide-y divide-neutral-100">
+              {/* Recipient User Checklist */}
+              <div className="max-h-64 overflow-y-auto rounded-lg border border-neutral-200 divide-y divide-neutral-100">
                 {occasionLoading ? (
-                  <div className="p-8 text-center text-xs text-neutral-500 flex items-center justify-center gap-2">
+                  <div className="p-6 text-center text-xs text-neutral-500 flex items-center justify-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-[#5C381E]" />
-                    Finding celebrants for {occasionDate}...
+                    Searching recipients for {occasionDate}...
                   </div>
                 ) : filteredOccasionUsers.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <Cake className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
-                    <p className="text-xs font-bold text-neutral-600">
-                      No users match the search or have their {occasionType === "BIRTHDAY" ? "birthday" : "anniversary"} on {occasionDate}.
-                    </p>
-                    <p className="text-[11px] text-neutral-400 mt-1">
-                      Click "Today" or choose a date to see celebrants.
-                    </p>
+                  <div className="p-6 text-center text-xs text-neutral-500">
+                    No customers found for {occasionDate}.
                   </div>
                 ) : (
                   filteredOccasionUsers.map((user) => {
@@ -665,8 +632,8 @@ export default function NotificationBroadcast() {
                     return (
                       <label
                         key={user._id}
-                        className={`flex items-center justify-between gap-3 px-4 py-3 cursor-pointer transition-colors ${
-                          isChecked ? "bg-[#FAF5ED]/60 hover:bg-[#FAF5ED]" : "hover:bg-neutral-50"
+                        className={`flex items-center justify-between gap-3 px-3.5 py-2.5 cursor-pointer transition-colors ${
+                          isChecked ? "bg-[#FAF5ED]/50 hover:bg-[#FAF5ED]" : "hover:bg-neutral-50"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
@@ -679,38 +646,34 @@ export default function NotificationBroadcast() {
                           <div className="min-w-0">
                             {/* Primary Identifier: Phone Number */}
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-neutral-900 tracking-wide font-mono flex items-center gap-1.5">
-                                <Smartphone className="w-3.5 h-3.5 text-[#5C381E]" />
+                              <span className="text-sm font-semibold text-neutral-900 tracking-wide font-mono">
                                 {user.phone ? user.phone : "No Phone"}
                               </span>
                               {user.date && (
-                                <span className="text-[11px] font-semibold text-[#5C381E] bg-[#FAF5ED] border border-[#5C381E]/30 px-2 py-0.5 rounded-md">
+                                <span className="text-[11px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
                                   {user.date}
                                 </span>
                               )}
                             </div>
 
-                            {/* Secondary Identifier: Name & Email */}
-                            <div className="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
-                              <User className="w-3 h-3 text-neutral-400" />
-                              <span>{user.name ? user.name : "Customer"}</span>
-                              {user.email && (
-                                <span className="text-neutral-400 truncate">• {user.email}</span>
-                              )}
+                            {/* Secondary Identifier: Name */}
+                            <div className="text-xs text-neutral-500 mt-0.5">
+                              {user.name ? user.name : "Customer"}
+                              {user.email ? ` • ${user.email}` : ""}
                             </div>
                           </div>
                         </div>
 
-                        {/* FCM Status Badge */}
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        {/* Status Badge */}
+                        <div className="shrink-0">
                           {user.hasFcm ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                               Push Ready ({user.fcmCount})
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-500 border border-neutral-200" title="User has not installed app or granted notification permission">
-                              In-App Only (No Push)
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
+                              In-App Only
                             </span>
                           )}
                         </div>
@@ -721,21 +684,18 @@ export default function NotificationBroadcast() {
               </div>
             </div>
 
-            {/* Quick Template Selection - VIST Theme */}
-            <div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Sparkles className="w-4 h-4 text-[#C5A059]" />
-                <span className="text-xs font-bold uppercase tracking-wider text-[#5C381E]">
-                  Quick {occasionType === "BIRTHDAY" ? "Birthday" : "Anniversary"} Templates
-                </span>
-              </div>
+            {/* Clean Templates (No Emojis) */}
+            <div className="space-y-2">
+              <span className="text-xs font-semibold text-neutral-600 uppercase tracking-wider block">
+                Quick Preset Templates
+              </span>
               <div className="flex flex-wrap gap-2">
                 {(occasionType === "BIRTHDAY" ? BIRTHDAY_TEMPLATES : ANNIVERSARY_TEMPLATES).map((tmpl, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleSelectTemplate(tmpl)}
-                    className="text-xs px-3.5 py-2 rounded-xl border border-[#5C381E]/30 bg-[#FAF5ED] hover:bg-[#5C381E] hover:text-white text-[#5C381E] font-bold transition-all shadow-xs"
+                    className="text-xs px-3 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 hover:bg-[#5C381E] hover:text-white text-neutral-700 font-medium transition-colors"
                   >
                     {tmpl.label}
                   </button>
@@ -743,56 +703,51 @@ export default function NotificationBroadcast() {
               </div>
             </div>
 
-            {/* Occasion Message Form - VIST Brand Theme */}
+            {/* Message Form */}
             <form onSubmit={handleOccasionSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-neutral-800 mb-1">Greeting Title</label>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">Notification Title</label>
                 <input
                   type="text"
                   value={occasionForm.title}
                   onChange={(e) => setOccasionForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter greeting title (e.g. Happy Birthday from VIST!)"
-                  className="w-full rounded-2xl border border-neutral-300 px-4 py-2.5 text-sm outline-none focus:border-[#5C381E] focus:ring-2 focus:ring-[#5C381E]/20"
+                  placeholder="Enter greeting title"
+                  className="w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-sm outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-neutral-800 mb-1">Greeting Message / Offer</label>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">Notification Message</label>
                 <textarea
                   value={occasionForm.message}
                   onChange={(e) => setOccasionForm((prev) => ({ ...prev, message: e.target.value }))}
-                  placeholder="Enter celebration message, coupon code, or warm wishes..."
+                  placeholder="Enter message details or offer terms..."
                   rows={4}
-                  className="w-full rounded-2xl border border-neutral-300 px-4 py-2.5 text-sm outline-none focus:border-[#5C381E] focus:ring-2 focus:ring-[#5C381E]/20 resize-y"
+                  className="w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-sm outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] resize-y"
                 />
               </div>
 
-              {/* Informational Summary Before Send */}
-              {selectedNoFcmCount > 0 && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium">
-                  ⚠️ Note: {selectedNoFcmCount} selected user(s) currently have no registered device token and will only receive an in-app alert. {selectedFcmCount} user(s) with active tokens will receive an instant mobile push notification popup.
-                </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                <div className="text-xs text-neutral-600">
-                  Targeting <strong className="text-neutral-900">{selectedOccasionUserIds.length}</strong> recipient(s) by mobile number{" "}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="text-xs text-neutral-500">
+                  Targeting <strong>{selectedOccasionUserIds.length}</strong> recipient(s) by mobile number
                   {selectedFcmCount > 0 && (
-                    <span className="text-emerald-700 font-semibold">({selectedFcmCount} will receive mobile push popup)</span>
+                    <span className="text-emerald-700 font-medium ml-1">
+                      ({selectedFcmCount} will receive device push popup)
+                    </span>
                   )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={submitting || selectedOccasionUserIds.length === 0}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#5C381E] hover:bg-[#482A14] px-6 py-3 text-sm font-bold text-white disabled:opacity-50 transition-all shadow-md cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#5C381E] hover:bg-[#482A14] px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50 transition-colors shadow-xs"
                 >
                   {submitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <Send className="w-4 h-4 text-[#C5A059]" />
+                    <Send className="w-4 h-4" />
                   )}
-                  Send {occasionType === "BIRTHDAY" ? "Birthday" : "Anniversary"} Wishes ({selectedOccasionUserIds.length})
+                  Send {occasionType === "BIRTHDAY" ? "Birthday" : "Anniversary"} Notification ({selectedOccasionUserIds.length})
                 </button>
               </div>
             </form>
@@ -801,28 +756,28 @@ export default function NotificationBroadcast() {
 
         {/* TAB 2: STANDARD GENERAL BROADCAST */}
         {activeTab === "STANDARD" && (
-          <form onSubmit={handleStandardSubmit} className="space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <form onSubmit={handleStandardSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label className="block">
-                <span className="text-sm font-semibold text-neutral-700">Title</span>
+                <span className="text-xs font-medium text-neutral-700">Title</span>
                 <input
                   value={standardForm.title}
                   onChange={(event) =>
                     setStandardForm((prev) => ({ ...prev, title: event.target.value }))
                   }
-                  placeholder="Enter notification title"
-                  className="mt-2 w-full rounded-2xl border border-neutral-300 px-4 py-3 text-sm outline-none focus:border-[#5C381E] focus:ring-2 focus:ring-[#5C381E]/20"
+                  placeholder="Enter broadcast title"
+                  className="mt-1 w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-sm outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E]"
                 />
               </label>
 
               <label className="block">
-                <span className="text-sm font-semibold text-neutral-700">Target Type</span>
+                <span className="text-xs font-medium text-neutral-700">Target Audience</span>
                 <select
                   value={standardForm.targetType}
                   onChange={(event) =>
                     setStandardForm((prev) => ({ ...prev, targetType: event.target.value }))
                   }
-                  className="mt-2 w-full rounded-2xl border border-neutral-300 px-4 py-3 text-sm outline-none focus:border-[#5C381E] focus:ring-2 focus:ring-[#5C381E]/20"
+                  className="mt-1 w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-sm outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E]"
                 >
                   {TARGET_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -834,42 +789,42 @@ export default function NotificationBroadcast() {
             </div>
 
             <label className="block">
-              <span className="text-sm font-semibold text-neutral-700">Message</span>
+              <span className="text-xs font-medium text-neutral-700">Message</span>
               <textarea
                 value={standardForm.message}
                 onChange={(event) =>
                   setStandardForm((prev) => ({ ...prev, message: event.target.value }))
                 }
-                placeholder="Enter notification message"
-                rows={5}
-                className="mt-2 w-full rounded-2xl border border-neutral-300 px-4 py-3 text-sm outline-none focus:border-[#5C381E] focus:ring-2 focus:ring-[#5C381E]/20 resize-y"
+                placeholder="Enter notification message..."
+                rows={4}
+                className="mt-1 w-full rounded-xl border border-neutral-300 px-3.5 py-2 text-sm outline-none focus:border-[#5C381E] focus:ring-1 focus:ring-[#5C381E] resize-y"
               />
             </label>
 
             {standardForm.targetType === "CUSTOM" && (
-              <div className="rounded-3xl border border-neutral-200 bg-neutral-50 p-4 space-y-4">
-                <div className="flex items-center gap-3 rounded-2xl border border-neutral-300 bg-white px-4 py-3">
+              <div className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-3.5 space-y-3">
+                <div className="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-1.5">
                   <Search className="w-4 h-4 text-neutral-400" />
                   <input
                     value={standardSearch}
                     onChange={(event) => setStandardSearch(event.target.value)}
-                    placeholder="Search users by phone number or name..."
-                    className="w-full text-sm bg-transparent outline-none"
+                    placeholder="Search by phone number or name..."
+                    className="w-full text-xs bg-transparent outline-none"
                   />
                 </div>
 
-                <div className="text-xs font-semibold text-neutral-600">
+                <div className="text-xs font-medium text-neutral-600">
                   Selected recipients: {selectedStandardRecipients.length}
                 </div>
 
-                <div className="max-h-72 overflow-y-auto rounded-2xl border border-neutral-200 bg-white divide-y divide-neutral-100">
+                <div className="max-h-60 overflow-y-auto rounded-lg border border-neutral-200 bg-white divide-y divide-neutral-100">
                   {standardRecipientLoading ? (
-                    <div className="p-6 text-sm text-neutral-500 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-[#5C381E]" />
+                    <div className="p-4 text-xs text-neutral-500 flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#5C381E]" />
                       Loading recipients...
                     </div>
                   ) : filteredStandardRecipients.length === 0 ? (
-                    <div className="p-6 text-sm text-neutral-500">No recipients found.</div>
+                    <div className="p-4 text-xs text-neutral-500">No customers found.</div>
                   ) : (
                     filteredStandardRecipients.map((recipient) => {
                       const key = `${recipient.ownerType}:${recipient.ownerId}`;
@@ -877,20 +832,20 @@ export default function NotificationBroadcast() {
                       return (
                         <label
                           key={key}
-                          className="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-neutral-50"
+                          className="flex items-start gap-2.5 px-3 py-2 cursor-pointer hover:bg-neutral-50 text-xs"
                         >
                           <input
                             type="checkbox"
                             checked={checked}
                             onChange={() => toggleStandardRecipient(recipient)}
-                            className="mt-1 h-4 w-4 rounded border-neutral-300 text-[#5C381E] focus:ring-[#5C381E]"
+                            className="mt-0.5 h-3.5 w-3.5 rounded border-neutral-300 text-[#5C381E] focus:ring-[#5C381E]"
                           />
                           <div className="min-w-0">
-                            <div className="text-sm font-bold text-neutral-900 font-mono">
+                            <div className="font-semibold text-neutral-900 font-mono">
                               {recipient.phone ? recipient.phone : recipient.label}
                             </div>
-                            <div className="text-xs text-neutral-500">
-                              {recipient.name ? `Name: ${recipient.name}` : ""}
+                            <div className="text-[11px] text-neutral-500">
+                              {recipient.name ? recipient.name : ""}
                               {recipient.subLabel ? ` • ${recipient.subLabel}` : ""}
                             </div>
                           </div>
@@ -902,16 +857,16 @@ export default function NotificationBroadcast() {
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-1">
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#5C381E] hover:bg-[#482A14] px-6 py-3 text-sm font-bold text-white disabled:opacity-60 transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#5C381E] hover:bg-[#482A14] px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60 transition-colors shadow-xs"
               >
                 {submitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Send className="w-4 h-4 text-[#C5A059]" />
+                  <Send className="w-4 h-4" />
                 )}
                 Send Broadcast
               </button>
@@ -921,40 +876,40 @@ export default function NotificationBroadcast() {
       </div>
 
       {/* Broadcast History Table */}
-      <div className="bg-white rounded-3xl border border-neutral-200 shadow-sm p-6">
+      <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs p-6">
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
-            <h2 className="text-xl font-bold text-neutral-900">Broadcast & Greetings History</h2>
-            <p className="text-sm text-neutral-500">Latest sent broadcasts, occasion greetings, and recipient metrics.</p>
+            <h2 className="text-base font-bold text-neutral-900">Broadcast History</h2>
+            <p className="text-xs text-neutral-500">Previously sent broadcasts and recipient counts.</p>
           </div>
           <button
             type="button"
             onClick={loadHistory}
-            className="p-2 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-600"
+            className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-neutral-600 transition-colors"
             title="Refresh history"
           >
-            <RefreshCw className={`w-4 h-4 ${historyLoading ? "animate-spin text-[#5C381E]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${historyLoading ? "animate-spin text-[#5C381E]" : ""}`} />
           </button>
         </div>
 
         {historyLoading ? (
-          <div className="py-10 text-sm text-neutral-500 flex items-center justify-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin text-[#5C381E]" />
+          <div className="py-8 text-xs text-neutral-500 flex items-center justify-center gap-2">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#5C381E]" />
             Loading history...
           </div>
         ) : history.length === 0 ? (
-          <div className="py-10 text-center text-sm text-neutral-500">No broadcast notifications found.</div>
+          <div className="py-8 text-center text-xs text-neutral-500">No broadcast notifications found.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+            <table className="min-w-full text-xs">
               <thead>
                 <tr className="text-left text-neutral-500 border-b border-neutral-200">
-                  <th className="py-3 pr-4 font-semibold">Title</th>
-                  <th className="py-3 pr-4 font-semibold">Message</th>
-                  <th className="py-3 pr-4 font-semibold">Category / Target</th>
-                  <th className="py-3 pr-4 font-semibold">Recipients</th>
-                  <th className="py-3 pr-4 font-semibold">Date</th>
-                  <th className="py-3 text-right font-semibold">Action</th>
+                  <th className="py-2.5 pr-4 font-semibold">Title</th>
+                  <th className="py-2.5 pr-4 font-semibold">Message</th>
+                  <th className="py-2.5 pr-4 font-semibold">Category</th>
+                  <th className="py-2.5 pr-4 font-semibold">Recipients</th>
+                  <th className="py-2.5 pr-4 font-semibold">Date</th>
+                  <th className="py-2.5 text-right font-semibold">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -963,44 +918,40 @@ export default function NotificationBroadcast() {
                   const isAnniv = item?.targetType === "ANNIVERSARY";
                   return (
                     <tr key={item?._id} className="border-b border-neutral-100 align-top hover:bg-neutral-50/60">
-                      <td className="py-4 pr-4 font-semibold text-neutral-900 max-w-xs">
-                        <div className="flex items-center gap-1.5">
-                          {isBday && <Cake className="w-4 h-4 text-[#C5A059] shrink-0" />}
-                          {isAnniv && <Heart className="w-4 h-4 text-rose-500 shrink-0" />}
-                          <span className="truncate">{item?.title || "Notification"}</span>
-                        </div>
+                      <td className="py-3 pr-4 font-semibold text-neutral-900 max-w-xs">
+                        <span className="truncate block">{item?.title || "Notification"}</span>
                       </td>
-                      <td className="py-4 pr-4 text-neutral-600 max-w-sm">
+                      <td className="py-3 pr-4 text-neutral-600 max-w-sm">
                         <p className="line-clamp-2">{item?.message || "-"}</p>
                       </td>
-                      <td className="py-4 pr-4 text-neutral-700 whitespace-nowrap">
+                      <td className="py-3 pr-4 text-neutral-700 whitespace-nowrap">
                         {isBday ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FAF5ED] text-[#5C381E] border border-[#5C381E]/30">
-                            🎂 Birthday Greeting
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#FAF5ED] text-[#5C381E] border border-[#5C381E]/30">
+                            Birthday
                           </span>
                         ) : isAnniv ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200">
-                            💍 Anniversary Greeting
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200">
+                            Anniversary
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700 border border-neutral-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-neutral-100 text-neutral-700 border border-neutral-200">
                             {item?.targetLabel || item?.targetType}
                           </span>
                         )}
                       </td>
-                      <td className="py-4 pr-4 text-neutral-700 font-bold whitespace-nowrap">
-                        {item?.targetCount || item?.targets?.length || 0} users
+                      <td className="py-3 pr-4 text-neutral-800 font-medium whitespace-nowrap">
+                        {item?.targetCount || item?.targets?.length || 0}
                       </td>
-                      <td className="py-4 pr-4 text-neutral-500 whitespace-nowrap text-xs">
+                      <td className="py-3 pr-4 text-neutral-500 whitespace-nowrap">
                         {toDateLabel(item?.createdAt)}
                       </td>
-                      <td className="py-4 text-right">
+                      <td className="py-3 text-right">
                         <button
                           type="button"
                           onClick={() => handleDelete(item?._id)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+                          className="inline-flex items-center gap-1 rounded-md border border-red-200 px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3 h-3" />
                           Delete
                         </button>
                       </td>
