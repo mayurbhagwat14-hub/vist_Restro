@@ -504,10 +504,16 @@ export default function Profile() {
                     {userProfile.phone}
                   </p>
                 )}
-                {userProfile?.dateOfBirth && (
-                  <div className="flex items-center gap-1.5 text-xs text-[#7A5B3E] dark:text-[#E6C687] bg-[#F7F2EB] dark:bg-white/5 border border-[#EADBCE] dark:border-white/10 px-2.5 py-1 rounded-full w-fit mb-2">
+                {userProfile?.dateOfBirth && !isNaN(new Date(userProfile.dateOfBirth).getTime()) && (
+                  <div className="flex items-center gap-1.5 text-xs text-[#7A5B3E] dark:text-[#E6C687] bg-[#F7F2EB] dark:bg-white/5 border border-[#EADBCE] dark:border-white/10 px-2.5 py-1 rounded-full w-fit mb-1.5">
                     <Calendar className="w-3.5 h-3.5 shrink-0" />
                     <span>Born: {new Date(userProfile.dateOfBirth).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                  </div>
+                )}
+                {userProfile?.anniversary && !isNaN(new Date(userProfile.anniversary).getTime()) && (
+                  <div className="flex items-center gap-1.5 text-xs text-[#7A5B3E] dark:text-[#E6C687] bg-[#F7F2EB] dark:bg-white/5 border border-[#EADBCE] dark:border-white/10 px-2.5 py-1 rounded-full w-fit mb-2">
+                    <Calendar className="w-3.5 h-3.5 shrink-0" />
+                    <span>Anniversary: {new Date(userProfile.anniversary).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                   </div>
                 )}
                 {!hasValidEmail && !userProfile?.phone && (
