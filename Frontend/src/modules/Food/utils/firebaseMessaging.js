@@ -2,6 +2,8 @@ import { toast } from "sonner";
 import { userAPI, restaurantAPI, deliveryAPI, adminAPI } from "@food/api";
 import { initializeApp, getApp, getApps } from "firebase/app";
 import fallbackNotificationSound from "@food/assets/audio/alert.mp3";
+import { shouldShowNotificationAlert } from "@food/utils/notificationDedupe";
+import { dispatchNotificationInboxRefresh } from "@food/hooks/useNotificationInbox";
 
 const pushNotificationSoundPath = "/zomato_sms.mp3";
 
@@ -814,12 +816,29 @@ function showForegroundNotification(payload = {}) {
     const toastId = `fcm-${notificationKey}`;
     const displayMessage = textMessage ? `${title}: ${textMessage}` : title;
 
+    const isBroadcast =
+      payload?.data?.type === "admin_broadcast" ||
+      Boolean(payload?.data?.broadcastId);
+    const dedupeKey = payload?.data?.broadcastId
+      ? `broadcast_${payload.data.broadcastId}`
+      : notificationKey || `${title}:::${textMessage}`;
+
+    if (!shouldShowNotificationAlert(dedupeKey, textMessage)) {
+      pushDebugLog(PUSH_DEBUG_PREFIX, "Skipping duplicate foreground alert already handled", { title });
+      return;
+    }
+
     if (isNegative) {
       toast.info(displayMessage, { id: toastId });
     } else {
       toast.success(displayMessage, { id: toastId });
     }
-    saveLocalNotification(title, textMessage, isNegative ? "AlertCircle" : "Bell");
+
+    if (isBroadcast) {
+      dispatchNotificationInboxRefresh();
+    } else {
+      saveLocalNotification(title, textMessage, isNegative ? "AlertCircle" : "Bell");
+    }
     pushDebugLog(PUSH_DEBUG_PREFIX, "Foreground notification shown as toast", { title, body });
   }
 }

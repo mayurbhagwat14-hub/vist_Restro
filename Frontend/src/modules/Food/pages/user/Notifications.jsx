@@ -28,6 +28,7 @@ import { Badge } from "@food/components/ui/badge"
 import useNotificationInbox from "@food/hooks/useNotificationInbox"
 import { isModuleAuthenticated } from "@food/utils/auth"
 import { toast } from "sonner"
+import { cleanDuplicateLocalNotifications } from "@food/utils/notificationDedupe"
 
 // Default notifications shown if localStorage is empty
 const DEFAULT_NOTIFICATIONS = [
@@ -75,6 +76,8 @@ export default function Notifications() {
 
   const [notificationsList, setNotificationsList] = useState(() => {
     try {
+      const cleaned = cleanDuplicateLocalNotifications()
+      if (Array.isArray(cleaned) && cleaned.length > 0) return cleaned
       const saved = localStorage.getItem("food_user_notifications")
       return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS
     } catch {
@@ -102,17 +105,14 @@ export default function Notifications() {
     }
   }, [])
 
-  // Persistence: Save to localStorage whenever list updates & dispatch badge update
+  // Persistence: Save to localStorage whenever list updates
   useEffect(() => {
     try {
       localStorage.setItem("food_user_notifications", JSON.stringify(notificationsList))
     } catch (e) {
       // ignore storage errors
     }
-    const localUnread = notificationsList.filter(n => !n.read).length
-    const totalUnread = localUnread + (broadcastUnreadCount || 0)
-    window.dispatchEvent(new CustomEvent("notificationsUpdated", { detail: { count: totalUnread } }))
-  }, [notificationsList, broadcastUnreadCount])
+  }, [notificationsList])
 
   // Real-time listeners: Order updates, OTPs, custom notifications
   useEffect(() => {
@@ -164,13 +164,8 @@ export default function Notifications() {
     }
   }, [])
 
-  // Merge and sort all notifications
+  // Merge and deduplicate all notifications
   const mergedNotifications = useMemo(() => {
-    const localItems = (notificationsList || []).map((item) => ({
-      ...item,
-      source: item.source || "local",
-    }))
-
     const broadcastItems = (broadcastNotifications || []).map((item) => {
       const category = String(item.category || "").toLowerCase()
       const isOffer = category.includes("offer") || category.includes("deal") || category.includes("coupon")
@@ -192,6 +187,40 @@ export default function Notifications() {
         iconColor: isOffer ? "text-amber-600 dark:text-amber-400" : "text-blue-600 dark:text-blue-400",
       }
     })
+
+    // Index server broadcast items by title and message to prevent duplicates from localItems
+    const seenKeys = new Set(
+      broadcastItems.map((b) => `${String(b.title || "").trim().toLowerCase()}:::${String(b.message || "").trim().toLowerCase()}`)
+    )
+
+    const localItems = (notificationsList || [])
+      .filter((item) => {
+        const key = `${String(item.title || "").trim().toLowerCase()}:::${String(item.message || "").trim().toLowerCase()}`
+        if (!key || seenKeys.has(key)) {
+          return false
+        }
+        seenKeys.add(key)
+        return true
+      })
+      .map((item) => {
+        const ts = item.timestamp ? new Date(item.timestamp).getTime() : Date.now()
+        return {
+          ...item,
+          source: item.source || "local",
+          time:
+            item.time ||
+            (item.createdAt || item.timestamp
+              ? new Date(item.createdAt || item.timestamp).toLocaleString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+              : "Recently"),
+          timestamp: ts,
+        }
+      })
 
     return [...broadcastItems, ...localItems].sort(
       (a, b) =>
@@ -215,6 +244,15 @@ export default function Notifications() {
     const unread = mergedNotifications.filter((n) => !n.read).length
     return { all, orders, offers, updates, unread }
   }, [mergedNotifications])
+
+  // Sync true deduplicated unread count with badges across the app
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("notificationsUpdated", {
+        detail: { count: counts.unread },
+      })
+    )
+  }, [counts.unread])
 
   // Filtered notifications
   const filteredNotifications = useMemo(() => {

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { API_BASE_URL } from '@food/api/config';
 import { userAPI } from '@food/api';
 import { dispatchNotificationInboxRefresh } from '@food/hooks/useNotificationInbox';
+import { shouldShowNotificationAlert } from '@food/utils/notificationDedupe';
 
 const debugLog = (...args) => {
   if (import.meta.env.DEV) {
@@ -172,11 +173,17 @@ export const useUserNotifications = () => {
     socketRef.current.on('admin_notification', (payload) => {
       const title = payload?.title || 'Notification';
       const message = payload?.message || 'New broadcast notification received.';
-      toast.message(title, {
-        description: message,
-        duration: 8000
-      });
-      saveLocalNotification(title, message, "Bell");
+      const broadcastId = payload?.id || payload?.broadcastId || '';
+      const dedupeKey = broadcastId ? `broadcast_${broadcastId}` : `${title}:::${message}`;
+
+      if (shouldShowNotificationAlert(dedupeKey, message)) {
+        toast.message(title, {
+          description: message,
+          duration: 8000
+        });
+      }
+      // Broadcast notifications are already stored in server inbox database.
+      // Refresh inbox list so useNotificationInbox displays it directly without duplicating in localStorage.
       dispatchNotificationInboxRefresh();
     });
 

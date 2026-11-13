@@ -12,13 +12,17 @@ export default function HeaderNotificationBell({ className = "", triggerClass = 
       return [];
     }
   });
+  const [syncedCount, setSyncedCount] = useState(null);
 
   const {
     unreadCount: broadcastUnreadCount = 0,
   } = useNotificationInbox("user", { limit: 20 });
 
   useEffect(() => {
-    const syncNotifications = () => {
+    const syncNotifications = (e) => {
+      if (e?.detail?.count !== undefined) {
+        setSyncedCount(Number(e.detail.count));
+      }
       try {
         const saved = localStorage.getItem('food_user_notifications');
         setNotifications(saved ? JSON.parse(saved) : []);
@@ -31,7 +35,9 @@ export default function HeaderNotificationBell({ className = "", triggerClass = 
     return () => window.removeEventListener('notificationsUpdated', syncNotifications);
   }, []);
 
-  const unreadCount = (Array.isArray(notifications) ? notifications.filter(n => !n.read).length : 0) + (broadcastUnreadCount || 0);
+  const unreadCount = syncedCount !== null
+    ? syncedCount
+    : (Array.isArray(notifications) ? notifications.filter(n => !n.read).length : 0) + (broadcastUnreadCount || 0);
 
   const hasCustomBg = triggerClass && (triggerClass.includes("bg-") || triggerClass.includes("rounded-"));
   const buttonStyle = hasCustomBg 
