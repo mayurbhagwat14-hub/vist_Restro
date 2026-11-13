@@ -135,6 +135,8 @@ export default function OTP() {
   const [nameError, setNameError] = useState("")
   const [dateOfBirth, setDateOfBirth] = useState("")
   const [dobError, setDobError] = useState("")
+  const [anniversary, setAnniversary] = useState("")
+  const [annivError, setAnnivError] = useState("")
   const [verifiedData, setVerifiedData] = useState(null)
   const [contactInfo, setContactInfo] = useState("")
   const inputRefs = useRef([])
@@ -298,6 +300,12 @@ export default function OTP() {
             setDateOfBirth(parsed.toISOString().split("T")[0])
           }
         }
+        if (user.anniversary) {
+          const parsedAnniv = new Date(user.anniversary)
+          if (!isNaN(parsedAnniv.getTime())) {
+            setAnniversary(parsedAnniv.toISOString().split("T")[0])
+          }
+        }
         setShowNameInput(true)
         setIsLoading(false)
         submittingRef.current = false
@@ -358,6 +366,20 @@ export default function OTP() {
       }
     }
 
+    if (anniversary) {
+      const selectedAnniv = new Date(anniversary)
+      const today = new Date()
+      today.setHours(23, 59, 59, 999)
+      if (isNaN(selectedAnniv.getTime()) || selectedAnniv > today) {
+        setAnnivError("Please enter a valid anniversary date in the past")
+        hasValidationError = true
+      } else {
+        setAnnivError("")
+      }
+    } else {
+      setAnnivError("")
+    }
+
     if (hasValidationError) return
 
     setIsLoading(true)
@@ -371,6 +393,7 @@ export default function OTP() {
       const profilePayload = {
         name: normalizedName,
         dateOfBirth: dateOfBirth,
+        ...(anniversary ? { anniversary } : {}),
       }
 
       try {
@@ -388,7 +411,17 @@ export default function OTP() {
         )
       }
 
-      setUserAuthData("user", accessToken, { ...user, name: normalizedName, dateOfBirth }, refreshToken)
+      setUserAuthData(
+        "user",
+        accessToken,
+        {
+          ...user,
+          name: normalizedName,
+          dateOfBirth,
+          ...(anniversary ? { anniversary } : {}),
+        },
+        refreshToken
+      )
       scheduleProactiveRefresh("user")
       window.dispatchEvent(new Event("userAuthChanged"))
       setSuccess(true)
@@ -637,7 +670,7 @@ export default function OTP() {
                     Date of Birth
                   </label>
                   <span className="text-[10px] text-[#A6885A] font-medium tracking-tight">
-                    for birthday surprises 🎁
+                    for birthday treats
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5">
@@ -659,6 +692,38 @@ export default function OTP() {
                 <div className="flex items-center gap-1.5 text-xs text-red-600 pl-4 -mt-2">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{dobError}</span>
+                </div>
+              )}
+
+              {/* Anniversary (Optional) */}
+              <div className="w-full bg-[#FFFFFF] border border-[#E5DDD0] focus-within:border-[#6E3B13] focus-within:ring-2 focus-within:ring-[#6E3B13]/12 rounded-full px-5 py-3 shadow-[0_2px_8px_rgba(74,44,17,0.04)]">
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className="block text-[10px] font-medium text-[#8E7B6B] uppercase tracking-wider">
+                    Anniversary Date
+                  </label>
+                  <span className="text-[10px] text-[#A6885A] font-medium tracking-tight">
+                    Optional (for milestone treats)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <Calendar className="w-4 h-4 text-[#8E7B6B] shrink-0" />
+                  <input
+                    type="date"
+                    max={new Date().toISOString().split("T")[0]}
+                    value={anniversary}
+                    onChange={(e) => {
+                      setAnniversary(e.target.value)
+                      setAnnivError("")
+                    }}
+                    className="w-full bg-transparent border-none p-0 outline-none font-semibold text-sm sm:text-base text-[#2E180C] focus:ring-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {annivError && (
+                <div className="flex items-center gap-1.5 text-xs text-red-600 pl-4 -mt-2">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{annivError}</span>
                 </div>
               )}
 
