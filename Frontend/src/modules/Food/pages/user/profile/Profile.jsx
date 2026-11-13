@@ -23,6 +23,7 @@ import {
   Power,
   ShoppingCart,
   MapPin,
+  Calendar,
   Share2,
   Trash2,
   Wrench,
@@ -499,9 +500,15 @@ export default function Profile() {
                 )}
                 {userProfile?.phone && (
                   <p
-                    className={`text-sm ${hasValidEmail ? "text-gray-600 dark:text-gray-400" : "text-black dark:text-white"} mb-3`}>
+                    className={`text-sm ${hasValidEmail ? "text-gray-600 dark:text-gray-400" : "text-black dark:text-white"} mb-1.5`}>
                     {userProfile.phone}
                   </p>
+                )}
+                {userProfile?.dateOfBirth && (
+                  <div className="flex items-center gap-1.5 text-xs text-[#7A5B3E] dark:text-[#E6C687] bg-[#F7F2EB] dark:bg-white/5 border border-[#EADBCE] dark:border-white/10 px-2.5 py-1 rounded-full w-fit mb-2">
+                    <Calendar className="w-3.5 h-3.5 shrink-0" />
+                    <span>Born: {new Date(userProfile.dateOfBirth).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                  </div>
                 )}
                 {!hasValidEmail && !userProfile?.phone && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">

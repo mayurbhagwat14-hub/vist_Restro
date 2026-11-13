@@ -2377,9 +2377,14 @@ export const userAPI = {
     }),
   /** PATCH /food/user/profile (Bearer USER) */
   updateProfile: (body) =>
-    apiClient.patch("/food/user/profile", body ?? {}, {
-      contextModule: "user",
-    }),
+    apiClient
+      .patch("/food/user/profile", body ?? {}, {
+        contextModule: "user",
+      })
+      .then((res) => {
+        clearUserMeCache();
+        return res;
+      }),
   /** Submit app feedback (Bearer USER) */
   submitAppFeedback: (body) =>
     apiClient.post("/food/user/profile/app-feedback", body ?? {}, {

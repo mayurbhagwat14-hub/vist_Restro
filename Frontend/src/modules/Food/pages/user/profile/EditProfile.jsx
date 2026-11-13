@@ -119,7 +119,13 @@ export default function EditProfile() {
   const storedProfile = loadProfileFromStorage()
   const draftProfile = loadEditProfileDraft()
   const realProfile = storedProfile || userProfile || {}
-  const initialProfile = draftProfile || realProfile
+  const initialProfile = {
+    ...realProfile,
+    ...(draftProfile || {}),
+    // Ensure genuine profile dateOfBirth/anniversary takes precedence over empty draft
+    dateOfBirth: realProfile.dateOfBirth || draftProfile?.dateOfBirth || "",
+    anniversary: realProfile.anniversary || draftProfile?.anniversary || "",
+  }
 
   const initialFormData = buildFormDataFromProfile(initialProfile)
   const realInitialFormData = buildFormDataFromProfile(realProfile)
@@ -139,17 +145,22 @@ export default function EditProfile() {
     dateOfBirth: "",
   })
   const fileInputRef = useRef(null)
-  const hydratedFromDraftRef = useRef(Boolean(draftProfile))
 
   // Update form data when profile changes
   useEffect(() => {
     const profile = loadProfileFromStorage() || userProfile || {}
-    setInitialData(buildFormDataFromProfile(profile))
+    const parsedData = buildFormDataFromProfile(profile)
+    setInitialData(parsedData)
 
-    if (hydratedFromDraftRef.current) return
-
-    const newFormData = buildFormDataFromProfile(profile)
-    setFormData(newFormData)
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || parsedData.name,
+      mobile: prev.mobile || parsedData.mobile,
+      email: prev.email || parsedData.email,
+      dateOfBirth: parsedData.dateOfBirth || prev.dateOfBirth,
+      anniversary: parsedData.anniversary || prev.anniversary,
+      gender: parsedData.gender || prev.gender,
+    }))
 
     // Update profile image
     if (profile.profileImage) {
