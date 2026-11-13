@@ -5,7 +5,9 @@ const genderEnum = z.enum(['male', 'female', 'other', 'prefer-not-to-say']);
 
 const isoDate = z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (expected YYYY-MM-DD)');
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (expected YYYY-MM-DD)')
+    .or(z.literal(''))
+    .nullable();
 
 const schema = z.object({
     name: z.string().max(200).optional(),

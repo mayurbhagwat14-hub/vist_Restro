@@ -456,12 +456,11 @@ export default function EditProfile() {
       // Prepare data for API
       const updateData = {
         name: formData.name.trim(),
-        email: formData.email || undefined,
-        phone: formData.mobile || undefined,
+        email: formData.email ? formData.email.trim() : undefined,
         dateOfBirth: formData.dateOfBirth || undefined,
         anniversary: formData.anniversary || undefined,
         gender: formData.gender || undefined,
-        profileImage: profileImage || undefined, // Include profileImage in update
+        profileImage: profileImage || undefined,
       }
 
       // Call API to update profile

@@ -6,7 +6,8 @@ import { ensureUserReferralCode } from './userReferral.service.js';
 const parseIsoDateOrNull = (value) => {
     if (value === undefined) return undefined;
     if (value === null || value === '') return null;
-    const d = new Date(`${String(value)}T00:00:00.000Z`);
+    const str = String(value).trim();
+    const d = str.includes('T') ? new Date(str) : new Date(`${str}T00:00:00.000Z`);
     // Keep null for invalid; validation is handled by DTO, but be defensive.
     return Number.isNaN(d.getTime()) ? null : d;
 };
@@ -25,10 +26,10 @@ export const updateCurrentUserProfile = async (userId, body) => {
     if (!user) throw new AuthError('Profile not found');
 
     if (body.phone !== undefined) {
-        const nextPhone = String(body.phone || '').trim();
-        const currentPhone = String(user.phone || '').trim();
-        // OTP login is phone-based in this project; don't allow changing it from profile edit.
-        if (nextPhone && nextPhone !== currentPhone) {
+        const cleanNext = String(body.phone || '').replace(/\D/g, '').slice(-10);
+        const cleanCurrent = String(user.phone || '').replace(/\D/g, '').slice(-10);
+        // OTP login is phone-based in this project; only block if user is attempting to change to a different phone number
+        if (cleanNext && cleanCurrent && cleanNext !== cleanCurrent) {
             throw new ValidationError('Phone number cannot be changed');
         }
     }
