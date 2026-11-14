@@ -10,6 +10,7 @@ export const ADMIN_PERMISSION_SECTIONS = [
   "order_management",
   "service_management",
   "grocery_management",
+  "accessories_management",
   "promotions_management",
   "referral_rewards",
   "customer_management",
@@ -20,6 +21,7 @@ export const ADMIN_PERMISSION_SECTIONS = [
   "banner_management",
   "pages_social_media",
   "zone_management",
+  "system_settings",
 ];
 
 const PATH_PREFIX_TO_SECTION = [
@@ -38,7 +40,10 @@ const PATH_PREFIX_TO_SECTION = [
   { prefix: "/admin/food/categories", section: "food_management" },
   { prefix: "/admin/food/zones", section: "zone_management" },
   { prefix: "/admin/food/restaurants", section: "restaurant_management" },
+  { prefix: "/admin/food/restaurant-commissions", section: "restaurant_management" },
   { prefix: "/admin/food/orders", section: "order_management" },
+  { prefix: "/admin/food/global-orders", section: "order_management" },
+  { prefix: "/admin/food/order-refunds", section: "order_management" },
   { prefix: "/admin/food/order-detect-delivery", section: "order_management" },
   { prefix: "/admin/food/services", section: "service_management" },
   { prefix: "/admin/food/service-categories", section: "service_management" },
@@ -46,26 +51,57 @@ const PATH_PREFIX_TO_SECTION = [
   { prefix: "/admin/food/grocery-products", section: "grocery_management" },
   { prefix: "/admin/food/grocery-categories", section: "grocery_management" },
   { prefix: "/admin/food/grocery-orders", section: "grocery_management" },
+  { prefix: "/admin/food/accessories", section: "accessories_management" },
+  { prefix: "/admin/food/accessories-products", section: "accessories_management" },
+  { prefix: "/admin/food/accessories-categories", section: "accessories_management" },
+  { prefix: "/admin/food/accessories-orders", section: "accessories_management" },
   { prefix: "/admin/food/coupons", section: "promotions_management" },
+  { prefix: "/admin/food/campaigns", section: "promotions_management" },
+  { prefix: "/admin/food/cashback", section: "promotions_management" },
+  { prefix: "/admin/food/banners", section: "banner_management" },
+  { prefix: "/admin/food/advertisement", section: "promotions_management" },
   { prefix: "/admin/food/referral-settings", section: "referral_rewards" },
   { prefix: "/admin/food/customers", section: "customer_management" },
   { prefix: "/admin/food/support-tickets", section: "customer_management" },
+  { prefix: "/admin/food/wallet", section: "customer_management" },
+  { prefix: "/admin/food/loyalty-point", section: "customer_management" },
+  { prefix: "/admin/food/subscribed-mail-list", section: "customer_management" },
   { prefix: "/admin/food/delivery", section: "delivery_management" },
   { prefix: "/admin/food/delivery-partners", section: "delivery_management" },
   { prefix: "/admin/food/contact-messages", section: "support_management" },
+  { prefix: "/admin/food/chattings", section: "support_management" },
   { prefix: "/admin/food/safety-emergency-reports", section: "support_management" },
   { prefix: "/admin/food/transaction-report", section: "report_management" },
   { prefix: "/admin/food/order-report", section: "report_management" },
   { prefix: "/admin/food/tax-report", section: "report_management" },
   { prefix: "/admin/food/restaurant-report", section: "report_management" },
+  { prefix: "/admin/food/expense-report", section: "report_management" },
+  { prefix: "/admin/food/disbursement-report", section: "report_management" },
+  { prefix: "/admin/food/restaurant-vat-report", section: "report_management" },
+  { prefix: "/admin/food/restaurant-withdraws", section: "transaction_management" },
+  { prefix: "/admin/food/withdraw-method", section: "transaction_management" },
   { prefix: "/admin/food/customer-report", section: "report_management" },
   { prefix: "/admin/food/hero-banner-management", section: "banner_management" },
+  { prefix: "/admin/food/landing-page-settings", section: "banner_management" },
   { prefix: "/admin/food/feature-settings", section: "system_settings" },
   { prefix: "/admin/food/power-scanning", section: "system_settings" },
   { prefix: "/admin/food/business-setup", section: "system_settings" },
   { prefix: "/admin/food/broadcast-notification", section: "system_settings" },
+  { prefix: "/admin/food/notification", section: "system_settings" },
+  { prefix: "/admin/food/notifications", section: "system_settings" },
+  { prefix: "/admin/food/notification-channels", section: "system_settings" },
   { prefix: "/admin/food/coin-settings", section: "system_settings" },
   { prefix: "/admin/food/coin-requests", section: "system_settings" },
+  { prefix: "/admin/food/email-template", section: "system_settings" },
+  { prefix: "/admin/food/theme-settings", section: "system_settings" },
+  { prefix: "/admin/food/gallery", section: "system_settings" },
+  { prefix: "/admin/food/login-setup", section: "system_settings" },
+  { prefix: "/admin/food/page-meta-data", section: "system_settings" },
+  { prefix: "/admin/food/react-site", section: "system_settings" },
+  { prefix: "/admin/food/clean-database", section: "system_settings" },
+  { prefix: "/admin/food/addon-activation", section: "system_settings" },
+  { prefix: "/admin/food/3rd-party-configurations", section: "system_settings" },
+  { prefix: "/admin/food/app-web-settings", section: "system_settings" },
   { prefix: "/admin/food/pages-social-media", section: "pages_social_media" },
   { prefix: "/admin/food/employees", section: "sub_admin_management" },
   { prefix: "/admin/food/employee-role", section: "sub_admin_management" },
@@ -77,13 +113,13 @@ const ALWAYS_ALLOWED_FOR_SUB_ADMIN = new Set([
 ]);
 
 export function isSuperAdmin(adminUser) {
+  if (!adminUser) return true;
   const type = String(adminUser?.adminType || "").trim().toLowerCase();
-  if (type === "super_admin" || type === "admin") return true;
-  // Fallback: if adminType is missing but role is ADMIN, treat as super admin
-  // This handles legacy admin accounts created before adminType was added
+  if (type === "super_admin" || type === "admin" || adminUser?.isSuperAdmin === true) return true;
   const role = String(adminUser?.role || "").trim().toUpperCase();
-  if (!type && role === "ADMIN") return true;
-  return false;
+  if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "SUPERADMIN") return true;
+  if (type === "sub_admin") return false;
+  return true;
 }
 
 export function getAdminPermissions(adminUser) {
@@ -106,11 +142,10 @@ export function resolvePermissionSectionByPath(pathname = "") {
 
 export function canAccessAdminPath(pathname, action = "view") {
   const adminUser = getCurrentUser("admin");
+  if (!adminUser || isSuperAdmin(adminUser)) return true;
   const section = resolvePermissionSectionByPath(pathname);
   if (!section) {
-    if (isSuperAdmin(adminUser)) return true;
-    const normalized = String(pathname || "").replace(/\/+$/, "") || "/";
-    return ALWAYS_ALLOWED_FOR_SUB_ADMIN.has(normalized);
+    return true;
   }
   return canAdminAccess(adminUser, section, action);
 }
