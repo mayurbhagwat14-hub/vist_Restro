@@ -14,7 +14,7 @@ const AdminSettings = lazy(() => import("@food/pages/admin/AdminSettings"));
 const NewRefundRequests = lazy(() => import("@food/pages/admin/refunds/NewRefundRequests"));
 const OrdersPage = lazy(() => import("@food/pages/admin/orders/OrdersPage"));
 const GlobalOrdersPage = lazy(() => import("@food/pages/admin/orders/GlobalOrdersPage"));
-const OrderDetectDelivery = () => null;
+const OrderDetectDelivery = () => <AdminServicePlaceholder title="Order Detect Delivery" />;
 const Category = lazy(() => import("@food/pages/admin/categories/Category"));
 const GroceryCategory = lazy(() => import("@food/pages/admin/grocery/GroceryCategory"));
 const GroceryProductsList = lazy(() => import("@food/pages/admin/grocery/GroceryProductsList"));
@@ -61,16 +61,16 @@ const SubscribedMailList = lazy(() => import("@food/pages/admin/SubscribedMailLi
 // Report Management
 const TransactionReport = lazy(() => import("@food/pages/admin/reports/TransactionReport"));
 const ExpenseReport = lazy(() => import("@food/pages/admin/reports/ExpenseReport"));
-const DisbursementReportRestaurants = () => null;
-const DisbursementReportDeliverymen = () => null;
+const DisbursementReportRestaurants = lazy(() => import("@food/pages/admin/reports/DisbursementReportRestaurants"));
+const DisbursementReportDeliverymen = () => <AdminServicePlaceholder title="Disbursement Report - Deliverymen" />;
 const RegularOrderReport = lazy(() => import("@food/pages/admin/reports/RegularOrderReport"));
 const CampaignOrderReport = lazy(() => import("@food/pages/admin/reports/CampaignOrderReport"));
 const RestaurantReport = lazy(() => import("@food/pages/admin/reports/RestaurantReport"));
 const FeedbackExperienceReport = lazy(() => import("@food/pages/admin/reports/FeedbackExperienceReport"));
 const TaxReport = lazy(() => import("@food/pages/admin/reports/TaxReport"));
-const RestaurantVATReport = () => null;
+const RestaurantVATReport = lazy(() => import("@food/pages/admin/reports/RestaurantVATReport"));
 // Transaction Management
-const RestaurantWithdraws = () => null;
+const RestaurantWithdraws = lazy(() => import("@food/pages/admin/transactions/RestaurantWithdraws"));
 const WithdrawMethod = lazy(() => import("@food/pages/admin/transactions/WithdrawMethod"));
 // Employee Management
 const EmployeeRole = lazy(() => import("@food/pages/admin/employees/EmployeeRole"));
@@ -175,8 +175,7 @@ function UnregisteredRestaurantsRouteGuard() {
   }, []);
 
   if (loading) return <Loader />;
-  if (!isEnabled) return <Navigate to="/admin/food/restaurants" replace />;
-  return <UnregisteredRestaurants />;
+  return <Navigate to="/admin/food/restaurants" replace />;
 }
 
 export default function AdminRouter() {

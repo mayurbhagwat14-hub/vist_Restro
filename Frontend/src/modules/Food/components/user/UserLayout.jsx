@@ -1,8 +1,10 @@
 import { Outlet, useLocation } from "react-router-dom"
-import { useEffect, useState, createContext, useContext, useRef, useCallback } from "react"
+import { useEffect, useState, createContext, useContext, useRef, useCallback, Suspense } from "react"
 import { ProfileProvider } from "@food/context/ProfileContext"
 import { CartProvider } from "@food/context/CartContext"
 import { OrdersProvider } from "@food/context/OrdersContext"
+import ErrorBoundary from "@/components/ErrorBoundary"
+import Loader from "@food/components/Loader"
 const debugLog = (...args) => {}
 const debugWarn = (...args) => {}
 const debugError = (...args) => {}
@@ -263,7 +265,17 @@ export default function UserLayout() {
                   {showDesktopNavbar && <DesktopNavbar />}
                 </div>
                 <main className={`${showDesktopNavbar ? "md:pt-32" : ""} ${showBottomNav ? "pb-24 md:pb-0" : ""}`}>
-                  <Outlet />
+                  <ErrorBoundary>
+                    <Suspense
+                      fallback={
+                        <div className="p-8 flex items-center justify-center min-h-[50vh]">
+                          <Loader />
+                        </div>
+                      }
+                    >
+                      <Outlet />
+                    </Suspense>
+                  </ErrorBoundary>
                 </main>
                 {showBottomNav && <BottomNavigation />}
               </LocationSelectorProvider>

@@ -3,11 +3,12 @@ import { Navigate, useLocation } from "react-router-dom"
 import { adminAPI } from "@food/api"
 import { clearModuleAuth, getCurrentUser, isModuleAuthenticated, setAuthData } from "@food/utils/auth"
 import { canAccessAdminPath, findFirstAllowedAdminPath } from "@food/utils/adminRbac"
+import Loader from "@food/components/Loader"
 
 export default function ProtectedRoute({ children }) {
   const location = useLocation()
   const isAuthenticated = isModuleAuthenticated("admin")
-  const [checking, setChecking] = useState(true)
+  const [checking, setChecking] = useState(() => !isModuleAuthenticated("admin") || !getCurrentUser("admin"))
   const [authError, setAuthError] = useState(false)
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function ProtectedRoute({ children }) {
     return () => {
       isMounted = false
     }
-  }, [isAuthenticated, location.pathname])
+  }, [isAuthenticated])
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />
@@ -65,7 +66,11 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />
   }
   if (checking) {
-    return <div className="min-h-screen bg-neutral-100" />
+    return (
+      <div className="min-h-screen bg-neutral-100 dark:bg-[#121212] flex items-center justify-center">
+        <Loader message="Loading Admin Panel..." />
+      </div>
+    )
   }
 
   const adminUser = getCurrentUser("admin")

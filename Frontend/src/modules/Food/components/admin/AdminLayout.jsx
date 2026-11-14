@@ -1,9 +1,69 @@
-import { useState, useEffect, useRef } from "react"
+import { Component, useState, useEffect, useRef, Suspense } from "react"
 import { Outlet, useLocation } from "react-router-dom"
+import { AlertTriangle, RotateCcw } from "lucide-react"
 import AdminSidebar from "./AdminSidebar"
 import AdminNavbar from "./AdminNavbar"
 import AdminNotificationManager from "./AdminNotificationManager"
+import Loader from "@food/components/Loader"
 import { API_BASE_URL } from "@food/api/config"
+
+class AdminPageErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Admin Page render error caught:", error, errorInfo);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.locationKey !== this.props.locationKey && this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 border border-amber-200 dark:border-amber-800 shadow-sm">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-2 font-serif">
+            Unable to display this page
+          </h2>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-md mb-6">
+            An unexpected error occurred while loading this section. You can retry or choose another option from the sidebar.
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => this.setState({ hasError: false, error: null })}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#5C381E] text-white text-sm font-semibold hover:bg-[#482A14] transition-colors shadow-sm cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Retry Page
+            </button>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+            >
+              Reload Window
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const debugLog = (...args) => {}
 const debugWarn = (...args) => {}
 const debugError = (...args) => {}
@@ -107,7 +167,17 @@ export default function AdminLayout() {
           ref={mainContentRef}
           className="flex-1 min-h-0 w-full max-w-full overflow-x-hidden overflow-y-auto bg-neutral-100 dark:bg-[#121212]"
         >
-          <Outlet />
+          <AdminPageErrorBoundary locationKey={location.pathname}>
+            <Suspense
+              fallback={
+                <div className="p-8 flex items-center justify-center min-h-[50vh]">
+                  <Loader message="Loading page..." />
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
+          </AdminPageErrorBoundary>
         </main>
       </div>
     </div>
