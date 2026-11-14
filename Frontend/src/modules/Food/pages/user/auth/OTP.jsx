@@ -288,8 +288,7 @@ export default function OTP() {
       }
 
       const hasName = user.name && String(user.name).trim().length > 0 && String(user.name).toLowerCase() !== "null"
-      const hasDob = user.dateOfBirth && String(user.dateOfBirth).trim().length > 0
-      const needsProfile = data.isNewUser === true || !hasName || !hasDob
+      const needsProfile = data.isNewUser === true || !hasName
 
       if (needsProfile) {
         setVerifiedData(data)
@@ -351,10 +350,7 @@ export default function OTP() {
       setNameError("")
     }
 
-    if (!dateOfBirth) {
-      setDobError("Please select your date of birth")
-      hasValidationError = true
-    } else {
+    if (dateOfBirth) {
       const selectedDate = new Date(dateOfBirth)
       const today = new Date()
       today.setHours(23, 59, 59, 999)
@@ -364,6 +360,8 @@ export default function OTP() {
       } else {
         setDobError("")
       }
+    } else {
+      setDobError("")
     }
 
     if (anniversary) {
@@ -392,7 +390,7 @@ export default function OTP() {
 
       const profilePayload = {
         name: normalizedName,
-        dateOfBirth: dateOfBirth,
+        ...(dateOfBirth ? { dateOfBirth } : {}),
         ...(anniversary ? { anniversary } : {}),
       }
 
@@ -417,7 +415,7 @@ export default function OTP() {
         {
           ...user,
           name: normalizedName,
-          dateOfBirth,
+          ...(dateOfBirth ? { dateOfBirth } : {}),
           ...(anniversary ? { anniversary } : {}),
         },
         refreshToken
@@ -670,7 +668,7 @@ export default function OTP() {
                     Date of Birth
                   </label>
                   <span className="text-[10px] text-[#A6885A] font-medium tracking-tight">
-                    for birthday treats
+                    Optional (for birthday treats)
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5">
@@ -729,7 +727,7 @@ export default function OTP() {
 
               <button
                 type="submit"
-                disabled={isLoading || !name.trim() || !dateOfBirth}
+                disabled={isLoading || !name.trim()}
                 className="w-full h-[52px] sm:h-[54px] rounded-full text-white font-medium text-[15px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-[0_4px_14px_rgba(74,44,17,0.18)] hover:shadow-[0_6px_20px_rgba(74,44,17,0.24)] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer pt-0 mt-3"
                 style={{
                   backgroundColor: "#5C381E",
