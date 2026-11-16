@@ -26,6 +26,13 @@ export const shouldShowNotificationAlert = (keyOrTitle, message = '', debounceMs
   return true;
 };
 
+const normalizeContent = (str) =>
+  String(str || "")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
 /**
  * Clean existing dirty localStorage notifications to remove duplicates.
  */
@@ -41,7 +48,7 @@ export const cleanDuplicateLocalNotifications = () => {
     const cleanList = [];
 
     for (const item of list) {
-      const key = `${String(item?.title || '').trim().toLowerCase()}:::${String(item?.message || '').trim().toLowerCase()}`;
+      const key = `${normalizeContent(item?.title)}:::${normalizeContent(item?.message)}`;
       if (!key || seen.has(key)) {
         continue; // duplicate
       }
@@ -58,3 +65,4 @@ export const cleanDuplicateLocalNotifications = () => {
     return [];
   }
 };
+

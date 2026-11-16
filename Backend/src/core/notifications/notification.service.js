@@ -64,25 +64,23 @@ export const createInboxNotifications = async ({ notifications = [] } = {}) => {
             payload.broadcastId = new mongoose.Types.ObjectId(String(item.broadcastId));
         }
 
+        const dedupeFilter = {
+            ownerType: payload.ownerType,
+            ownerId: payload.ownerId,
+            $or: [
+                ...(payload.broadcastId ? [{ broadcastId: payload.broadcastId }] : []),
+                { title: payload.title, message: payload.message }
+            ]
+        };
+
         return {
             updateOne: {
-                filter: payload.broadcastId
-                    ? {
-                        broadcastId: payload.broadcastId,
-                        ownerType: payload.ownerType,
-                        ownerId: payload.ownerId
-                    }
-                    : {
-                        ownerType: payload.ownerType,
-                        ownerId: payload.ownerId,
-                        title: payload.title,
-                        message: payload.message,
-                        source: payload.source
-                    },
+                filter: dedupeFilter,
                 update: {
                     $set: {
                         ...payload,
-                        dismissedAt: null
+                        dismissedAt: null,
+                        createdAt: new Date()
                     },
                     $setOnInsert: {
                         isRead: false,

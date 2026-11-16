@@ -30,6 +30,26 @@ import { isModuleAuthenticated } from "@food/utils/auth"
 import { toast } from "sonner"
 import { cleanDuplicateLocalNotifications } from "@food/utils/notificationDedupe"
 
+const formatNotificationDate = (value) => {
+  if (!value) return "Recently"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "Recently"
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })
+}
+
+const normalizeTextKey = (str) =>
+  String(str || "")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+
 // Default notifications shown if localStorage is empty
 const DEFAULT_NOTIFICATIONS = [
   {
@@ -173,56 +193,47 @@ export default function Notifications() {
         ...item,
         source: "broadcast",
         type: isOffer ? "offer" : "broadcast",
-        time: item.createdAt
-          ? new Date(item.createdAt).toLocaleString("en-IN", {
-              day: "2-digit",
-              month: "short",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })
-          : "Recently",
+        time: formatNotificationDate(item.createdAt),
         timestamp: item.createdAt ? new Date(item.createdAt).getTime() : Date.now(),
         icon: isOffer ? "Tag" : "Bell",
         iconColor: isOffer ? "text-amber-600 dark:text-amber-400" : "text-blue-600 dark:text-blue-400",
       }
     })
 
-    // Index server broadcast items by title and message to prevent duplicates from localItems
-    const seenKeys = new Set(
-      broadcastItems.map((b) => `${String(b.title || "").trim().toLowerCase()}:::${String(b.message || "").trim().toLowerCase()}`)
-    )
+    const localItems = (notificationsList || []).map((item) => {
+      const ts = item.timestamp ? new Date(item.timestamp).getTime() : Date.now()
+      return {
+        ...item,
+        source: item.source || "local",
+        time: item.time && item.time !== "Invalid Date" && item.time !== "undefined"
+          ? item.time
+          : formatNotificationDate(item.createdAt || item.timestamp),
+        timestamp: ts,
+      }
+    })
 
-    const localItems = (notificationsList || [])
-      .filter((item) => {
-        const key = `${String(item.title || "").trim().toLowerCase()}:::${String(item.message || "").trim().toLowerCase()}`
-        if (!key || seenKeys.has(key)) {
-          return false
-        }
-        seenKeys.add(key)
-        return true
-      })
-      .map((item) => {
-        const ts = item.timestamp ? new Date(item.timestamp).getTime() : Date.now()
-        return {
-          ...item,
-          source: item.source || "local",
-          time:
-            item.time ||
-            (item.createdAt || item.timestamp
-              ? new Date(item.createdAt || item.timestamp).toLocaleString("en-IN", {
-                  day: "2-digit",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })
-              : "Recently"),
-          timestamp: ts,
-        }
-      })
+    // Combine all and deduplicate by normalized title & message to avoid duplicate cards
+    const all = [...broadcastItems, ...localItems]
+    const seenMap = new Map()
 
-    return [...broadcastItems, ...localItems].sort(
+    for (const item of all) {
+      const normTitle = normalizeTextKey(item.title)
+      const normMsg = normalizeTextKey(item.message)
+      const dedupeKey = `${normTitle}:::${normMsg}`
+
+      if (!seenMap.has(dedupeKey)) {
+        seenMap.set(dedupeKey, item)
+      } else {
+        // If a duplicate exists, prefer server broadcast item or newer item
+        const existing = seenMap.get(dedupeKey)
+        const isBetter = item.source === "broadcast" && existing.source !== "broadcast"
+        if (isBetter) {
+          seenMap.set(dedupeKey, { ...existing, ...item })
+        }
+      }
+    }
+
+    return Array.from(seenMap.values()).sort(
       (a, b) =>
         new Date(b.timestamp || b.createdAt || 0).getTime() -
         new Date(a.timestamp || a.createdAt || 0).getTime()
@@ -651,7 +662,7 @@ export default function Notifications() {
                           <div className="flex items-center justify-between text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 pt-0.5">
                             <div className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              <span>{notification.time}</span>
+                              <span>{notification.time || "Recently"}</span>
                             </div>
 
                             {isUnread && (
