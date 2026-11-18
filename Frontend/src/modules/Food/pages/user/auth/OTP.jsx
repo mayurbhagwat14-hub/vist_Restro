@@ -293,7 +293,7 @@ export default function OTP() {
       if (needsProfile) {
         setVerifiedData(data)
         if (hasName) setName(String(user.name).trim())
-        if (hasDob) {
+        if (user.dateOfBirth) {
           const parsed = new Date(user.dateOfBirth)
           if (!isNaN(parsed.getTime())) {
             setDateOfBirth(parsed.toISOString().split("T")[0])
@@ -429,6 +429,25 @@ export default function OTP() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleSkipProfile = () => {
+    if (!verifiedData?.accessToken) return
+    const user = verifiedData.user || {}
+    const rawPhone = String(user.phone || "").replace(/\D/g, "")
+    const fallbackName = user.name || (rawPhone ? `User ${rawPhone.slice(-4)}` : "Guest User")
+    
+    setUserAuthData(
+      "user",
+      verifiedData.accessToken,
+      { ...user, name: fallbackName },
+      verifiedData.refreshToken
+    )
+    scheduleProactiveRefresh("user")
+    window.dispatchEvent(new Event("userAuthChanged"))
+    sessionStorage.removeItem("userAuthData")
+    setSuccess(true)
+    setTimeout(() => navigate(redirectTo, { replace: true }), 300)
   }
 
   const handleResend = async () => {
@@ -744,6 +763,15 @@ export default function OTP() {
                     <ArrowRight className="w-4 h-4 stroke-[2.2]" />
                   </>
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSkipProfile}
+                disabled={isLoading}
+                className="w-full text-center text-xs font-semibold text-[#8E7B6B] hover:text-[#5C381E] mt-2.5 py-1.5 transition-colors cursor-pointer"
+              >
+                Skip for now
               </button>
             </form>
           )}
