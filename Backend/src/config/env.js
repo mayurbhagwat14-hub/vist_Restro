@@ -5,10 +5,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Explicitly load .env from Backend directory and fallback to process.cwd()
+// Strictly load all credentials from Backend/.env
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-dotenv.config();
 
 export const config = {
     // Basic server config
