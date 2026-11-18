@@ -45,10 +45,18 @@ const formatNotificationDate = (value) => {
 
 const normalizeTextKey = (str) =>
   String(str || "")
-    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim()
     .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+
+const extractCouponOrOrder = (item) => {
+  const text = `${item?.title || ""} ${item?.message || ""} ${item?.couponCode || ""} ${item?.orderId || ""}`.toUpperCase()
+  const couponMatch = text.match(/\b(BDAY20|FIRST50|VIST100|WELCOME|DISCOUNT\d*|OFFER\d*)\b/)
+  const orderMatch = text.match(/#?([0-9A-Z_-]{5,20})/)
+  return {
+    coupon: couponMatch ? couponMatch[1] : null,
+    orderId: item?.orderId || (orderMatch ? orderMatch[1] : null),
+  }
+}
 
 // Default notifications shown if localStorage is empty
 const DEFAULT_NOTIFICATIONS = [
@@ -212,28 +220,58 @@ export default function Notifications() {
       }
     })
 
-    // Combine all and deduplicate by normalized title & message to avoid duplicate cards
+    // Combine all and deduplicate aggressively to avoid duplicate cards
     const all = [...broadcastItems, ...localItems]
-    const seenMap = new Map()
+    const uniqueCards = []
 
     for (const item of all) {
       const normTitle = normalizeTextKey(item.title)
       const normMsg = normalizeTextKey(item.message)
-      const dedupeKey = `${normTitle}:::${normMsg}`
+      const { coupon, orderId } = extractCouponOrOrder(item)
 
-      if (!seenMap.has(dedupeKey)) {
-        seenMap.set(dedupeKey, item)
+      // Find if this notification already exists in uniqueCards
+      const existingIndex = uniqueCards.findIndex((existing) => {
+        const exTitle = normalizeTextKey(existing.title)
+        const exMsg = normalizeTextKey(existing.message)
+        const exMeta = extractCouponOrOrder(existing)
+
+        // Exact normalized title and message match
+        if (normTitle && exTitle && normTitle === exTitle && normMsg === exMsg) return true
+
+        // Same coupon code match (e.g. BDAY20 birthday notification)
+        if (coupon && exMeta.coupon && coupon === exMeta.coupon) return true
+
+        // Same order ID update
+        if (orderId && exMeta.orderId && orderId === exMeta.orderId && normTitle === exTitle) return true
+
+        // Same title and message prefix (covers truncated message vs full message)
+        if (normTitle && exTitle && normTitle === exTitle) {
+          const prefixLen = Math.min(30, Math.min(normMsg.length, exMsg.length))
+          if (prefixLen >= 15 && normMsg.slice(0, prefixLen) === exMsg.slice(0, prefixLen)) {
+            return true
+          }
+        }
+
+        return false
+      })
+
+      if (existingIndex === -1) {
+        uniqueCards.push(item)
       } else {
-        // If a duplicate exists, prefer server broadcast item or newer item
-        const existing = seenMap.get(dedupeKey)
-        const isBetter = item.source === "broadcast" && existing.source !== "broadcast"
-        if (isBetter) {
-          seenMap.set(dedupeKey, { ...existing, ...item })
+        // Merge: prefer server broadcast item or item with more complete time/data
+        const existing = uniqueCards[existingIndex]
+        const preferNew =
+          item.source === "broadcast" && existing.source !== "broadcast"
+        uniqueCards[existingIndex] = {
+          ...(preferNew ? existing : item),
+          ...(preferNew ? item : existing),
+          time: (preferNew ? item.time : existing.time) || existing.time || item.time || "Recently",
+          timestamp: Math.max(item.timestamp || 0, existing.timestamp || 0),
         }
       }
     }
 
-    return Array.from(seenMap.values()).sort(
+    return uniqueCards.sort(
       (a, b) =>
         new Date(b.timestamp || b.createdAt || 0).getTime() -
         new Date(a.timestamp || a.createdAt || 0).getTime()

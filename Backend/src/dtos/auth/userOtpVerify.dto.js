@@ -31,7 +31,21 @@ const schema = z.object({
 });
 
 export const validateUserOtpVerifyDto = (body) => {
-  const result = schema.safeParse(body);
+  let cleanPhone = String(body?.phone || '').replace(/\D/g, '');
+  if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+    cleanPhone = cleanPhone.slice(2);
+  } else if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+    cleanPhone = cleanPhone.slice(1);
+  } else if (cleanPhone.length > 10) {
+    cleanPhone = cleanPhone.slice(-10);
+  }
+
+  const payload = {
+    ...body,
+    phone: cleanPhone || body?.phone
+  };
+
+  const result = schema.safeParse(payload);
   if (!result.success) {
     throw new ValidationError(result.error.errors[0].message);
   }

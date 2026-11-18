@@ -28,10 +28,8 @@ export const shouldShowNotificationAlert = (keyOrTitle, message = '', debounceMs
 
 const normalizeContent = (str) =>
   String(str || "")
-    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 
 /**
  * Clean existing dirty localStorage notifications to remove duplicates.
@@ -44,16 +42,27 @@ export const cleanDuplicateLocalNotifications = () => {
     const list = JSON.parse(raw);
     if (!Array.isArray(list)) return [];
 
-    const seen = new Set();
     const cleanList = [];
 
     for (const item of list) {
-      const key = `${normalizeContent(item?.title)}:::${normalizeContent(item?.message)}`;
-      if (!key || seen.has(key)) {
-        continue; // duplicate
+      const normTitle = normalizeContent(item?.title);
+      const normMsg = normalizeContent(item?.message);
+      const isDuplicate = cleanList.some((existing) => {
+        const exTitle = normalizeContent(existing?.title);
+        const exMsg = normalizeContent(existing?.message);
+        if (normTitle && exTitle && normTitle === exTitle && normMsg === exMsg) return true;
+        if (normTitle && exTitle && normTitle === exTitle) {
+          const prefixLen = Math.min(25, Math.min(normMsg.length, exMsg.length));
+          if (prefixLen >= 15 && normMsg.slice(0, prefixLen) === exMsg.slice(0, prefixLen)) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      if (!isDuplicate) {
+        cleanList.push(item);
       }
-      seen.add(key);
-      cleanList.push(item);
     }
 
     if (cleanList.length !== list.length) {

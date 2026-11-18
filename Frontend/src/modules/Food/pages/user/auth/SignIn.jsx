@@ -141,7 +141,6 @@ export default function SignIn() {
     const clean = num.replace(/\D/g, "")
     if (!clean) return "Mobile number is required"
     if (clean.length !== 10) return "Mobile number must be 10 digits"
-    if (!/^[6-9]/.test(clean)) return "Enter a valid mobile number starting with 6, 7, 8, or 9"
     return ""
   }
 

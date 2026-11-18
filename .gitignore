@@ -116,3 +116,5 @@ temp_interactive_push.bat
 # ── Markdown files (as requested) ─────────────────────────────────────────────
 *.md
 config.bat
+
+.env

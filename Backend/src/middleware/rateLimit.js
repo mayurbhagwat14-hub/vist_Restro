@@ -21,9 +21,10 @@ const authWindowMs = config.authRateLimitWindowMinutes * 60 * 1000;
 /** Stricter rate limit for auth routes (OTP, login, refresh, logout). Applied in addition to global limiter. */
 export const authRateLimiter = rateLimit({
     windowMs: authWindowMs,
-    // Dev UX: login/otp testing can be frequent. Keep production strict (e.g. 30), 
-    // but relax local development to avoid 429 when testing flows.
-    max: config.nodeEnv === 'development' ? Math.max(config.authRateLimitMax, 100) : config.authRateLimitMax,
+    // When default OTP is active or in dev mode, relax to avoid blocking test flows
+    max: (config.useDefaultOtp || config.nodeEnv === 'development')
+        ? Math.max(config.authRateLimitMax, 2000)
+        : config.authRateLimitMax,
     standardHeaders: true,
     legacyHeaders: false,
     message: {
