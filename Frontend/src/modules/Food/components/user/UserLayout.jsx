@@ -205,16 +205,26 @@ export default function UserLayout() {
   const normalizedPath =
     path.length > 1 ? path.replace(/\/+$/, "") : path
 
-  // Auth pages & checkout flows should not have bottom nav
+  // Auth pages, cart, checkout flows, and restaurant details/menu should not have bottom nav
   const isAuthPage = normalizedPath.includes("/auth")
+  const isCartPage = normalizedPath.includes("/cart")
   const isCheckoutOrAddressPage =
     normalizedPath.includes("/checkout") ||
     normalizedPath.includes("/address-selector") ||
     normalizedPath.includes("/select-address")
   const isInvoicePage = normalizedPath.includes("/invoice")
+  const isRestaurantDetailsPage =
+    /\/restaurants\/[^/]+/.test(location.pathname) ||
+    /\/restaurant\/[^/]+/.test(location.pathname) ||
+    /\/restaurants\/[^/]+/.test(normalizedPath)
 
-  // Bottom navigation remains visible across all browsing & account pages
-  const showBottomNav = !isAuthPage && !isCheckoutOrAddressPage && !isInvoicePage
+  // Bottom navigation remains visible across browsing & account pages, but hidden on cart and restaurant details/menu
+  const showBottomNav =
+    !isAuthPage &&
+    !isCartPage &&
+    !isCheckoutOrAddressPage &&
+    !isInvoicePage &&
+    !isRestaurantDetailsPage
 
   const isUnder250 = normalizedPath === "/under-250" || normalizedPath === "/user/under-250"
 

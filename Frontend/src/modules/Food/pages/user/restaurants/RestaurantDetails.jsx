@@ -2964,9 +2964,9 @@ function RestaurantDetailsContent() {
 
       {/* Menu Button - Sticky at page bottom right (hidden when filter or menu sheet open) */}
       {!showFilterSheet && !showMenuSheet && !showMenuOptionsSheet && (
-        <div className="sticky bottom-4 flex justify-end px-4 z-50 mt-auto">
+        <div className="sticky bottom-4 flex justify-end px-4 z-50 mt-auto pointer-events-none">
           <Button
-            className="relative bg-[#1a1a1a] dark:bg-[#5C381E] hover:bg-black dark:hover:bg-[#482A14] text-white flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/10 dark:border-[#5C381E]/20 w-32 h-14 rounded-full font-bold transform transition-all duration-300 hover:scale-110 active:scale-95 group"
+            className="pointer-events-auto relative bg-[#1a1a1a] dark:bg-[#5C381E] hover:bg-black dark:hover:bg-[#482A14] text-white flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/10 dark:border-[#5C381E]/20 w-32 h-14 rounded-full font-bold transform transition-all duration-300 hover:scale-110 active:scale-95 group"
             onClick={() => setShowMenuSheet(true)}
           >
             <Utensils className="absolute left-5 h-5 w-5 text-[#5C381E] dark:text-white group-hover:rotate-12 transition-transform" />
@@ -4221,7 +4221,7 @@ function RestaurantDetailsContent() {
       {typeof window !== "undefined" &&
         createPortal(
           <AddToCartAnimation
-            bottomOffset={80}
+            bottomOffset={16}
             linkTo="/food/user/cart"
             hideOnPages={true}
           />,
