@@ -378,7 +378,12 @@ function OrderTrackingCardInner({ hasBottomNav = true }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className={`fixed ${hasBottomNav ? "bottom-20" : "bottom-6"} left-4 right-4 z-[9999]`}
+        className="fixed left-4 right-4 z-[9999]"
+        style={{
+          bottom: hasBottomNav
+            ? "calc(5.25rem + env(safe-area-inset-bottom, 0px))"
+            : "1.5rem",
+        }}
       >
         <div 
           onClick={() =>

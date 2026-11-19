@@ -9,7 +9,10 @@ import { gsap } from "gsap"
 export default function StickyCartCard() {
   const { cart, getCartCount, lastAddEvent } = useCart()
   const [isVisible, setIsVisible] = useState(true)
-  const [bottomPosition, setBottomPosition] = useState("bottom-[70px]") // Fixed above bottom navigation
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window !== "undefined") return window.innerWidth >= 768
+    return false
+  })
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
   const cartCount = getCartCount()
   const activeModule = useActiveModule()
@@ -106,27 +109,15 @@ export default function StickyCartCard() {
     }
   }, [lastAddEvent, activeModule])
 
-  // Set fixed position above bottom navigation (no scroll-based movement)
+  // Track screen size and keyboard state for responsive placement above bottom navigation
   useEffect(() => {
-    // Set initial position based on screen size
-    const setInitialPosition = () => {
-      if (window.innerWidth >= 768) {
-        setBottomPosition("bottom-6") // Desktop: fixed position
-      } else {
-        setBottomPosition("bottom-[70px]") // Mobile: above bottom nav (fixed, doesn't move with scroll)
-      }
-    }
-
-    setInitialPosition()
-
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setBottomPosition("bottom-6") // Desktop: always fixed
-      } else {
-        setBottomPosition("bottom-[70px]") // Mobile: above bottom nav (fixed)
+      if (typeof window !== "undefined") {
+        setIsDesktop(window.innerWidth >= 768)
       }
     }
 
+    handleResize()
     window.addEventListener("resize", handleResize)
 
     const handleFocus = (e) => {
@@ -243,7 +234,14 @@ export default function StickyCartCard() {
       <AnimatePresence>
         {isVisible && (
           <motion.div
-            className={`fixed ${bottomPosition} md:bottom-6 left-0 right-0 md:left-auto md:right-6 px-4 md:px-0 pb-4 md:pb-0 pointer-events-none transition-opacity duration-200 ${isKeyboardOpen ? 'opacity-0 -z-50' : 'z-50 opacity-100'}`}
+            className={`fixed left-0 right-0 md:left-auto md:right-6 px-3.5 sm:px-4 md:px-0 pointer-events-none transition-opacity duration-200 ${
+              isKeyboardOpen ? 'opacity-0 -z-50 pointer-events-none' : 'z-40 opacity-100'
+            }`}
+            style={{
+              bottom: isDesktop
+                ? '1.5rem'
+                : 'calc(5.5rem + env(safe-area-inset-bottom, 0px))',
+            }}
             initial="initial"
             animate="animate"
             exit="exit"
