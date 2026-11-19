@@ -114,27 +114,30 @@ export default function BottomNavigation() {
   const activeProfile = pathname.includes("/user/profile") || (pathname.includes("/auth/login") && location.search.includes("profile"));
 
   return (
-    <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 w-full bg-white dark:bg-[#1A1410] border-t border-[#E8DEC8] dark:border-neutral-800 shadow-[0_-6px_25px_rgba(44,24,16,0.10)] dark:shadow-[0_-6px_25px_rgba(0,0,0,0.6)] hide-on-keyboard ${isKeyboardVisible ? 'hidden' : ''}`}>
-      <div className="flex items-center justify-around h-[66px] sm:h-[70px] max-w-lg mx-auto px-2 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))]">
+    <nav
+      aria-label="Mobile Navigation"
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-50 w-full bg-[#FFFDF9] dark:bg-[#181310] border-t-2 border-[#E8DEC8] dark:border-neutral-800 shadow-[0_-5px_22px_rgba(44,24,16,0.12)] dark:shadow-[0_-5px_25px_rgba(0,0,0,0.6)] hide-on-keyboard ${isKeyboardVisible ? 'hidden' : ''}`}
+    >
+      <div className="flex items-center justify-around max-w-lg mx-auto px-2 pt-2 pb-[max(0.6rem,calc(env(safe-area-inset-bottom)+0.35rem))]">
 
         {/* Home Tab */}
         <Link
           to={activeModule.path}
-          className="flex flex-1 flex-col items-center justify-center py-1 transition-all duration-200 group active:scale-95"
+          className="flex flex-1 flex-col items-center justify-center transition-all duration-200 group active:scale-95"
         >
           <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
-            activeHome ? "bg-[#F5EDE2] dark:bg-[#34241B] shadow-xs" : "hover:bg-gray-100/60 dark:hover:bg-white/5"
+            activeHome ? "bg-[#5C381E] dark:bg-[#C5A059] shadow-sm" : "hover:bg-[#F5EDE2]/60 dark:hover:bg-white/5"
           }`}>
             <Home
-              className={`h-5 w-5 transition-transform duration-200 ${
-                activeHome ? "scale-105 text-[#6E3B13] dark:text-[#E6C687]" : "text-[#8A7968] dark:text-[#A8988B]"
+              className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                activeHome ? "scale-105 text-white dark:text-[#2C1810]" : "text-[#7A6B63] dark:text-[#A8988B]"
               }`}
-              strokeWidth={activeHome ? 2.5 : 1.9}
+              strokeWidth={activeHome ? 2.5 : 2}
             />
           </div>
           <span
             className={`text-[11px] leading-tight mt-1 tracking-tight transition-colors ${
-              activeHome ? "text-[#6E3B13] dark:text-[#E6C687] font-bold" : "text-[#8A7968] dark:text-[#A8988B] font-medium"
+              activeHome ? "text-[#5C381E] dark:text-[#C5A059] font-bold" : "text-[#7A6B63] dark:text-[#A8988B] font-medium"
             }`}
           >
             Home
@@ -144,21 +147,21 @@ export default function BottomNavigation() {
         {/* Menu Tab */}
         <Link
           to={categoryPath}
-          className="flex flex-1 flex-col items-center justify-center py-1 transition-all duration-200 group active:scale-95"
+          className="flex flex-1 flex-col items-center justify-center transition-all duration-200 group active:scale-95"
         >
           <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
-            activeCat ? "bg-[#F5EDE2] dark:bg-[#34241B] shadow-xs" : "hover:bg-gray-100/60 dark:hover:bg-white/5"
+            activeCat ? "bg-[#5C381E] dark:bg-[#C5A059] shadow-sm" : "hover:bg-[#F5EDE2]/60 dark:hover:bg-white/5"
           }`}>
             <UtensilsCrossed
-              className={`h-5 w-5 transition-transform duration-200 ${
-                activeCat ? "scale-105 text-[#6E3B13] dark:text-[#E6C687]" : "text-[#8A7968] dark:text-[#A8988B]"
+              className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                activeCat ? "scale-105 text-white dark:text-[#2C1810]" : "text-[#7A6B63] dark:text-[#A8988B]"
               }`}
-              strokeWidth={activeCat ? 2.5 : 1.9}
+              strokeWidth={activeCat ? 2.5 : 2}
             />
           </div>
           <span
             className={`text-[11px] leading-tight mt-1 tracking-tight transition-colors ${
-              activeCat ? "text-[#6E3B13] dark:text-[#E6C687] font-bold" : "text-[#8A7968] dark:text-[#A8988B] font-medium"
+              activeCat ? "text-[#5C381E] dark:text-[#C5A059] font-bold" : "text-[#7A6B63] dark:text-[#A8988B] font-medium"
             }`}
           >
             Menu
@@ -168,21 +171,21 @@ export default function BottomNavigation() {
         {/* Orders Tab */}
         <Link
           to={ordersDestination}
-          className="flex flex-1 flex-col items-center justify-center py-1 transition-all duration-200 group active:scale-95"
+          className="flex flex-1 flex-col items-center justify-center transition-all duration-200 group active:scale-95"
         >
           <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
-            activeOrders ? "bg-[#F5EDE2] dark:bg-[#34241B] shadow-xs" : "hover:bg-gray-100/60 dark:hover:bg-white/5"
+            activeOrders ? "bg-[#5C381E] dark:bg-[#C5A059] shadow-sm" : "hover:bg-[#F5EDE2]/60 dark:hover:bg-white/5"
           }`}>
             <ClipboardList
-              className={`h-5 w-5 transition-transform duration-200 ${
-                activeOrders ? "scale-105 text-[#6E3B13] dark:text-[#E6C687]" : "text-[#8A7968] dark:text-[#A8988B]"
+              className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                activeOrders ? "scale-105 text-white dark:text-[#2C1810]" : "text-[#7A6B63] dark:text-[#A8988B]"
               }`}
-              strokeWidth={activeOrders ? 2.5 : 1.9}
+              strokeWidth={activeOrders ? 2.5 : 2}
             />
           </div>
           <span
             className={`text-[11px] leading-tight mt-1 tracking-tight transition-colors ${
-              activeOrders ? "text-[#6E3B13] dark:text-[#E6C687] font-bold" : "text-[#8A7968] dark:text-[#A8988B] font-medium"
+              activeOrders ? "text-[#5C381E] dark:text-[#C5A059] font-bold" : "text-[#7A6B63] dark:text-[#A8988B] font-medium"
             }`}
           >
             Orders
@@ -192,21 +195,21 @@ export default function BottomNavigation() {
         {/* Profile Tab */}
         <Link
           to={profileDestination}
-          className="flex flex-1 flex-col items-center justify-center py-1 transition-all duration-200 group active:scale-95"
+          className="flex flex-1 flex-col items-center justify-center transition-all duration-200 group active:scale-95"
         >
           <div className={`w-12 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
-            activeProfile ? "bg-[#F5EDE2] dark:bg-[#34241B] shadow-xs" : "hover:bg-gray-100/60 dark:hover:bg-white/5"
+            activeProfile ? "bg-[#5C381E] dark:bg-[#C5A059] shadow-sm" : "hover:bg-[#F5EDE2]/60 dark:hover:bg-white/5"
           }`}>
             <User
-              className={`h-5 w-5 transition-transform duration-200 ${
-                activeProfile ? "scale-105 text-[#6E3B13] dark:text-[#E6C687]" : "text-[#8A7968] dark:text-[#A8988B]"
+              className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                activeProfile ? "scale-105 text-white dark:text-[#2C1810]" : "text-[#7A6B63] dark:text-[#A8988B]"
               }`}
-              strokeWidth={activeProfile ? 2.5 : 1.9}
+              strokeWidth={activeProfile ? 2.5 : 2}
             />
           </div>
           <span
             className={`text-[11px] leading-tight mt-1 tracking-tight transition-colors ${
-              activeProfile ? "text-[#6E3B13] dark:text-[#E6C687] font-bold" : "text-[#8A7968] dark:text-[#A8988B] font-medium"
+              activeProfile ? "text-[#5C381E] dark:text-[#C5A059] font-bold" : "text-[#7A6B63] dark:text-[#A8988B] font-medium"
             }`}
           >
             Profile
@@ -214,6 +217,6 @@ export default function BottomNavigation() {
         </Link>
 
       </div>
-    </div>
+    </nav>
   )
 }
