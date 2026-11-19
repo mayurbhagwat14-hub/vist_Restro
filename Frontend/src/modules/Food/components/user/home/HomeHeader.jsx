@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation as useRouterLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, ChevronDown, Search, Mic } from 'lucide-react';
 import HeaderCartIcon from "../HeaderCartIcon";
@@ -28,6 +28,7 @@ export default function HomeHeader({
   vegMode = false,
   handleVegModeChange
 }) {
+  const routerLocation = useRouterLocation();
   const activePlaceholders = placeholders && placeholders.length > 0 ? placeholders : DEFAULT_PLACEHOLDERS;
   const [internalIndex, setInternalIndex] = useState(0);
 
@@ -70,7 +71,17 @@ export default function HomeHeader({
       {/* Concept 2 Row 1: Brand (Left) | Location (Center) | Actions (Right) */}
       <div className="flex items-center justify-between gap-2">
         {/* Left: Brand Crest & Wordmark */}
-        <Link to="/food" className="flex items-center gap-3 group shrink-0">
+        <Link
+          to="/food/user"
+          onClick={(e) => {
+            const p = routerLocation?.pathname || '';
+            if (p === '/food' || p === '/food/' || p === '/food/user' || p === '/food/user/') {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+          className="flex items-center gap-3 group shrink-0"
+        >
           <div className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] rounded-full overflow-hidden border-2 border-[#C5A059]/60 shadow-sm bg-[#FFFDF9] shrink-0 flex items-center justify-center ring-2 ring-[#C5A059]/15">
             <img
               src="/visit-logo-transparent.png"
