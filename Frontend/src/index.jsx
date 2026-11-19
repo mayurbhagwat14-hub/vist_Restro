@@ -158,6 +158,9 @@ try {
       <App />
     </AppProviders>
   )
+  if (typeof window !== 'undefined' && typeof window.__dismissVistPreloader === 'function') {
+    window.__dismissVistPreloader()
+  }
 } catch (bootErr) {
   console.error("Critical frontend boot error:", bootErr)
   rootElement.innerHTML = `

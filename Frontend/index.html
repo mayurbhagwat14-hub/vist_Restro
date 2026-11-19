@@ -104,6 +104,28 @@
         <div class="vist-preloader-spinner"></div>
       </div>
     </div>
+    <script>
+      (function() {
+        var preloader = document.querySelector('.vist-preloader');
+        window.__dismissVistPreloader = function() {
+          if (!preloader) preloader = document.querySelector('.vist-preloader');
+          if (!preloader || !preloader.parentNode) return;
+          preloader.style.transition = 'opacity 0.2s ease-out';
+          preloader.style.opacity = '0';
+          setTimeout(function() {
+            if (preloader && preloader.parentNode) {
+              preloader.parentNode.removeChild(preloader);
+            }
+          }, 200);
+        };
+        // Watchdog failsafe: never allow splash screen to hang for more than 2.2s on mobile cold start
+        setTimeout(function() {
+          if (window.__dismissVistPreloader) {
+            window.__dismissVistPreloader();
+          }
+        }, 2200);
+      })();
+    </script>
     <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>

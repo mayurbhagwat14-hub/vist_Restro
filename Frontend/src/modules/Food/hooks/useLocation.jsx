@@ -14,6 +14,33 @@ const DEFAULT_LOCATION = {
   formattedAddress: "Select location"
 }
 
+export const DEFAULT_SERVICE_LOCATION = {
+  latitude: 22.7196,
+  longitude: 75.8577,
+  city: "Indore",
+  state: "Madhya Pradesh",
+  area: "Indore",
+  address: "Indore, Madhya Pradesh",
+  formattedAddress: "Indore, Madhya Pradesh",
+  isDefaultFallback: true
+}
+
+export const checkGeoPermissionFast = async (timeoutMs = 800) => {
+  if (typeof navigator === "undefined" || !navigator.permissions || !navigator.permissions.query) {
+    return "prompt"
+  }
+  try {
+    const queryPromise = navigator.permissions.query({ name: "geolocation" })
+    const timeoutPromise = new Promise((resolve) =>
+      setTimeout(() => resolve({ state: "prompt" }), timeoutMs)
+    )
+    const res = await Promise.race([queryPromise, timeoutPromise])
+    return res?.state || "prompt"
+  } catch {
+    return "prompt"
+  }
+}
+
 
 // BigDataCloud reverse-geocode is expensive/noisy if many components mount `useLocation()`.
 // This module-level guard dedupes concurrent calls + rate-limits starts across the whole app.
@@ -1061,21 +1088,18 @@ export function useLocation() {
                 if (showLoading) setLoading(false)
                 resolve(fallback)
               } else {
-                // No fallback available: keep location unset instead of forcing an inaccurate city.
-                debugWarn("?? No fallback location available, keeping location unset")
-                setLocation(null)
-                setError(err.code === 3 ? "Location request timed out. Please try again." : err.message)
-                setPermissionGranted(false)
+                debugLog("Using default service location fallback for instant render")
+                setLocation(DEFAULT_SERVICE_LOCATION)
+                setPermissionGranted(true)
                 if (showLoading) setLoading(false)
-                resolve(null)
+                resolve(DEFAULT_SERVICE_LOCATION)
               }
             } catch (fallbackErr) {
-              debugWarn("?? Fallback retrieval failed:", fallbackErr)
-              setLocation(null)
-              setError(err.code === 3 ? "Location request timed out. Please try again." : err.message)
-              setPermissionGranted(false)
+              debugWarn("Fallback retrieval using default service location:", fallbackErr)
+              setLocation(DEFAULT_SERVICE_LOCATION)
+              setPermissionGranted(true)
               if (showLoading) setLoading(false)
-              resolve(null)
+              resolve(DEFAULT_SERVICE_LOCATION)
             }
           },
           options
@@ -1086,10 +1110,12 @@ export function useLocation() {
     // Try with high accuracy first
     // If forceFresh is true, don't use cached location (maximumAge: 0)
     // Otherwise, allow cached location for faster response
+    // Fast initial location: Try network-based geolocation (sub-300ms) with a 3.5s timeout.
+    // Never stall the initial render for 15s waiting for GPS satellites.
     return getPositionWithRetry({
-      enableHighAccuracy: true,  // Use GPS for exact location (highest accuracy)
-      timeout: 15000,            // 15 seconds timeout (gives GPS more time to get accurate fix)
-      maximumAge: forceFresh ? 0 : 60000  // If forceFresh, get fresh location. Otherwise allow 1 minute cache
+      enableHighAccuracy: false,
+      timeout: 3500,
+      maximumAge: forceFresh ? 10000 : 300000
     })
   }
 
@@ -1317,7 +1343,7 @@ export function useLocation() {
 
     const loadingTimeout = setTimeout(() => {
       setLoading(false)
-    }, 5000)
+    }, 1500)
 
     const init = async () => {
       try {
@@ -1325,67 +1351,59 @@ export function useLocation() {
         let initialResolvedLocation = null
         let hasInitialLocation = false
 
-        // Only preload from storage if mode is 'saved'. 
-        // If mode is 'current', we want a fresh location every time.
-        if (mode === "saved") {
-          const stored = localStorage.getItem("userLocation")
-          if (stored) {
-            try {
-              const loc = JSON.parse(stored)
-              if (loc?.latitude && loc?.longitude) {
-                setLocation(loc)
-                initialResolvedLocation = loc
-                hasInitialLocation = true
-                setLoading(false)
-                setPermissionGranted(true)
-              }
-            } catch (e) {
-              debugWarn("Failed to parse stored location", e)
-            }
-          }
-
-          if (!hasInitialLocation) {
-            const dbLoc = await fetchLocationFromDB()
-            if (dbLoc) {
-              setLocation(dbLoc)
-              initialResolvedLocation = dbLoc
+        // Always check cached location first for instant cold start
+        const stored = localStorage.getItem("userLocation")
+        if (stored) {
+          try {
+            const loc = JSON.parse(stored)
+            if (loc?.latitude && loc?.longitude) {
+              setLocation(loc)
+              initialResolvedLocation = loc
               hasInitialLocation = true
               setLoading(false)
               setPermissionGranted(true)
             }
+          } catch (e) {
+            debugWarn("Failed to parse stored location", e)
           }
-        } else {
-          // Mode is current, don't use the old cached location
-          localStorage.removeItem("userLocation")
         }
 
         if (!hasInitialLocation) {
-          setLocation(null)
+          const dbLoc = await fetchLocationFromDB().catch(() => null)
+          if (dbLoc) {
+            setLocation(dbLoc)
+            initialResolvedLocation = dbLoc
+            hasInitialLocation = true
+            setLoading(false)
+            setPermissionGranted(true)
+          }
+        }
+
+        // On first open with no saved location, use default service location immediately so UI never hangs!
+        if (!hasInitialLocation) {
+          setLocation(DEFAULT_SERVICE_LOCATION)
+          initialResolvedLocation = DEFAULT_SERVICE_LOCATION
+          hasInitialLocation = true
           setLoading(false)
         }
 
         const tryAutoResolveLocation = async () => {
-          if (mode === "current") {
-            // Always get fresh location for current mode
-            const freshLoc = await getLocation(true, true)
+          try {
+            const freshLoc = await getLocation(true, false, false)
             if (freshLoc) {
               setLocation(freshLoc)
               if (AUTO_START_LIVE_WATCH) startWatchingLocation()
             }
-          } else if (AUTO_START_LIVE_WATCH) {
-            startWatchingLocation()
+          } catch (autoErr) {
+            debugWarn("Background location auto-resolve skipped:", autoErr?.message)
           }
         }
 
-        if (navigator.permissions && navigator.permissions.query) {
-          const result = await navigator.permissions.query({ name: 'geolocation' })
-          if (result.state === 'granted') {
-            await tryAutoResolveLocation()
-          } else if (mode === "current") {
-            // Denied and we wanted current: clear it
-            setLocation(null)
-            setPermissionGranted(false)
-          }
+        // Check permission with safe race timeout (never hangs in WebView)
+        const permState = await checkGeoPermissionFast(800)
+        if (permState === 'granted') {
+          setPermissionGranted(true)
+          tryAutoResolveLocation()
         } else {
           setPermissionGranted(false)
         }
@@ -1408,8 +1426,7 @@ export function useLocation() {
     setLoading(true)
     setError(null)
     try {
-      localStorage.removeItem("userLocation")
-      const loc = await getLocation(true, true, true)
+      const loc = await getLocation(true, false, false)
       setPermissionGranted(true)
       if (AUTO_START_LIVE_WATCH) startWatchingLocation()
       return loc

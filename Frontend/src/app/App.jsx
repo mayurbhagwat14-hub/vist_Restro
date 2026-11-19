@@ -7,6 +7,10 @@ function App() {
   useEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") return;
 
+    if (typeof window.__dismissVistPreloader === 'function') {
+      window.__dismissVistPreloader();
+    }
+
     const isTextInputFocused = () => {
       const el = document.activeElement;
       if (!el) return false;

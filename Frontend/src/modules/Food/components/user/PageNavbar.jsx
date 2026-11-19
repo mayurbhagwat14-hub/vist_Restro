@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronDown, ShoppingCart, Wallet } from "lucide-react"
 import { Button } from "@food/components/ui/button"
-import { useLocation } from "@food/hooks/useLocation"
+import { useLocation, checkGeoPermissionFast } from "@food/hooks/useLocation"
 import { useCart } from "@food/context/CartContext"
 import { useLocationSelector } from "./UserLayout"
 import { FaLocationDot } from "react-icons/fa6"
@@ -67,13 +67,8 @@ export default function PageNavbar({
     const timeoutId = setTimeout(async () => {
       try {
         let shouldRequest = false
-        if (navigator.permissions?.query) {
-          const result = await navigator.permissions.query({ name: 'geolocation' })
-          shouldRequest = result.state === 'granted'
-        } else {
-          // Fallback for webviews/browsers without Permissions API support.
-          shouldRequest = false
-        }
+        const permState = await checkGeoPermissionFast(800)
+        shouldRequest = permState === 'granted'
 
         if (!shouldRequest) {
           debugLog("?? Geolocation permission not granted; waiting for user action")

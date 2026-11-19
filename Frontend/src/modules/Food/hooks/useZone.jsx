@@ -70,7 +70,7 @@ export function useZone(location) {
     if (typeof window !== 'undefined' && localStorage.getItem('userZoneId')) {
       return 'IN_SERVICE'
     }
-    return 'loading'
+    return 'IN_SERVICE' // Default to IN_SERVICE for instant cold start rendering
   })
   const [mode, setMode] = useState(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('userGlobalService') === 'true') {
