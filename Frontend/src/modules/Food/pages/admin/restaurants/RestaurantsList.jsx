@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react"
-import { Loader } from '@googlemaps/js-api-loader'
+import { getGoogleMapsLoader } from "@food/utils/googleMapsLoader"
 import { getGoogleMapsApiKey } from "@food/utils/googleMapsApiKey"
 import { Search, Trash2, Loader2, Eye, Pencil, Plus, ChevronLeft, ChevronRight, Check, X, Building2, MapPin, Phone, Mail, Clock, Star, AlertTriangle, ShieldCheck, ShieldX, Save } from "lucide-react"
 import { adminAPI, uploadAPI } from "@food/api"
@@ -1051,11 +1051,7 @@ const MapPicker = ({ form, setForm }) => {
 
     const initializeMap = async () => {
       try {
-        const loader = new Loader({
-          apiKey: apiKey,
-          version: "weekly",
-          libraries: ["places"],
-        })
+        const loader = getGoogleMapsLoader(apiKey)
         const google = await loader.load()
         if (!isMounted || !mapContainerRef.current) {
           return

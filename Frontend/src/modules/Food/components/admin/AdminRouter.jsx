@@ -51,6 +51,24 @@ const AdsList = lazy(() => import("@food/pages/admin/advertisement/AdsList"));
 const Chattings = lazy(() => import("@food/pages/admin/Chattings"));
 const ContactMessages = lazy(() => import("@food/pages/admin/ContactMessages"));
 const SafetyEmergencyReports = lazy(() => import("@food/pages/admin/SafetyEmergencyReports"));
+// Deliveryman Management
+const DeliveryBoyCommission = lazy(() => import("@food/pages/admin/DeliveryBoyCommission"));
+const DeliveryCashLimit = lazy(() => import("@food/pages/admin/DeliveryCashLimit"));
+const CashLimitSettlement = lazy(() => import("@food/pages/admin/CashLimitSettlement"));
+const CashConfirmations = lazy(() => import("@food/pages/admin/CashConfirmations"));
+const DeliveryWithdrawal = lazy(() => import("@food/pages/admin/DeliveryWithdrawal"));
+const DeliveryBoyWallet = lazy(() => import("@food/pages/admin/DeliveryBoyWallet"));
+const DeliveryEmergencyHelp = lazy(() => import("@food/pages/admin/DeliveryEmergencyHelp"));
+const DeliverySupportTickets = lazy(() => import("@food/pages/admin/DeliverySupportTickets"));
+const JoinRequest = lazy(() => import("@food/pages/admin/delivery-partners/JoinRequest"));
+const AddDeliveryman = lazy(() => import("@food/pages/admin/delivery-partners/AddDeliveryman"));
+const DeliverymanList = lazy(() => import("@food/pages/admin/delivery-partners/DeliverymanList"));
+const DeliverymanReviews = lazy(() => import("@food/pages/admin/delivery-partners/DeliverymanReviews"));
+const DeliverymanBonus = lazy(() => import("@food/pages/admin/delivery-partners/DeliverymanBonus"));
+const EarningAddon = lazy(() => import("@food/pages/admin/delivery-partners/EarningAddon"));
+const EarningAddonHistory = lazy(() => import("@food/pages/admin/delivery-partners/EarningAddonHistory"));
+const DeliveryEarnings = lazy(() => import("@food/pages/admin/delivery-partners/DeliveryEarnings"));
+const DeliveryPartnerWorkload = lazy(() => import("@food/pages/admin/dispatch/DeliveryPartnerWorkload"));
 // Customer Management
 const Customers = lazy(() => import("@food/pages/admin/Customers"));
 const SupportTickets = lazy(() => import("@food/pages/admin/SupportTickets"));
@@ -302,6 +320,25 @@ export default function AdminRouter() {
             
             <Route path="customers" element={<Customers />} />
             <Route path="support-tickets" element={<SupportTickets />} />
+
+            {/* Deliveryman Management */}
+            <Route path="delivery-boy-commission" element={<DeliveryBoyCommission />} />
+            <Route path="delivery-cash-limit" element={<DeliveryCashLimit />} />
+            <Route path="cash-limit-settlement" element={<CashLimitSettlement />} />
+            <Route path="cash-confirmations" element={<CashConfirmations />} />
+            <Route path="delivery-withdrawal" element={<DeliveryWithdrawal />} />
+            <Route path="delivery-boy-wallet" element={<DeliveryBoyWallet />} />
+            <Route path="delivery-emergency-help" element={<DeliveryEmergencyHelp />} />
+            <Route path="delivery-support-tickets" element={<DeliverySupportTickets />} />
+            <Route path="delivery-partners" element={<DeliverymanList />} />
+            <Route path="delivery-partners/add" element={<AddDeliveryman />} />
+            <Route path="delivery-partners/join-request" element={<JoinRequest />} />
+            <Route path="delivery-partners/reviews" element={<DeliverymanReviews />} />
+            <Route path="delivery-partners/bonus" element={<DeliverymanBonus />} />
+            <Route path="delivery-partners/earning-addon" element={<EarningAddon />} />
+            <Route path="delivery-partners/earning-addon-history" element={<EarningAddonHistory />} />
+            <Route path="delivery-partners/earnings" element={<DeliveryEarnings />} />
+            <Route path="delivery-partners/workload" element={<DeliveryPartnerWorkload />} />
             <Route path="wallet/add-fund" element={<AddFund />} />
             <Route path="wallet/bonus" element={<Bonus />} />
             <Route path="loyalty-point/report" element={<LoyaltyPointReport />} />

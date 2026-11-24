@@ -5,14 +5,14 @@ import { GroceryOrder } from '../models/groceryOrder.model.js';
 import { logger } from '../../../../utils/logger.js';
 import { FoodUser } from '../../../../core/users/user.model.js';
 const FoodRestaurant = mongoose.models.FoodRestaurant || mongoose.model('FoodRestaurant', new mongoose.Schema({}, { strict: false, collection: 'food_restaurants' }));
-const FoodDeliveryPartner = mongoose.models.FoodDeliveryPartner || mongoose.model('FoodDeliveryPartner', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_partners' }));
+import { FoodDeliveryPartner } from '../../delivery/models/deliveryPartner.model.js';
 import { FoodZone } from '../../admin/models/zone.model.js';
 import { FoodFeeSettings } from '../../admin/models/feeSettings.model.js';
 import { ValidationError, ForbiddenError, NotFoundError } from '../../../../core/auth/errors.js';
 import { buildPaginationOptions, buildPaginatedResult } from '../../../../utils/helpers.js';
 import { FoodOffer } from '../../admin/models/offer.model.js';
 import { FoodOfferUsage } from '../../admin/models/offerUsage.model.js';
-const FoodDeliveryCommissionRule = mongoose.models.FoodDeliveryCommissionRule || mongoose.model('FoodDeliveryCommissionRule', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_commission_rules' }));
+import { FoodDeliveryCommissionRule } from '../../admin/models/deliveryCommissionRule.model.js';
 const FoodRestaurantCommission = mongoose.models.FoodRestaurantCommission || mongoose.model('FoodRestaurantCommission', new mongoose.Schema({}, { strict: false, collection: 'food_restaurant_commissions' }));
 import { FoodBusinessSettings } from '../../admin/models/businessSettings.model.js';
 import { FoodTransaction } from '../models/foodTransaction.model.js';
@@ -33,6 +33,8 @@ import * as foodTransactionService from './foodTransaction.service.js';
 import * as userWalletService from '../../user/services/userWallet.service.js';
 import { calculateOrderPricing } from './order-pricing.service.js';
 import * as paymentService from './order-payment.service.js';
+import * as deliveryService from './order-delivery.service.js';
+import { detectZoneIdForPoint, isPointInZonePolygon } from '../../utils/zoneGeo.js';
 import {
   enqueueOrderEvent,
   haversineKm,
@@ -667,6 +669,8 @@ export async function createOrder(userId, dto, bypassRazorpay = false) {
     const order = new FoodOrder({
       userId: toObjectId(userId, 'User ID'),
       restaurantIds: distinctRestaurantIds.map(id => toObjectId(id, 'Restaurant ID')),
+      // Primary pickup restaurant — used by the delivery partner flow (pickup location / contact).
+      restaurantId: distinctRestaurantIds[0] ? toObjectId(distinctRestaurantIds[0], 'Restaurant ID') : undefined,
       moduleType: dto.moduleType || 'food',
       zoneId: dto.zoneId ? toObjectId(dto.zoneId, 'Zone ID') : (restaurant.zoneId ? toObjectId(restaurant.zoneId, 'Restaurant Zone ID') : null),
       items: populatedItems,
@@ -1412,7 +1416,30 @@ export async function getOrderById(
 }
 
 export async function getDropOtpUser(orderId, userId) {
-  throw new ValidationError("Delivery OTP verification is discontinued.");
+  const identity = buildOrderIdentityFilter(orderId);
+  if (!identity) throw new ValidationError("Order id required");
+  const order = await FoodOrder.findOne({
+    ...identity,
+    userId: new mongoose.Types.ObjectId(userId),
+  }).select("+deliveryOtp");
+  if (!order) throw new NotFoundError("Order not found");
+
+  const phase = order.deliveryState?.currentPhase;
+  const isEligible = phase === "at_drop";
+
+  if (!isEligible) {
+    throw new ValidationError(
+      "OTP will appear once the delivery partner requests it at your location."
+    );
+  }
+
+  if (!String(order.deliveryOtp || "").trim()) {
+    throw new ValidationError(
+      "OTP is not available yet. Ask the delivery partner to request OTP again."
+    );
+  }
+
+  return { otp: order.deliveryOtp };
 }
 
 /**
@@ -1974,51 +2001,47 @@ export async function resendDeliveryNotificationAdmin(orderId) {
 }
 
 export async function getCurrentTripDelivery(deliveryPartnerId) {
-  return null;
+  return deliveryService.getCurrentTripDelivery(deliveryPartnerId);
 }
 
 // ----- Delivery: available, accept, reject, status -----
 export async function listOrdersAvailableDelivery(deliveryPartnerId, query) {
-  return { docs: [], total: 0, page: 1, limit: 10 };
+  return deliveryService.listOrdersAvailableDelivery(deliveryPartnerId, query);
 }
 
 export async function acceptOrderDelivery(orderId, deliveryPartnerId) {
-  throw new ValidationError("Delivery service is disabled");
+  return deliveryService.acceptOrderDelivery(orderId, deliveryPartnerId);
 }
 
 export async function rejectOrderDelivery(orderId, deliveryPartnerId) {
-  throw new ValidationError("Delivery service is disabled");
+  return deliveryService.rejectOrderDelivery(orderId, deliveryPartnerId);
 }
 
 export async function confirmReachedPickupDelivery(orderId, deliveryPartnerId) {
-  throw new ValidationError("Delivery service is disabled");
+  return deliveryService.confirmReachedPickupDelivery(orderId, deliveryPartnerId);
 }
 
 /**
  * Slide to confirm pickup (Bill uploaded)
  */
-export async function confirmPickupDelivery(
-  orderId,
-  deliveryPartnerId,
-  billImageUrl,
-) {
-  throw new ValidationError("Delivery service is disabled");
+export async function confirmPickupDelivery(orderId, deliveryPartnerId, billImageUrl) {
+  return deliveryService.confirmPickupDelivery(orderId, deliveryPartnerId, billImageUrl);
 }
 
 export async function confirmReachedDropDelivery(orderId, deliveryPartnerId) {
-  throw new ValidationError("Delivery service is disabled");
+  return deliveryService.confirmReachedDropDelivery(orderId, deliveryPartnerId);
 }
 
 export async function verifyDropOtpDelivery(orderId, deliveryPartnerId, otp) {
-  throw new ValidationError("Delivery service is disabled");
+  return deliveryService.verifyDropOtpDelivery(orderId, deliveryPartnerId, otp);
 }
 
 export async function completeDelivery(orderId, deliveryPartnerId, body = {}) {
-  throw new ValidationError("Delivery service is disabled");
+  return deliveryService.completeDelivery(orderId, deliveryPartnerId, body);
 }
 
 export async function updateOrderStatusDelivery(orderId, deliveryPartnerId, orderStatus) {
-  throw new ValidationError("Delivery service is disabled");
+  return deliveryService.updateOrderStatusDelivery(orderId, deliveryPartnerId, orderStatus);
 }
 
 // ----- COD QR collection -----
@@ -2302,30 +2325,212 @@ export async function assignDeliveryPartnerAdmin(
   orderId,
   deliveryPartnerId,
   adminId,
+  options = {}
 ) {
-  const order = await FoodOrder.findById(orderId);
+  const allowOffline = Boolean(options.allowOffline);
+  const isReassign = Boolean(options.reassign);
+
+  const identity = buildOrderIdentityFilter(orderId);
+  if (!identity) throw new ValidationError("Valid order id required");
+
+  const order = await FoodOrder.findOne(identity);
   if (!order) throw new NotFoundError("Order not found");
-  if (order.dispatch.status === "accepted")
-    throw new ValidationError("Order already accepted by partner");
 
-  const partner = await FoodDeliveryPartner.findById(deliveryPartnerId)
-    .select("status")
-    .lean();
-  if (!partner || partner.status !== "approved")
-    throw new ValidationError("Delivery partner not available");
+  if (['grocery', 'accessories'].includes(order.moduleType)) {
+    throw new ValidationError("Delivery partners can only be assigned to food orders");
+  }
 
-  order.dispatch.status = 'assigned';
-  order.dispatch.deliveryPartnerId = new mongoose.Types.ObjectId(deliveryPartnerId);
-  order.dispatch.assignedAt = new Date();
-  pushStatusHistory(order, { byRole: 'ADMIN', byId: adminId, from: order.dispatch.status, to: 'assigned' });
-  await order.save();
+  // Older Vist orders only stored restaurantIds[]; the rider flow needs a primary pickup restaurant.
+  if (!order.restaurantId && Array.isArray(order.restaurantIds) && order.restaurantIds.length > 0) {
+    await FoodOrder.updateOne({ _id: order._id }, { $set: { restaurantId: order.restaurantIds[0] } });
+    order.restaurantId = order.restaurantIds[0];
+  }
+
+  const TERMINAL_STATUSES = [
+    'delivered',
+    'cancelled_by_user',
+    'cancelled_by_restaurant',
+    'cancelled_by_admin'
+  ];
+  if (TERMINAL_STATUSES.includes(order.orderStatus)) {
+    throw new ValidationError(`Cannot assign partner to order with terminal status '${order.orderStatus}'`);
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(deliveryPartnerId)) {
+    throw new ValidationError("Invalid delivery partner ID");
+  }
+
+  const partner = await FoodDeliveryPartner.findById(deliveryPartnerId).lean();
+  if (!partner) throw new NotFoundError("Delivery partner not found");
+  if (partner.status !== "approved") {
+    throw new ValidationError(`Delivery partner is not approved (current status: ${partner.status})`);
+  }
+
+  const isOnline = partner.availabilityStatus === 'online';
+  if (!isOnline && !allowOffline) {
+    throw new ValidationError("Delivery partner is currently offline. Enable allowOffline to assign anyway.");
+  }
+
+  const currentAssignedPartnerId = order.dispatch?.deliveryPartnerId?.toString?.();
+  const targetPartnerId = deliveryPartnerId.toString();
+
+  // Idempotency: already assigned to this exact partner
+  if (
+    currentAssignedPartnerId === targetPartnerId &&
+    ['assigned', 'accepted'].includes(order.dispatch?.status)
+  ) {
+    try {
+      const io = getIO();
+      if (io) {
+        const restaurant = await FoodRestaurant.findById(order.restaurantId)
+          .select('restaurantName location addressLine1 area city state')
+          .lean();
+        const payload = {
+          ...buildDeliverySocketPayload(order, restaurant),
+          isDirectAssignment: true,
+          directAssignment: true,
+        };
+        io.to(rooms.delivery(targetPartnerId)).emit('new_order', payload);
+        io.to(rooms.delivery(targetPartnerId)).emit('new_order_available', payload);
+        io.to(rooms.delivery(targetPartnerId)).emit('direct_assignment', payload);
+      }
+    } catch (_) {}
+    return normalizeOrderForClient(order);
+  }
+
+  // Already assigned to a different partner
+  const isDifferentPartnerAssigned =
+    currentAssignedPartnerId &&
+    currentAssignedPartnerId !== targetPartnerId &&
+    ['assigned', 'accepted'].includes(order.dispatch?.status);
+
+  if (isDifferentPartnerAssigned && !isReassign) {
+    throw new ValidationError(
+      "Order is already assigned to another delivery partner. Explicit reassignment is required."
+    );
+  }
+
+  const previousPartnerId = isDifferentPartnerAssigned ? currentAssignedPartnerId : null;
+  const previousDispatchStatus = order.dispatch?.status || 'unassigned';
+
+  // Atomic update to prevent concurrent assignment race conditions
+  const atomicFilter = {
+    _id: order._id,
+    orderStatus: { $nin: TERMINAL_STATUSES }
+  };
+  if (!isReassign) {
+    atomicFilter.$or = [
+      { 'dispatch.deliveryPartnerId': null },
+      { 'dispatch.status': 'unassigned' },
+      { 'dispatch.deliveryPartnerId': new mongoose.Types.ObjectId(deliveryPartnerId) }
+    ];
+  }
+
+  const updatedOrder = await FoodOrder.findOneAndUpdate(
+    atomicFilter,
+    {
+      $set: {
+        'dispatch.status': 'assigned',
+        'dispatch.deliveryPartnerId': new mongoose.Types.ObjectId(deliveryPartnerId),
+        'dispatch.assignedAt': new Date(),
+        'dispatch.acceptedAt': null
+      },
+      $push: {
+        statusHistory: {
+          byRole: 'ADMIN',
+          byId: adminId,
+          from: previousDispatchStatus,
+          to: 'assigned',
+          note: isReassign
+            ? `Reassigned by admin from partner ${previousPartnerId || 'unknown'}`
+            : 'Assigned by admin',
+          at: new Date()
+        }
+      }
+    },
+    { new: true }
+  ).populate('restaurantId userId');
+
+  if (!updatedOrder) {
+    throw new ValidationError("Assignment conflict: order was updated concurrently or is no longer eligible.");
+  }
+
+  // Real-time direct updates: strictly direct, never broadcast
+  try {
+    const io = getIO();
+    if (io) {
+      const restaurant = updatedOrder.restaurantId?.toObject ? updatedOrder.restaurantId.toObject() : updatedOrder.restaurantId;
+      const payload = {
+        ...buildDeliverySocketPayload(updatedOrder, restaurant),
+        isDirectAssignment: true,
+        directAssignment: true,
+      };
+
+      // Targeted notification ONLY to the newly assigned delivery partner
+      io.to(rooms.delivery(deliveryPartnerId)).emit('new_order', payload);
+      io.to(rooms.delivery(deliveryPartnerId)).emit('new_order_available', payload);
+      io.to(rooms.delivery(deliveryPartnerId)).emit('direct_assignment', payload);
+
+      // If previous partner existed, notify them of unassignment
+      if (previousPartnerId) {
+        const unassignPayload = {
+          orderMongoId: updatedOrder._id.toString(),
+          orderId: updatedOrder.order_id || updatedOrder._id.toString(),
+          reason: 'Order reassigned by admin to another partner',
+          claimedBy: deliveryPartnerId.toString()
+        };
+        io.to(rooms.delivery(previousPartnerId)).emit('order_unassigned', unassignPayload);
+        io.to(rooms.delivery(previousPartnerId)).emit('order_reassigned_elsewhere', unassignPayload);
+      }
+
+      // Update admin dashboard rooms with new dispatch state
+      io.to(rooms.admin()).emit('admin_dispatch_updated', {
+        orderId: updatedOrder.order_id || updatedOrder._id.toString(),
+        orderMongoId: updatedOrder._id.toString(),
+        status: 'assigned',
+        deliveryPartnerId: deliveryPartnerId.toString(),
+        deliveryPartnerName: partner.name || '',
+        previousPartnerId: previousPartnerId || null
+      });
+      io.to(rooms.admin()).emit('admin_order_status_update', {
+        orderMongoId: updatedOrder._id.toString(),
+        orderId: updatedOrder.order_id || updatedOrder._id.toString(),
+        orderStatus: updatedOrder.orderStatus,
+        dispatchStatus: 'assigned',
+        deliveryPartnerId: deliveryPartnerId.toString()
+      });
+    }
+
+    // Direct FCM Push to the selected partner only
+    void notifyOwnerSafely(
+      { ownerType: 'DELIVERY_PARTNER', ownerId: String(deliveryPartnerId) },
+      {
+        title: '🛵 New Order Assigned!',
+        body: `You have been assigned order #${updatedOrder.order_id || updatedOrder._id}. Tap to view details and proceed to pickup.`,
+        sound: 'default',
+        channelId: 'delivery_orders',
+        sendToAllDevices: true,
+        data: {
+          type: 'order_assigned',
+          orderId: updatedOrder.order_id || updatedOrder._id.toString(),
+          orderMongoId: updatedOrder._id.toString(),
+          link: '/food/delivery',
+        },
+      }
+    );
+  } catch (notifErr) {
+    logger.warn(`Failed notifying assigned partner ${deliveryPartnerId}: ${notifErr?.message || notifErr}`);
+  }
+
   enqueueOrderEvent('delivery_partner_assigned', {
-    orderMongoId: order._id?.toString?.(),
-    orderId: order._id.toString(),
-    deliveryPartnerId,
-    adminId
+    orderMongoId: updatedOrder._id.toString(),
+    orderId: updatedOrder.order_id || updatedOrder._id.toString(),
+    deliveryPartnerId: deliveryPartnerId.toString(),
+    adminId,
+    isReassign
   });
-  return normalizeOrderForClient(order);
+
+  return normalizeOrderForClient(updatedOrder);
 }
 
 export async function deleteOrderAdmin(orderId, adminId) {
@@ -2677,3 +2882,408 @@ export async function submitOrderRatings(orderId, userId, dto) {
   return normalizeOrderForClient(updatedOrder, 'user');
 }
 
+export async function getActiveTripsDelivery(deliveryPartnerId) {
+  return deliveryService.getActiveTripsDelivery(deliveryPartnerId);
+}
+
+export async function getPartnerOrderCapacity(deliveryPartnerId) {
+  return deliveryService.getPartnerOrderCapacity(deliveryPartnerId);
+}
+
+export async function getDeliveryPartnersWorkload({
+  orderId = null,
+  search = '',
+  presence = null,
+  workload = null,
+  page = 1,
+  limit = 300
+} = {}) {
+  const ACTIVE_DELIVERY_STATUSES = [
+    'confirmed',
+    'preparing',
+    'ready_for_pickup',
+    'reached_pickup',
+    'picked_up',
+    'reached_drop'
+  ];
+
+  let orderDoc = null;
+  let restaurant = null;
+  let restaurantCoords = null;
+  let restaurantZone = null;
+  let restaurantZoneId = null;
+  let restaurantZoneName = null;
+
+  if (orderId) {
+    const identity = buildOrderIdentityFilter(orderId);
+    if (identity) {
+      orderDoc = await FoodOrder.findOne(identity)
+        .select('restaurantId restaurantIds zoneId dispatch restaurantName customerName customerPhone order_id deliveryAddress')
+        .populate({
+          path: 'restaurantId',
+          select: 'restaurantName name zoneId location addressLine1 area city state pincode'
+        })
+        .populate({
+          path: 'restaurantIds',
+          select: 'restaurantName name zoneId location addressLine1 area city state pincode'
+        })
+        .lean();
+
+      // Older Vist orders only have restaurantIds[] — use the first one as pickup restaurant.
+      if (orderDoc && !orderDoc.restaurantId && Array.isArray(orderDoc.restaurantIds) && orderDoc.restaurantIds[0]) {
+        orderDoc.restaurantId = orderDoc.restaurantIds[0];
+      }
+
+      if (orderDoc?.restaurantId) {
+        restaurant = orderDoc.restaurantId;
+        const coords = restaurant.location?.coordinates;
+        if (Array.isArray(coords) && coords.length >= 2) {
+          restaurantCoords = { lng: coords[0], lat: coords[1] };
+        }
+
+        // 1. Check restaurant's configured zoneId (primary source of truth)
+        if (restaurant.zoneId) {
+          restaurantZone = await FoodZone.findById(restaurant.zoneId).lean();
+        }
+      }
+
+      // 2. Check order's configured zoneId if not resolved from restaurant
+      if (!restaurantZone && orderDoc?.zoneId) {
+        restaurantZone = await FoodZone.findById(orderDoc.zoneId).lean();
+      }
+
+      // 3. Fallback: Check restaurant GPS point-in-zone if configured zone wasn't set
+      if (!restaurantZone && restaurantCoords) {
+        const detectedId = await detectZoneIdForPoint(restaurantCoords.lat, restaurantCoords.lng);
+        if (detectedId) {
+          restaurantZone = await FoodZone.findById(detectedId).lean();
+        }
+      }
+
+      // 4. Fallback: match by restaurant city
+      if (!restaurantZone && (restaurant?.city || orderDoc?.deliveryAddress?.city)) {
+        const cityCandidate = String(restaurant?.city || orderDoc?.deliveryAddress?.city || '').trim();
+        if (cityCandidate) {
+          restaurantZone = await FoodZone.findOne({
+            isActive: true,
+            $or: [
+              { name: { $regex: new RegExp(`^${cityCandidate}$`, 'i') } },
+              { zoneName: { $regex: new RegExp(`^${cityCandidate}$`, 'i') } }
+            ]
+          }).lean();
+        }
+      }
+
+      if (restaurantZone) {
+        restaurantZoneId = restaurantZone._id.toString();
+        restaurantZoneName = restaurantZone.name || restaurantZone.zoneName || 'Main Zone';
+      } else {
+        restaurantZoneName = restaurant?.city || orderDoc?.deliveryAddress?.city || 'Default Zone';
+      }
+    }
+  }
+
+  // Fetch all active zones configured in the system
+  const allZones = await FoodZone.find({ isActive: true })
+    .select('_id name zoneName coordinates')
+    .lean();
+  const zoneByIdMap = new Map();
+  for (const z of allZones) {
+    zoneByIdMap.set(String(z._id), z);
+  }
+
+  const partnerFilter = { status: 'approved' };
+  if (search && String(search).trim()) {
+    const term = String(search).trim();
+    partnerFilter.$or = [
+      { name: { $regex: term, $options: 'i' } },
+      { phone: { $regex: term, $options: 'i' } },
+      { email: { $regex: term, $options: 'i' } },
+      { vehicleNumber: { $regex: term, $options: 'i' } },
+      { city: { $regex: term, $options: 'i' } }
+    ];
+  }
+  if (presence === 'online' || presence === 'offline') {
+    partnerFilter.availabilityStatus = presence;
+  }
+
+  const partners = await FoodDeliveryPartner.find(partnerFilter)
+    .select('_id name phone email availabilityStatus vehicleType vehicleName vehicleNumber profilePhoto lastLat lastLng lastLocationAt rating totalRatings city zoneId')
+    .sort({ availabilityStatus: -1, createdAt: -1 })
+    .lean();
+
+  const partnerIds = partners.map((p) => p._id);
+
+  let activeCountsMap = new Map();
+  if (partnerIds.length > 0) {
+    const activeAgg = await FoodOrder.aggregate([
+      {
+        $match: {
+          moduleType: { $nin: ['grocery', 'accessories'] },
+          'dispatch.deliveryPartnerId': { $in: partnerIds },
+          'dispatch.status': { $in: ['assigned', 'accepted'] },
+          orderStatus: { $in: ACTIVE_DELIVERY_STATUSES }
+        }
+      },
+      {
+        $group: {
+          _id: '$dispatch.deliveryPartnerId',
+          count: { $sum: 1 },
+          orders: {
+            $push: {
+              orderMongoId: { $toString: '$_id' },
+              orderId: { $ifNull: ['$order_id', { $toString: '$_id' }] },
+              orderStatus: '$orderStatus',
+              dispatchStatus: '$dispatch.status',
+              restaurantName: '$restaurantName',
+              assignedAt: '$dispatch.assignedAt',
+              acceptedAt: '$dispatch.acceptedAt'
+            }
+          }
+        }
+      }
+    ]);
+
+    for (const item of activeAgg) {
+      activeCountsMap.set(String(item._id), {
+        count: item.count || 0,
+        orders: item.orders || []
+      });
+    }
+  }
+
+  let onlineCount = 0;
+  let offlineCount = 0;
+  let availableCount = 0;
+  let busyCount = 0;
+
+  const mappedPartners = partners.map((p) => {
+    const pid = String(p._id);
+    const isOnline = p.availabilityStatus === 'online';
+    const activeInfo = activeCountsMap.get(pid) || { count: 0, orders: [] };
+    const activeOrdersCount = activeInfo.count;
+    const activeOrders = activeInfo.orders;
+
+    let presenceStatus = isOnline ? 'online' : 'offline';
+    let partnerWorkload = 'offline';
+
+    if (isOnline) {
+      onlineCount++;
+      if (activeOrdersCount === 0) {
+        partnerWorkload = 'available';
+        availableCount++;
+      } else {
+        partnerWorkload = 'busy';
+        busyCount++;
+      }
+    } else {
+      offlineCount++;
+      partnerWorkload = 'offline';
+    }
+
+    let distanceKm = null;
+    if (
+      restaurantCoords &&
+      Number.isFinite(p.lastLat) &&
+      Number.isFinite(p.lastLng)
+    ) {
+      const d = haversineKm(p.lastLat, p.lastLng, restaurantCoords.lat, restaurantCoords.lng);
+      if (Number.isFinite(d)) {
+        distanceKm = Math.round(d * 10) / 10;
+      }
+    }
+
+    const isAssignedToThisOrder = orderDoc
+      ? String(orderDoc.dispatch?.deliveryPartnerId || '') === pid
+      : false;
+
+    // Resolve partner's zone
+    let partnerZoneId = null;
+    let partnerZoneName = null;
+
+    // A. Explicit zoneId on partner record
+    if (p.zoneId && zoneByIdMap.has(String(p.zoneId))) {
+      const z = zoneByIdMap.get(String(p.zoneId));
+      partnerZoneId = String(z._id);
+      partnerZoneName = z.name || z.zoneName;
+    }
+    // B. Point in polygon
+    else if (Number.isFinite(p.lastLat) && Number.isFinite(p.lastLng)) {
+      for (const z of allZones) {
+        if (isPointInZonePolygon(p.lastLat, p.lastLng, z.coordinates || [])) {
+          partnerZoneId = String(z._id);
+          partnerZoneName = z.name || z.zoneName;
+          break;
+        }
+      }
+    }
+
+    // C. City name match against configured zones
+    if (!partnerZoneId && p.city) {
+      const pCityNorm = String(p.city).toLowerCase().trim();
+      const matchedCityZone = allZones.find(
+        (z) => (z.name || z.zoneName || '').toLowerCase().trim() === pCityNorm
+      );
+      if (matchedCityZone) {
+        partnerZoneId = String(matchedCityZone._id);
+        partnerZoneName = matchedCityZone.name || matchedCityZone.zoneName;
+      } else {
+        partnerZoneId = 'city_' + pCityNorm.replace(/\s+/g, '_');
+        partnerZoneName = p.city;
+      }
+    }
+
+    if (!partnerZoneId) {
+      partnerZoneId = 'unassigned';
+      partnerZoneName = 'Other / Unassigned';
+    }
+
+    // Determine if partner belongs to the restaurant's zone
+    let isRestaurantZone = false;
+    if (restaurantZoneId) {
+      isRestaurantZone = String(partnerZoneId) === String(restaurantZoneId) ||
+        (partnerZoneName && restaurantZoneName && partnerZoneName.toLowerCase().trim() === restaurantZoneName.toLowerCase().trim());
+    }
+
+    return {
+      _id: p._id,
+      id: p._id.toString(),
+      name: p.name,
+      phone: p.phone,
+      email: p.email,
+      vehicleType: p.vehicleType,
+      vehicleName: p.vehicleName,
+      vehicleNumber: p.vehicleNumber,
+      vehicle: {
+        type: p.vehicleType || '',
+        model: p.vehicleName || '',
+        plateNumber: p.vehicleNumber || ''
+      },
+      profilePhoto: p.profilePhoto,
+      presence: presenceStatus,
+      presenceStatus,
+      isOnline,
+      workload: partnerWorkload,
+      workloadStatus: partnerWorkload,
+      activeOrdersCount,
+      activeOrders,
+      distanceKm,
+      isAssignedToThisOrder,
+      isCurrentlyAssignedToThisOrder: isAssignedToThisOrder,
+      rating: p.rating || 0,
+      lastLocationAt: p.lastLocationAt,
+      zoneId: partnerZoneId,
+      zoneName: partnerZoneName,
+      isRestaurantZone
+    };
+  });
+
+  let filtered = mappedPartners;
+  if (workload) {
+    filtered = mappedPartners.filter((p) => p.workload === workload);
+  }
+
+  // Priority Sort:
+  // 1. Available (online and 0 active orders)
+  // 2. Busy (online and >=1 active orders)
+  // 3. Offline (offline)
+  // Within same rank: fewer active orders first, closer distance first, name
+  const sortPartnersByPriority = (list) => {
+    return [...list].sort((a, b) => {
+      const rank = (p) => {
+        if (p.isOnline && p.activeOrdersCount === 0) return 1;
+        if (p.isOnline && p.activeOrdersCount > 0) return 2;
+        return 3;
+      };
+      const rA = rank(a);
+      const rB = rank(b);
+      if (rA !== rB) return rA - rB;
+
+      if (a.activeOrdersCount !== b.activeOrdersCount) {
+        return a.activeOrdersCount - b.activeOrdersCount;
+      }
+
+      if (a.distanceKm != null && b.distanceKm != null) {
+        return a.distanceKm - b.distanceKm;
+      }
+
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  };
+
+  // Group into Restaurant Zone vs Other Zones
+  const restaurantZoneList = [];
+  const otherZoneMap = new Map();
+
+  for (const p of filtered) {
+    if (p.isRestaurantZone) {
+      restaurantZoneList.push(p);
+    } else {
+      const zKey = p.zoneId || 'other';
+      if (!otherZoneMap.has(zKey)) {
+        otherZoneMap.set(zKey, {
+          zoneId: zKey,
+          zoneName: p.zoneName || 'Other',
+          partners: []
+        });
+      }
+      otherZoneMap.get(zKey).partners.push(p);
+    }
+  }
+
+  const restaurantZonePartners = sortPartnersByPriority(restaurantZoneList);
+
+  const otherZones = Array.from(otherZoneMap.values())
+    .map((group) => ({
+      ...group,
+      partners: sortPartnersByPriority(group.partners)
+    }))
+    .sort((a, b) => (a.zoneName || '').localeCompare(b.zoneName || ''));
+
+  // Flat prioritized partners list (Restaurant zone first, then other zones)
+  const prioritizedPartners = [
+    ...restaurantZonePartners,
+    ...otherZones.flatMap((g) => g.partners)
+  ];
+
+  const total = filtered.length;
+  const pageNum = Math.max(1, Number(page) || 1);
+  const limitNum = Math.max(1, Math.min(500, Number(limit) || 300));
+
+  const countsObj = {
+    total: partners.length,
+    filtered: total,
+    online: onlineCount,
+    offline: offlineCount,
+    available: availableCount,
+    busy: busyCount,
+    restaurantZoneCount: restaurantZonePartners.length,
+    otherZonesCount: otherZones.reduce((sum, g) => sum + g.partners.length, 0)
+  };
+
+  return {
+    order: orderDoc ? {
+      id: orderDoc._id.toString(),
+      orderId: orderDoc.order_id || orderDoc._id.toString(),
+      restaurantId: orderDoc.restaurantId?._id?.toString?.(),
+      restaurantName: orderDoc.restaurantId?.restaurantName || orderDoc.restaurantName || '',
+      zoneId: restaurantZoneId,
+      zoneName: restaurantZoneName
+    } : null,
+    restaurantZone: {
+      id: restaurantZoneId,
+      name: restaurantZoneName || 'Restaurant Zone'
+    },
+    restaurantZonePartners,
+    otherZones,
+    partners: prioritizedPartners,
+    counts: countsObj,
+    summary: countsObj,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      totalPages: Math.ceil(total / limitNum) || 1
+    }
+  };
+}

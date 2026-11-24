@@ -1670,13 +1670,16 @@ export async function getDeliveryWallets(req, res, next) {
     }
 }
 
-export async function updateDeliveryBoyWallet(req, res, next) {
-    try {
-        const data = await adminService.updateDeliveryBoyWallet(req.body);
-        res.status(200).json({ success: true, message: 'Wallet updated successfully', data });
-    } catch (error) {
-        next(error);
-    }
+/**
+ * Rider wallet figures (pocket balance, cash in hand) are computed from delivered orders,
+ * bonuses, deposits and withdrawals — a stored override would be ignored by every screen.
+ * Admins adjust balances through Deliveryman Bonus (credit) or Cash Limit Settlement instead.
+ */
+export async function updateDeliveryBoyWallet(_req, res) {
+    return res.status(400).json({
+        success: false,
+        message: 'Direct wallet edits are not supported. Use Deliveryman Bonus to credit the rider, or Cash Limit Settlement to clear cash in hand.'
+    });
 }
 
 export async function deleteDeliveryPartner(req, res, next) {
@@ -1785,3 +1788,21 @@ export async function updateFeatureSetting(req, res, next) {
     }
 }
 
+// ----- Delivery cash-in-hand settlements -----
+export async function getCashConfirmations(req, res, next) {
+    try {
+        const data = await adminService.getCashConfirmations(req.query || {});
+        res.status(200).json({ success: true, message: 'Cash confirmations fetched successfully', data });
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function updateCashLimitSettlement(req, res, next) {
+    try {
+        const data = await adminService.updateCashLimitSettlementStatus(req.params.id, req.body || {}, req.user);
+        res.status(200).json({ success: true, message: 'Settlement updated successfully', data });
+    } catch (error) {
+        next(error);
+    }
+}

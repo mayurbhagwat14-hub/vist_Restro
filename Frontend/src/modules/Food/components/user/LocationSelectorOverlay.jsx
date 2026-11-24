@@ -8,7 +8,7 @@ import { useLocation as useGeoLocation } from "@food/hooks/useLocation"
 import { useProfile } from "@food/context/ProfileContext"
 import { toast } from "sonner"
 import { locationAPI, userAPI } from "@food/api"
-import { Loader } from '@googlemaps/js-api-loader'
+import { getGoogleMapsLoader } from "@food/utils/googleMapsLoader"
 const debugLog = (...args) => {}
 const debugWarn = (...args) => {}
 const debugError = (...args) => {}
@@ -454,10 +454,7 @@ export default function LocationSelectorOverlay({ isOpen, onClose }) {
 
     const initializeGoogleMap = async () => {
       try {
-        const loader = new Loader({
-          apiKey: GOOGLE_MAPS_API_KEY,
-          version: "weekly"
-        })
+        const loader = getGoogleMapsLoader(GOOGLE_MAPS_API_KEY)
 
         const google = await loader.load()
 

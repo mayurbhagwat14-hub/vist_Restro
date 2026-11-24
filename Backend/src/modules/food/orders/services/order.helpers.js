@@ -33,6 +33,18 @@ export function haversineKm(lat1, lon1, lat2, lon2) {
 
 export function sanitizeOrderForExternal(orderDoc) {
   const o = orderDoc?.toObject ? orderDoc.toObject() : { ...(orderDoc || {}) };
+  // Never leak the plain handover OTP to riders/restaurant/admin payloads.
+  delete o.deliveryOtp;
+  const dv = o.deliveryVerification;
+  if (dv && dv.dropOtp != null) {
+    o.deliveryVerification = {
+      ...dv,
+      dropOtp: {
+        required: Boolean(dv.dropOtp.required),
+        verified: Boolean(dv.dropOtp.verified),
+      },
+    };
+  }
   o.orderMongoId = (o._id || orderDoc?._id || "").toString();
   // Ensure orderId field for UI always contains the pretty ID
   o.orderId = o.order_id || o.orderMongoId; 
@@ -462,4 +474,28 @@ export async function broadcastNewOrderToAdmin(order) {
   } catch (err) {
     logger.warn(`Failed to broadcast new order to admin via sockets: ${err.message}`);
   }
+}
+
+// ----- Delivery partner helpers (ported from DoorDish delivery module) -----
+
+/** Push the handover OTP to the customer in real time (never sent to the rider). */
+export function emitDeliveryDropOtpToUser(order, plainOtp) {
+  try {
+    const io = getIO();
+    if (!io || !plainOtp || !order?.userId) return;
+
+    io.to(rooms.user(order.userId)).emit("delivery_drop_otp", {
+      orderMongoId: order._id?.toString?.(),
+      orderId: order.order_id || order._id?.toString?.(),
+      otp: plainOtp,
+      orderType: "delivery",
+      message: "Share this OTP with your delivery partner to hand over the order.",
+    });
+  } catch (e) {
+    logger.warn(`emitDeliveryDropOtpToUser failed: ${e?.message || e}`);
+  }
+}
+
+export function generateFourDigitDeliveryOtp() {
+  return String(Math.floor(1000 + Math.random() * 9000));
 }

@@ -115,3 +115,21 @@ export async function initiateRazorpayRefund(paymentId, amount) {
         };
     }
 }
+
+export function assertRazorpayPaymentMatches(payment, { orderId, amountPaise }) {
+    if (!payment?.id) throw new Error('Payment not found on Razorpay');
+    const status = String(payment.status || '').toLowerCase();
+    if (!['captured', 'authorized'].includes(status)) {
+        throw new Error(`Payment not successful (status=${status || 'unknown'})`);
+    }
+    if (orderId && payment.order_id && String(payment.order_id) !== String(orderId)) {
+        throw new Error('Payment does not match Razorpay order');
+    }
+    if (Number.isFinite(amountPaise) && amountPaise > 0) {
+        const paid = Number(payment.amount);
+        if (!Number.isFinite(paid) || Math.abs(paid - Math.round(amountPaise)) > 1) {
+            throw new Error('Payment amount mismatch');
+        }
+    }
+    return true;
+}

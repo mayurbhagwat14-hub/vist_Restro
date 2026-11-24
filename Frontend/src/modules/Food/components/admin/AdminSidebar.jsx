@@ -141,6 +141,12 @@ const buildLabelDictionary = (menu = []) => {
 
 const SIDEBAR_LABEL_BY_PATH = buildLabelDictionary(adminSidebarMenu)
 
+/** Ask the sidebar to refetch its badge counts (e.g. after approving a delivery partner). */
+export function refreshSidebarBadges() {
+  if (typeof window === "undefined") return
+  window.dispatchEvent(new CustomEvent("refresh-sidebar-badges"))
+}
+
 export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange }) {
   const location = useLocation()
   const [searchQuery, setSearchQuery] = useState("")
@@ -207,7 +213,16 @@ export default function AdminSidebar({ isOpen = false, onClose, onCollapseChange
     }
     fetchBadges()
     const timer = setInterval(fetchBadges, 60000)
-    return () => clearInterval(timer)
+    // Pages (e.g. delivery join requests) can ask for an immediate badge refresh.
+    const handleRefreshRequest = () => {
+      fetchBadges()
+      window.dispatchEvent(new CustomEvent("admin-list-refresh", { detail: {} }))
+    }
+    window.addEventListener("refresh-sidebar-badges", handleRefreshRequest)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener("refresh-sidebar-badges", handleRefreshRequest)
+    }
   }, [])
 
   useEffect(() => {

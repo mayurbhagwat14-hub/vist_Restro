@@ -1,0 +1,277 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap");
+
+.delivery-v2-theme {
+  /* VISIT Restaurant palette (matches the customer app) */
+  --dv-primary: #6E3B13;
+  --dv-primary-strong: #522807;
+  --dv-primary-soft: #F6EBD7;
+  --dv-accent: #3D210F;
+  --dv-surface: #ffffff;
+  --dv-bg: #FBF5EA;
+  --dv-text: #3D210F;
+  --dv-muted: #7E6D5E;
+  --dv-border: #E8DEC8;
+  --dv-green: #2F8F4E;
+  background:
+    radial-gradient(900px 420px at 92% -5%, #F1E2C6 0%, transparent 52%),
+    radial-gradient(760px 360px at -8% 0%, #F6EBD7 0%, transparent 58%),
+    linear-gradient(180deg, #FBF5EA 0%, #F6EBD7 100%);
+  min-height: 100vh;
+  color: var(--dv-text);
+  font-family: "Outfit", "Poppins", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.delivery-v2-theme,
+.delivery-v2-theme * {
+  font-family: inherit;
+}
+
+.delivery-v2-theme .font-poppins,
+.delivery-v2-theme [class*="font-['Poppins']"],
+.delivery-v2-theme [class*="font-\[\'Poppins\'\]"] {
+  font-family: "Outfit", sans-serif !important;
+}
+
+.delivery-v2-theme h1,
+.delivery-v2-theme h2,
+.delivery-v2-theme h3,
+.delivery-v2-theme h4,
+.delivery-v2-theme .font-black,
+.delivery-v2-theme .font-extrabold {
+  font-family: "Outfit", sans-serif;
+  letter-spacing: 0.01em;
+  color: var(--dv-text);
+}
+
+.delivery-v2-theme main {
+  max-width: min(1040px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding-bottom: 6.5rem;
+}
+
+.delivery-v2-theme [class*="rounded-2xl"],
+.delivery-v2-theme [class*="rounded-3xl"] {
+  box-shadow: 0 10px 28px -18px rgba(110, 59, 19, 0.18);
+  border-color: var(--dv-border);
+}
+
+.delivery-v2-theme [class*="bg-[#f6e9dc]"],
+.delivery-v2-theme [class*="bg-yellow-400"],
+.delivery-v2-theme [class*="bg-yellow-300"] {
+  background-color: var(--dv-bg) !important;
+}
+
+.delivery-v2-theme [class*="text-[#ff8100]"],
+.delivery-v2-theme [class*="text-[#EB590E]"],
+.delivery-v2-theme [class*="text-[#10B981]"],
+.delivery-v2-theme [class*="text-[#15498b]"],
+.delivery-v2-theme .text-blue-500,
+.delivery-v2-theme .text-blue-600,
+.delivery-v2-theme .text-cyan-500,
+.delivery-v2-theme .text-cyan-600,
+.delivery-v2-theme .text-indigo-500,
+.delivery-v2-theme .text-indigo-600,
+.delivery-v2-theme .text-teal-500,
+.delivery-v2-theme .text-teal-600,
+.delivery-v2-theme .text-orange-500,
+.delivery-v2-theme .text-orange-600,
+.delivery-v2-theme .text-green-500,
+.delivery-v2-theme .text-green-600,
+.delivery-v2-theme .text-emerald-500,
+.delivery-v2-theme .text-emerald-600 {
+  color: var(--dv-primary) !important;
+}
+
+.delivery-v2-theme [class*="bg-[#ff8100]"],
+.delivery-v2-theme [class*="bg-[#00B761]"],
+.delivery-v2-theme [class*="bg-[#10B981]"],
+.delivery-v2-theme [class*="bg-[#15498b]"],
+.delivery-v2-theme .bg-blue-500,
+.delivery-v2-theme .bg-blue-600,
+.delivery-v2-theme .bg-cyan-500,
+.delivery-v2-theme .bg-cyan-600,
+.delivery-v2-theme .bg-indigo-500,
+.delivery-v2-theme .bg-indigo-600,
+.delivery-v2-theme .bg-teal-500,
+.delivery-v2-theme .bg-teal-600,
+.delivery-v2-theme .bg-orange-500,
+.delivery-v2-theme .bg-orange-600,
+.delivery-v2-theme .bg-green-500,
+.delivery-v2-theme .bg-green-600,
+.delivery-v2-theme .bg-emerald-500,
+.delivery-v2-theme .bg-emerald-600 {
+  background-color: var(--dv-primary) !important;
+}
+
+.delivery-v2-theme .hover\:bg-orange-600:hover,
+.delivery-v2-theme .hover\:bg-green-600:hover,
+.delivery-v2-theme .hover\:bg-blue-600:hover,
+.delivery-v2-theme .hover\:bg-cyan-600:hover,
+.delivery-v2-theme .hover\:bg-indigo-600:hover,
+.delivery-v2-theme [class*="hover:bg-[#00A055]"]:hover,
+.delivery-v2-theme [class*="hover:bg-[#6a2f56]"]:hover {
+  background-color: var(--dv-primary-strong) !important;
+}
+
+.delivery-v2-theme .bg-orange-50,
+.delivery-v2-theme .bg-green-50,
+.delivery-v2-theme .bg-emerald-50,
+.delivery-v2-theme .bg-blue-50,
+.delivery-v2-theme .bg-cyan-50,
+.delivery-v2-theme .bg-indigo-50,
+.delivery-v2-theme .bg-teal-50,
+.delivery-v2-theme .bg-orange-500\/10,
+.delivery-v2-theme .bg-green-500\/10,
+.delivery-v2-theme .bg-emerald-500\/10,
+.delivery-v2-theme .bg-blue-500\/10,
+.delivery-v2-theme .bg-cyan-500\/10,
+.delivery-v2-theme .bg-indigo-500\/10,
+.delivery-v2-theme [class*="bg-orange-50"],
+.delivery-v2-theme [class*="bg-green-50"],
+.delivery-v2-theme [class*="bg-emerald-50"] {
+  background-color: var(--dv-primary-soft) !important;
+}
+
+.delivery-v2-theme .border-orange-100,
+.delivery-v2-theme .border-orange-200,
+.delivery-v2-theme .border-orange-500\/20,
+.delivery-v2-theme .border-green-100,
+.delivery-v2-theme .border-green-500\/20,
+.delivery-v2-theme .border-emerald-200,
+.delivery-v2-theme .border-blue-100,
+.delivery-v2-theme .border-blue-200,
+.delivery-v2-theme .border-blue-500\/20,
+.delivery-v2-theme .border-cyan-100,
+.delivery-v2-theme .border-indigo-200,
+.delivery-v2-theme [class*="border-[#10B981]"],
+.delivery-v2-theme [class*="border-[#ff8100]"] {
+  border-color: color-mix(in srgb, var(--dv-primary) 28%, #ffffff) !important;
+}
+
+.delivery-v2-theme .from-orange-500,
+.delivery-v2-theme .from-green-500,
+.delivery-v2-theme .from-emerald-500,
+.delivery-v2-theme .from-blue-500,
+.delivery-v2-theme .from-cyan-500,
+.delivery-v2-theme .from-indigo-500,
+.delivery-v2-theme .from-teal-500,
+.delivery-v2-theme .to-orange-600,
+.delivery-v2-theme .to-green-600,
+.delivery-v2-theme .to-emerald-600,
+.delivery-v2-theme .to-blue-600,
+.delivery-v2-theme .to-cyan-600,
+.delivery-v2-theme .to-indigo-600,
+.delivery-v2-theme .to-teal-600,
+.delivery-v2-theme .from-amber-500,
+.delivery-v2-theme .to-amber-500 {
+  --tw-gradient-from: var(--dv-primary) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: var(--dv-primary-strong) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.delivery-v2-theme .shadow-orange-500\/20,
+.delivery-v2-theme .shadow-green-500\/20,
+.delivery-v2-theme .shadow-green-500\/30,
+.delivery-v2-theme .shadow-emerald-500\/20,
+.delivery-v2-theme .shadow-blue-500\/20,
+.delivery-v2-theme .shadow-cyan-500\/20,
+.delivery-v2-theme .shadow-indigo-500\/20 {
+  --tw-shadow-color: color-mix(in srgb, var(--dv-primary) 35%, transparent) !important;
+}
+
+.delivery-v2-theme .delivery-online-toggle.is-online {
+  background-color: var(--dv-primary) !important;
+  --tw-shadow-color: rgb(110 59 19 / 0.32) !important;
+}
+
+.delivery-v2-theme .delivery-online-toggle.is-offline {
+  background-color: var(--dv-primary-strong) !important;
+  --tw-shadow-color: rgb(82 40 7 / 0.28) !important;
+}
+
+.delivery-v2-theme button,
+.delivery-v2-theme [role="button"] {
+  transition: all 0.2s ease;
+}
+
+.delivery-v2-theme input,
+.delivery-v2-theme textarea,
+.delivery-v2-theme select {
+  border-color: var(--dv-border) !important;
+  background-color: #fff !important;
+  color: var(--dv-text) !important;
+}
+
+.delivery-v2-theme input:not(.dv-no-focus-ring):focus,
+.delivery-v2-theme textarea:focus,
+.delivery-v2-theme select:focus {
+  border-color: color-mix(in srgb, var(--dv-primary) 55%, #fff) !important;
+  box-shadow: 0 0 0 4px rgb(110 59 19 / 0.14) !important;
+}
+
+@media (max-width: 900px) {
+  .delivery-v2-theme main {
+    max-width: calc(100% - 1.25rem);
+    padding-bottom: 6rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .delivery-v2-theme main {
+    max-width: calc(100% - 1rem);
+    padding-bottom: 5.75rem;
+  }
+
+  .delivery-v2-theme [class*="px-6"] {
+    padding-left: 1.1rem !important;
+    padding-right: 1.1rem !important;
+  }
+
+  .delivery-v2-theme [class*="p-6"] {
+    padding: 1.1rem !important;
+  }
+}
+/* ---------------------------------------------------------------------------
+ * VISIT theme: remap Tailwind's orange/amber scales to the VISIT bronze/brown palette
+ * for every element of the delivery panel. Set on body:has(...) so portaled
+ * dialogs, sheets and toasts rendered outside the panel inherit it too.
+ * ------------------------------------------------------------------------- */
+.delivery-v2-theme,
+body:has(.delivery-v2-theme) {
+  --color-orange-50: #FBF5EA;
+  --color-orange-100: #F6EBD7;
+  --color-orange-200: #E8D5B5;
+  --color-orange-300: #D4B48A;
+  --color-orange-400: #B8895A;
+  --color-orange-500: #8A5426;
+  --color-orange-600: #6E3B13;
+  --color-orange-700: #5C381E;
+  --color-orange-800: #522807;
+  --color-orange-900: #3D210F;
+  --color-orange-950: #2E180C;
+
+  --color-amber-50: #FBF6EC;
+  --color-amber-100: #F5E9CF;
+  --color-amber-200: #EBD5A8;
+  --color-amber-300: #DDBB7C;
+  --color-amber-400: #C9A05A;
+  --color-amber-500: #B8873F;
+  --color-amber-600: #9A6E2E;
+  --color-amber-700: #7A5524;
+  --color-amber-800: #5E411C;
+  --color-amber-900: #463114;
+  --color-amber-950: #2E200C;
+}
+
+body:has(.delivery-v2-theme) {
+  background-color: #FBF5EA;
+}
+
+/* Primary buttons: VISIT brown gradient (same as customer login "Continue"). */
+.delivery-v2-theme .dv-btn-primary {
+  background: linear-gradient(180deg, #6E3B13 0%, #522807 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(82, 40, 7, 0.28);
+}

@@ -20,6 +20,29 @@ import { validateAdminChangePasswordDto } from "../../dtos/auth/adminChangePassw
 import { validateAdminForgotPasswordRequestDto } from "../../dtos/auth/adminForgotPasswordRequest.dto.js";
 import { validateAdminForgotPasswordResetDto } from "../../dtos/auth/adminForgotPasswordReset.dto.js";
 import { sendResponse } from "../../utils/response.js";
+import { requestDeliveryOtp, verifyDeliveryOtpAndLogin } from "./deliveryAuth.service.js";
+import { validateDeliveryOtpRequestDto } from "../../dtos/auth/deliveryOtpRequest.dto.js";
+import { validateDeliveryOtpVerifyDto } from "../../dtos/auth/deliveryOtpVerify.dto.js";
+
+export const requestDeliveryOtpController = async (req, res, next) => {
+  try {
+    const { phone } = validateDeliveryOtpRequestDto(req.body);
+    const result = await requestDeliveryOtp(phone);
+    return sendResponse(res, 200, "OTP sent successfully", { phone, ...result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyDeliveryOtpController = async (req, res, next) => {
+  try {
+    const { phone, otp, fcmToken, platform, confirmAction } = validateDeliveryOtpVerifyDto(req.body);
+    const result = await verifyDeliveryOtpAndLogin(phone, otp, fcmToken, platform, confirmAction);
+    return sendResponse(res, 200, "Login successful", result);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const requestUserOtpController = async (req, res, next) => {
   try {

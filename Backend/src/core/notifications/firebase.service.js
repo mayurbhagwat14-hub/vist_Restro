@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import { FoodUser } from '../users/user.model.js';
 import mongoose from 'mongoose';
 const FoodRestaurant = mongoose.models.FoodRestaurant || mongoose.model('FoodRestaurant', new mongoose.Schema({}, { strict: false, collection: 'food_restaurants' }));
-const FoodDeliveryPartner = mongoose.models.FoodDeliveryPartner || mongoose.model('FoodDeliveryPartner', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_partners' }));
+import { FoodDeliveryPartner } from '../../modules/food/delivery/models/deliveryPartner.model.js';
 import { FoodAdmin } from '../admin/admin.model.js';
 import { config } from '../../config/env.js';
 import { logger } from '../../utils/logger.js';

@@ -9,7 +9,7 @@ import { useLocation as useGeoLocation } from "@food/hooks/useLocation"
 import { useProfile } from "@food/context/ProfileContext"
 import { toast } from "sonner"
 import { locationAPI, userAPI } from "@food/api"
-import { Loader } from '@googlemaps/js-api-loader'
+import { getGoogleMapsLoader } from "@food/utils/googleMapsLoader"
 import AnimatedPage from "@food/components/user/AnimatedPage"
 import useAppBackNavigation from "@food/hooks/useAppBackNavigation"
 import { isModuleAuthenticated } from "@food/utils/auth"
@@ -140,11 +140,7 @@ export default function AddressSelectorPage() {
     if (!GOOGLE_MAPS_API_KEY) return false
 
     if (!window.google?.maps?.places) {
-      const loader = new Loader({
-        apiKey: GOOGLE_MAPS_API_KEY,
-        version: "weekly",
-        libraries: ["places"],
-      })
+      const loader = getGoogleMapsLoader(GOOGLE_MAPS_API_KEY)
       await loader.load()
     }
 
@@ -323,11 +319,7 @@ export default function AddressSelectorPage() {
 
     const initializeGoogleMap = async () => {
       try {
-        const loader = new Loader({
-          apiKey: GOOGLE_MAPS_API_KEY,
-          version: "weekly",
-          libraries: ["places"],
-        })
+        const loader = getGoogleMapsLoader(GOOGLE_MAPS_API_KEY)
         const google = await loader.load()
         if (!isMounted || !mapContainerRef.current) return
 

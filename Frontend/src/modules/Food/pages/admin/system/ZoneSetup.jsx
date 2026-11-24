@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { toast } from "sonner"
-import { Loader } from "@googlemaps/js-api-loader"
+import { getGoogleMapsLoader } from "@food/utils/googleMapsLoader"
 import { MapPin, Plus, Trash2, Edit2, ShieldAlert, Sparkles, CheckCircle, XCircle, RefreshCw, ZoomIn, Info } from "lucide-react"
 import { Button } from "@food/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@food/components/ui/card"
@@ -117,11 +117,7 @@ export default function ZoneSetup() {
   // Initialize Map
   const initializeGoogleMap = async (key) => {
     try {
-      const loader = new Loader({
-        apiKey: key,
-        version: "weekly",
-        libraries: ["places"]
-      })
+      const loader = getGoogleMapsLoader(key)
       const google = await loader.load()
       if (!mapContainerRef.current) return
 

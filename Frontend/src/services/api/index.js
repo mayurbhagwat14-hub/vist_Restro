@@ -723,6 +723,23 @@ export const adminAPI = {
     apiClient.put(`/food/admin/orders/${String(orderId)}/status`, data, {
       contextModule: "admin",
     }),
+  /** Manually assign (or reassign) a delivery partner to an order. body: { deliveryPartnerId, allowOffline?, reassign? } */
+  assignDeliveryPartner: (orderId, body = {}) =>
+    apiClient.patch(`/food/admin/orders/${String(orderId)}/assign-delivery`, body, {
+      contextModule: "admin",
+    }),
+  /** Delivery partners with presence, active workload and distance to the order's restaurant. */
+  getOrderDeliveryPartners: (orderId, params = {}) =>
+    apiClient.get(`/food/admin/orders/${String(orderId)}/delivery-partners`, {
+      params,
+      contextModule: "admin",
+    }),
+  /** All approved delivery partners with presence + active workload. */
+  getDeliveryPartnersWorkload: (params = {}) =>
+    apiClient.get("/food/admin/delivery-partners/workload", {
+      params,
+      contextModule: "admin",
+    }),
   deassignAndResendOrder: (orderId) =>
     apiClient.patch(
       `/food/admin/orders/${String(orderId)}/deassign-resend`,
@@ -949,6 +966,16 @@ export const adminAPI = {
   getCashLimitSettlements: (params = {}) =>
     apiClient.get("/food/admin/delivery/cash-limit-settlements", {
       params,
+      contextModule: "admin",
+    }),
+  /** Cash handed over physically by riders, awaiting admin confirmation. */
+  getCashConfirmations: (params = {}) =>
+    apiClient.get("/food/admin/delivery/cash-confirmations", {
+      params,
+      contextModule: "admin",
+    }),
+  updateCashLimitSettlement: (id, body) =>
+    apiClient.patch(`/food/admin/delivery/cash-limit-settlements/${String(id)}`, body ?? {}, {
       contextModule: "admin",
     }),
 
@@ -1931,10 +1958,10 @@ export const deliveryAPI = {
     if (!phone) return Promise.reject(new Error("Phone is required"));
     return authService.requestDeliveryOtp(phone);
   },
-  verifyOTP: (phone, otp, _purpose, _name, fcmToken = null, platform = "web") => {
+  verifyOTP: (phone, otp, _purpose, _name, fcmToken = null, platform = "web", confirmAction = null) => {
     if (!phone || !otp)
       return Promise.reject(new Error("Phone and OTP are required"));
-    return authService.verifyDeliveryOtp(phone, otp, fcmToken, platform);
+    return authService.verifyDeliveryOtp(phone, otp, fcmToken, platform, confirmAction);
   },
   getMe: () => getDeliveryMeOnce(),
   /** Get delivery profile (same as getMe under the hood; maps response to profile shape). */
@@ -2334,6 +2361,22 @@ export const deliveryAPI = {
   createDepositOrder: (amount) =>
     apiClient.post("/food/delivery/wallet/deposit/order", { amount }, {
       contextModule: "delivery"
+    }),
+  /** Alias used by the Pocket screen — creates a Razorpay order to deposit cash-in-hand. */
+  depositCashLimit: (amount) =>
+    apiClient.post("/food/delivery/wallet/deposit/order", { amount }, {
+      contextModule: "delivery"
+    }),
+  /** Rider declares cash handed over physically; admin confirms it in Cash Confirmations. */
+  submitCashDeposit: (amount) =>
+    apiClient.post("/food/delivery/wallet/deposit/cash-submit", { amount }, {
+      contextModule: "delivery"
+    }),
+  /** GET /food/delivery/my-reviews - customer reviews for the logged-in partner */
+  getMyReviews: (params) =>
+    apiClient.get("/food/delivery/my-reviews", {
+      params: params ?? {},
+      contextModule: "delivery",
     }),
   verifyDepositPayment: (body) =>
     apiClient.post("/food/delivery/wallet/deposit/verify", body ?? {}, {

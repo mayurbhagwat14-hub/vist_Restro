@@ -28,6 +28,8 @@ const PATH_PREFIX_TO_SECTION = [
   { prefix: "/admin/food/point-of-sale", section: "point_of_sale" },
   { prefix: "/admin/food/fee-settings", section: "system_settings" },
   { prefix: "/admin/food/delivery-cash-limit", section: "delivery_management" },
+  { prefix: "/admin/food/cash-confirmations", section: "delivery_management" },
+  { prefix: "/admin/food/delivery-boy-commission", section: "delivery_management" },
   { prefix: "/admin/food/cash-limit-settlement", section: "delivery_management" },
   { prefix: "/admin/food/delivery-withdrawal", section: "delivery_management" },
   { prefix: "/admin/food/delivery-boy-wallet", section: "delivery_management" },

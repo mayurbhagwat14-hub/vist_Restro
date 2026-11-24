@@ -1064,3 +1064,81 @@ export async function registerWebPushForCurrentModule(pathname = window.location
   await registerNativeWebViewFcmToken(moduleName);
   return null;
 }
+
+// ----- Token helpers for the delivery partner onboarding flow -----
+
+/** True when running inside the Flutter WebView shell. */
+export function isNativeAppWebView() {
+  return isFlutterWebView();
+}
+
+/**
+ * Resolve the device FCM token without syncing it to the backend.
+ * Used during delivery partner login/signup, where the token is sent with the auth request.
+ * @param {{ moduleName?: string, requestPermission?: boolean }} options
+ * @returns {Promise<{ fcmToken: string|null, platform: "web"|"mobile" }>}
+ */
+export async function resolveDeviceFcmToken({ moduleName = "delivery", requestPermission = false } = {}) {
+  if (isFlutterWebView()) {
+    const handlerNames = ["getFcmToken", "getFCMToken", "getPushToken", "getFirebaseToken"];
+    for (const handlerName of handlerNames) {
+      try {
+        const token = String(
+          (await window.flutter_inappwebview.callHandler(handlerName, { module: moduleName })) || "",
+        ).trim();
+        if (token.length >= 20) return { fcmToken: token, platform: "mobile" };
+      } catch {
+        // Try next handler.
+      }
+    }
+    return { fcmToken: null, platform: "mobile" };
+  }
+
+  try {
+    if (!isSupportedBrowser() || !isSecureContextForPush()) return { fcmToken: null, platform: "web" };
+    let permission = Notification.permission;
+    if (permission === "default" && requestPermission) permission = await Notification.requestPermission();
+    if (permission !== "granted") return { fcmToken: null, platform: "web" };
+
+    const firebasePublicEnv = await getFirebasePublicEnv();
+    if (!firebasePublicEnv?.vapidKey) return { fcmToken: null, platform: "web" };
+    const app = getMessagingFirebaseApp(firebasePublicEnv);
+    if (!app) return { fcmToken: null, platform: "web" };
+
+    const { getMessaging, getToken, isSupported } = await import("firebase/messaging");
+    if (!(await isSupported().catch(() => false))) return { fcmToken: null, platform: "web" };
+
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    passFirebaseConfigToServiceWorker(registration, firebasePublicEnv);
+    const token = await getToken(getMessaging(app), {
+      vapidKey: firebasePublicEnv.vapidKey,
+      serviceWorkerRegistration: registration,
+    });
+    await attachForegroundListener(app);
+    return { fcmToken: token || null, platform: "web" };
+  } catch (e) {
+    if (!shouldIgnoreFcmRegistrationError(e)) {
+      pushDebugWarn(PUSH_DEBUG_PREFIX, "resolveDeviceFcmToken failed", { error: e?.message || e });
+    }
+    return { fcmToken: null, platform: "web" };
+  }
+}
+
+/** Remember a token as already synced for a module (prevents a redundant backend save). */
+export function rememberSyncedFcmToken(moduleName, token) {
+  if (moduleName && token) setSavedToken(moduleName, token);
+}
+
+/** Forget the cached token for a module (used when onboarding restarts). */
+export function forgetSyncedFcmToken(moduleName) {
+  if (typeof localStorage === "undefined" || !moduleName) return;
+  localStorage.removeItem(`${tokenCachePrefix}${moduleName}`);
+}
+
+/** Dedupe OS/background notifications for the same order event across socket + push conduits. */
+export function shouldSkipDuplicateOsNotification(source = {}) {
+  const orderId = source?.orderMongoId || source?.orderId || '';
+  const status = source?.orderStatus || source?.type || 'update';
+  if (!orderId) return false;
+  return wasRecentlyHandled(getNotificationKey({ orderId: String(orderId), type: String(status) }));
+}

@@ -11,6 +11,7 @@ import FilterPanel from "@food/components/admin/orders/FilterPanel"
 import ViewOrderDialog from "@food/components/admin/orders/ViewOrderDialog"
 import SettingsDialog from "@food/components/admin/orders/SettingsDialog"
 import RefundModal from "@food/components/admin/orders/RefundModal"
+import AssignDeliveryPartnerModal from "@food/components/admin/orders/AssignDeliveryPartnerModal"
 import { useOrdersManagement } from "@food/components/admin/orders/useOrdersManagement"
 import { Loader2 } from "lucide-react"
 import { OrdersDashboardSkeleton } from "@food/components/ui/loading-skeletons"
@@ -41,6 +42,8 @@ export default function OrdersPage({ statusKey = "all" }) {
   const [deletingOrderId, setDeletingOrderId] = useState(null)
   const [refundModalOpen, setRefundModalOpen] = useState(false)
   const [selectedOrderForRefund, setSelectedOrderForRefund] = useState(null)
+  const [assignPartnerModalOpen, setAssignPartnerModalOpen] = useState(false)
+  const [selectedOrderForAssign, setSelectedOrderForAssign] = useState(null)
   const showLoadingSkeleton = useDelayedLoading(isLoading, { delay: 120, minDuration: 360 })
   const seenOrderIdsRef = useRef(new Set())
   const isFirstLoadRef = useRef(true)
@@ -943,6 +946,16 @@ export default function OrdersPage({ statusKey = "all" }) {
     }
   }
 
+  // Manual delivery partner assignment (admin picks the rider)
+  const handleOpenAssignModal = useCallback((order) => {
+    setSelectedOrderForAssign(order)
+    setAssignPartnerModalOpen(true)
+  }, [])
+
+  const handleOrderAssigned = useCallback(() => {
+    fetchOrders({ silent: true, withRingCheck: false })
+  }, [fetchOrders])
+
   if (showLoadingSkeleton) {
     return (
       <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 p-4 lg:p-6">
@@ -1003,7 +1016,13 @@ export default function OrdersPage({ statusKey = "all" }) {
         onConfirm={handleRefundConfirm}
         isProcessing={processingRefund !== null}
       />
-      <OrdersTable 
+      <AssignDeliveryPartnerModal
+        isOpen={assignPartnerModalOpen}
+        onOpenChange={setAssignPartnerModalOpen}
+        order={selectedOrderForAssign}
+        onAssigned={handleOrderAssigned}
+      />
+      <OrdersTable
         orders={filteredOrders} 
         visibleColumns={visibleColumns}
         onViewOrder={handleViewOrder}
@@ -1019,6 +1038,7 @@ export default function OrdersPage({ statusKey = "all" }) {
         actionLoadingOrderId={processingActionOrderId}
         deletingOrderId={deletingOrderId}
         showAssignedDeliveryPartner={statusKey === "all"}
+        onAssignDeliveryPartner={handleOpenAssignModal}
       />
     </div>
   )
