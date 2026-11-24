@@ -58,6 +58,7 @@ const resolveSectionFromRequest = (path = '', method = '') => {
     if (path.startsWith('/categories') || path.startsWith('/foods')) return 'food_management';
     if (path.startsWith('/offers')) return 'promotions_management';
     if (path.startsWith('/orders')) return 'order_management';
+    if (path.startsWith('/delivery') || path.startsWith('/delivery-cash-limit') || path.startsWith('/delivery-emergency-help') || path.startsWith('/delivery-partners')) return 'delivery_management';
     if (path.startsWith('/feedback-experiences')) return 'report_management';
     if (path.startsWith('/reports')) return 'report_management';
     if (path.startsWith('/feature-settings') || path.startsWith('/business-settings') || path.startsWith('/power-scanning') || path.startsWith('/notifications') || path.startsWith('/coin-settings') || path.startsWith('/coin-requests')) return 'system_settings';
@@ -326,6 +327,57 @@ router.patch('/orders/:orderId/reject', orderController.rejectOrderAdminControll
 router.put('/orders/:orderId/status', orderController.updateOrderStatusAdminController);
 router.post('/orders/:orderId/refund', orderController.processRefundAdminController);
 router.delete('/orders/:orderId', orderController.deleteOrderAdminController);
+
+// ----- Delivery partner assignment (admin manual assign) -----
+router.patch('/orders/:orderId/assign-delivery', orderController.assignDeliveryPartnerController);
+router.post('/orders/:orderId/assign-delivery', orderController.assignDeliveryPartnerController);
+router.get('/orders/:orderId/delivery-partners', orderController.getDeliveryPartnersWorkloadController);
+router.get('/delivery-partners/workload', orderController.getDeliveryPartnersWorkloadController);
+
+// ----- Delivery Cash Limit -----
+router.get('/delivery-cash-limit', adminController.getDeliveryCashLimit);
+router.patch('/delivery-cash-limit', adminController.updateDeliveryCashLimit);
+
+// ----- Delivery Emergency Help -----
+router.get('/delivery-emergency-help', adminController.getEmergencyHelp);
+router.put('/delivery-emergency-help', adminController.createOrUpdateEmergencyHelp);
+
+// ----- Delivery partners: withdrawals, cash settlements, earnings, bonus -----
+router.get('/delivery/withdrawals', adminController.getDeliveryWithdrawals);
+router.patch('/delivery/withdrawals/:id', adminController.updateDeliveryWithdrawalStatus);
+router.get('/delivery/cash-limit-settlements', adminController.getCashLimitSettlements);
+router.get('/delivery/cash-confirmations', adminController.getCashConfirmations);
+router.patch('/delivery/cash-limit-settlements/:id', adminController.updateCashLimitSettlement);
+router.get('/delivery/join-requests', adminController.getDeliveryJoinRequests);
+router.get('/delivery/wallets', adminController.getDeliveryWallets);
+router.patch('/delivery/wallets', adminController.updateDeliveryBoyWallet);
+router.get('/delivery/bonus-transactions', adminController.getDeliveryPartnerBonusTransactions);
+router.get('/delivery/earnings', adminController.getDeliveryEarnings);
+router.post('/delivery/bonus', adminController.addDeliveryPartnerBonus);
+router.get('/delivery/commission-rules', adminController.getDeliveryCommissionRules);
+router.post('/delivery/commission-rules', adminController.createDeliveryCommissionRule);
+router.patch('/delivery/commission-rules/:id', adminController.updateDeliveryCommissionRule);
+router.delete('/delivery/commission-rules/:id', adminController.deleteDeliveryCommissionRule);
+router.patch('/delivery/commission-rules/:id/status', adminController.toggleDeliveryCommissionRuleStatus);
+router.get('/delivery/reviews', adminController.getDeliverymanReviews);
+router.get('/delivery/earning-addons', adminController.getEarningAddons);
+router.post('/delivery/earning-addons', adminController.createEarningAddon);
+router.patch('/delivery/earning-addons/:id', adminController.updateEarningAddon);
+router.delete('/delivery/earning-addons/:id', adminController.deleteEarningAddon);
+router.patch('/delivery/earning-addons/:id/status', adminController.toggleEarningAddonStatus);
+router.get('/delivery/earning-addon-history', adminController.getEarningAddonHistory);
+router.post('/delivery/earning-addon-history/:id/credit', adminController.creditEarningToWallet);
+router.post('/delivery/earning-addon-history/:id/cancel', adminController.cancelEarningAddonHistory);
+router.post('/delivery/earning-addon-completions/check', adminController.checkEarningAddonCompletions);
+router.get('/delivery/support-tickets/stats', adminController.getSupportTicketStats);
+router.get('/delivery/support-tickets', adminController.getSupportTickets);
+router.patch('/delivery/support-tickets/:id', adminController.updateSupportTicket);
+router.get('/delivery/partners', adminController.getDeliveryPartners);
+// NOTE: '/delivery/:id' routes must stay after all static '/delivery/*' routes.
+router.get('/delivery/:id', adminController.getDeliveryPartnerById);
+router.patch('/delivery/:id/approve', adminController.approveDeliveryPartner);
+router.patch('/delivery/:id/reject', adminController.rejectDeliveryPartner);
+router.delete('/delivery/:id', adminController.deleteDeliveryPartner);
 
 // ----- CMS Pages (About + legal) -----
 router.get('/pages-social-media/:key', getAdminPageController);

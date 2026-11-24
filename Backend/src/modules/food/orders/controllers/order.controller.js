@@ -1,5 +1,6 @@
 import { sendResponse } from '../../../../utils/response.js';
 import * as orderService from '../services/order.service.js';
+import { ValidationError } from '../../../../core/auth/errors.js';
 import * as foodOrderPaymentService from '../services/foodOrderPayment.service.js';
 import {
     validateCalculateOrderDto,
@@ -260,6 +261,245 @@ export async function submitOrderRatingsController(req, res, next) {
         const dto = validateOrderRatingsDto(req.body);
         const order = await orderService.submitOrderRatings(orderId, userId, dto);
         return sendResponse(res, 200, 'Rating submitted successfully', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function getCurrentTripDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const [activeOrders, capacity] = await Promise.all([
+            orderService.getActiveTripsDelivery(deliveryPartnerId),
+            orderService.getPartnerOrderCapacity(deliveryPartnerId),
+        ]);
+        return sendResponse(res, 200, 'Current trip retrieved', {
+            activeOrder: activeOrders[0] || null,
+            activeOrders,
+            capacity,
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function listOrdersAvailableDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const result = await orderService.listOrdersAvailableDelivery(deliveryPartnerId, req.query);
+        return sendResponse(res, 200, 'Orders retrieved', result);
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function listLegacyAssignedActiveDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const [activeOrders, capacity] = await Promise.all([
+            orderService.getActiveTripsDelivery(deliveryPartnerId),
+            orderService.getPartnerOrderCapacity(deliveryPartnerId),
+        ]);
+        return sendResponse(res, 200, 'Orders retrieved', {
+            orders: activeOrders,
+            activeOrder: activeOrders[0] || null,
+            activeOrders,
+            capacity,
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function listLegacyPendingDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const result = await orderService.listOrdersAvailableDelivery(
+            deliveryPartnerId,
+            req.query,
+        );
+        const orders = Array.isArray(result?.orders)
+            ? result.orders
+            : Array.isArray(result)
+              ? result
+              : [];
+        return sendResponse(res, 200, 'Orders retrieved', {
+            ...((result && typeof result === 'object' && !Array.isArray(result)) ? result : {}),
+            orders,
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function getOrderByIdDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = String(req.params.orderId || '').trim();
+        const reserved = new Set(['assigned', 'active', 'pending', 'current', 'available']);
+        // Defense-in-depth if a reserved slug ever hits :orderId
+        if (!orderId || reserved.has(orderId.toLowerCase())) {
+            return sendResponse(res, 200, 'Orders retrieved', {
+                order: null,
+                orders: [],
+                activeOrders: [],
+                activeOrder: null,
+            });
+        }
+        const order = await orderService.getOrderById(orderId, { deliveryPartnerId });
+        return sendResponse(res, 200, 'Order retrieved', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function acceptOrderDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const order = await orderService.acceptOrderDelivery(orderId, deliveryPartnerId);
+        const capacity = await orderService.getPartnerOrderCapacity(deliveryPartnerId);
+        return sendResponse(res, 200, 'Order accepted', { order, capacity });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function rejectOrderDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const order = await orderService.rejectOrderDelivery(orderId, deliveryPartnerId);
+        return sendResponse(res, 200, 'Order rejected', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function confirmReachedPickupDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const order = await orderService.confirmReachedPickupDelivery(orderId, deliveryPartnerId);
+        return sendResponse(res, 200, 'Reached pickup confirmed', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function confirmPickupDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const { billImageUrl } = req.body;
+        const order = await orderService.confirmPickupDelivery(orderId, deliveryPartnerId, billImageUrl);
+        return sendResponse(res, 200, 'Pickup confirmed', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function confirmReachedDropDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const order = await orderService.confirmReachedDropDelivery(orderId, deliveryPartnerId);
+        return sendResponse(res, 200, 'Reached drop confirmed', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function verifyDropOtpDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const { otp } = req.body;
+        const result = await orderService.verifyDropOtpDelivery(orderId, deliveryPartnerId, otp);
+        return sendResponse(res, 200, 'OTP verified', { order: result.order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function completeDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const order = await orderService.completeDelivery(orderId, deliveryPartnerId, req.body || {});
+        return sendResponse(res, 200, 'Delivery completed', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function updateOrderStatusDeliveryController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const dto = validateOrderStatusDto(req.body);
+        const order = await orderService.updateOrderStatusDelivery(orderId, deliveryPartnerId, dto.orderStatus);
+        return sendResponse(res, 200, 'Order status updated', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function createCollectQrController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const customerInfo = req.body || {};
+        const result = await orderService.createCollectQr(orderId, deliveryPartnerId, customerInfo);
+        return sendResponse(res, 200, 'QR created', result);
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function getPaymentStatusController(req, res, next) {
+    try {
+        const deliveryPartnerId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const result = await orderService.getPaymentStatus(orderId, deliveryPartnerId);
+        return sendResponse(res, 200, 'Payment status retrieved', result);
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function assignDeliveryPartnerController(req, res, next) {
+    try {
+        const adminId = req.user?.userId;
+        const orderId = req.params.orderId;
+        const dto = validateAssignDeliveryDto(req.body);
+        const order = await orderService.assignDeliveryPartnerAdmin(
+            orderId,
+            dto.deliveryPartnerId,
+            adminId,
+            {
+                allowOffline: dto.allowOffline,
+                reassign: dto.reassign
+            }
+        );
+        return sendResponse(res, 200, 'Delivery partner assigned successfully', { order });
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function getDeliveryPartnersWorkloadController(req, res, next) {
+    try {
+        const orderId = req.params.orderId || req.query.orderId || null;
+        const data = await orderService.getDeliveryPartnersWorkload({
+            orderId,
+            search: req.query.search,
+            presence: req.query.presence,
+            workload: req.query.workload,
+            page: req.query.page,
+            limit: req.query.limit
+        });
+        return sendResponse(res, 200, 'Delivery partners workload retrieved successfully', data);
     } catch (err) {
         next(err);
     }

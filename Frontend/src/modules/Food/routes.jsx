@@ -16,6 +16,9 @@ const AdminRouter = lazy(() => import("@food/components/admin/AdminRouter"))
 const AdminLogin = lazy(() => import("@food/pages/admin/auth/AdminLogin"))
 const AdminForgotPassword = lazy(() => import("@food/pages/admin/auth/AdminForgotPassword"))
 
+// Delivery Partner (rider) panel
+const DeliveryRouter = lazy(() => import("../DeliveryV2"))
+
 
 function UserPathRedirect() {
   const location = useLocation()
@@ -115,6 +118,9 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Delivery Partner Panel — /food/delivery/* */}
+          <Route path="delivery/*" element={<DeliveryRouter />} />
 
           {/* Direct notification route aliases */}
           <Route path="notification" element={<Navigate to="/food/user/notifications" replace />} />

@@ -116,14 +116,57 @@ const paymentSchema = new mongoose.Schema(
 
 const dispatchSchema = new mongoose.Schema(
     {
-        deliveryPartnerId: { type: mongoose.Schema.Types.ObjectId, default: null }
+        modeAtCreation: { type: String, enum: ['auto', 'manual'], default: 'manual' },
+        status: {
+            type: String,
+            enum: ['unassigned', 'assigned', 'accepted', 'rejected', 'cancelled'],
+            default: 'unassigned'
+        },
+        deliveryPartnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'FoodDeliveryPartner', default: null },
+        assignedAt: { type: Date },
+        acceptedAt: { type: Date },
+        /** Partners this order was offered/assigned to (admin manual assignment history). */
+        offeredTo: [{
+            partnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'FoodDeliveryPartner' },
+            at: { type: Date, default: Date.now },
+            action: { type: String, enum: ['offered', 'rejected', 'timeout'], default: 'offered' },
+            allowOverLimit: { type: Boolean, default: false },
+            requiredCashForOrder: { type: Number, default: 0 }
+        }],
+        dispatchingAt: { type: Date }
     },
     { _id: false }
 );
 
 const deliveryStateSchema = new mongoose.Schema(
     {
-        status: { type: String, default: '' }
+        currentPhase: {
+            type: String,
+            enum: [
+                'en_route_to_pickup',
+                'at_pickup',
+                'en_route_to_delivery',
+                'at_drop',
+                'delivered',
+                'completed'
+            ],
+            default: 'en_route_to_pickup'
+        },
+        status: { type: String, default: '' },
+        reachedPickupAt: { type: Date, default: null },
+        reachedDropAt: { type: Date, default: null },
+        pickedUpAt: { type: Date, default: null },
+        deliveredAt: { type: Date, default: null }
+    },
+    { _id: false }
+);
+
+const deliveryVerificationSchema = new mongoose.Schema(
+    {
+        dropOtp: {
+            required: { type: Boolean, default: false },
+            verified: { type: Boolean, default: false }
+        }
     },
     { _id: false }
 );
@@ -131,7 +174,7 @@ const deliveryStateSchema = new mongoose.Schema(
 const statusHistorySchema = new mongoose.Schema(
     {
         at: { type: Date, default: Date.now },
-        byRole: { type: String, enum: ['USER', 'RESTAURANT', 'ADMIN', 'SYSTEM'] },
+        byRole: { type: String, enum: ['USER', 'RESTAURANT', 'DELIVERY_PARTNER', 'ADMIN', 'SYSTEM'] },
         byId: { type: mongoose.Schema.Types.ObjectId },
         from: { type: String },
         to: { type: String },
@@ -251,6 +294,9 @@ const orderSchema = new mongoose.Schema(
                 'confirmed',
                 'preparing',
                 'ready_for_pickup',
+                'reached_pickup',
+                'picked_up',
+                'reached_drop',
                 'delivered',
                 'cancelled_by_user',
                 'cancelled_by_restaurant',
@@ -281,6 +327,20 @@ const orderSchema = new mongoose.Schema(
         deliveryFleet: { type: String, default: 'standard', trim: true },
         scheduledAt: { type: Date, default: null },
         coinsEarned: { type: Number, default: 0 },
+        /** Rider payout for this order (computed from delivery commission rules). */
+        riderEarning: { type: Number, default: 0, min: 0 },
+        platformProfit: { type: Number, default: 0, min: 0 },
+        /** Plain 4-digit OTP for handover; cleared after verify (never exposed to rider APIs). */
+        deliveryOtp: { type: String, default: '', select: false },
+        deliveryVerification: {
+            type: deliveryVerificationSchema,
+            default: () => ({})
+        },
+        /** Latest rider location for this order (GeoJSON Point). */
+        lastRiderLocation: {
+            type: { type: String, enum: ['Point'] },
+            coordinates: { type: [Number] }
+        },
         checkoutGroupId: { type: String, default: '', index: true }
     },
     {
@@ -291,6 +351,9 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.index({ 'deliveryAddress.location': '2dsphere' });
 orderSchema.index({ userId: 1, createdAt: -1 });
+orderSchema.index({ lastRiderLocation: '2dsphere' });
+orderSchema.index({ 'dispatch.deliveryPartnerId': 1, orderStatus: 1 });
+orderSchema.index({ 'dispatch.status': 1, orderStatus: 1, updatedAt: -1 });
 // orderSchema.index({ restaurantId: 1, orderStatus: 1, createdAt: -1 });
 orderSchema.index({
     restaurantIds: 1,

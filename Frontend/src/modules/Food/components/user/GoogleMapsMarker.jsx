@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   GoogleMap, 
-  useJsApiLoader, 
   Marker, 
   InfoWindow, 
   DirectionsService, 
   DirectionsRenderer 
 } from '@react-google-maps/api';
+import { useGoogleMapsLoader } from '@food/utils/googleMapsLoader';
 import { MapPin, Navigation, Compass, AlertCircle, RefreshCw } from 'lucide-react';
 import { getGoogleMapsApiKey } from '@food/utils/googleMapsApiKey';
 
@@ -67,10 +67,7 @@ export default function GoogleMapsMarker({
     });
   }, []);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: apiKey,
-    libraries: LIBRARIES,
-  });
+  const { isLoaded, loadError } = useGoogleMapsLoader();
 
   // Track User Location
   const requestUserLocation = useCallback(() => {

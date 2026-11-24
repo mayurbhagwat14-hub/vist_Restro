@@ -15,15 +15,32 @@ const generateOtpCode = () => {
  * @param {string} phone - 10-digit mobile number (will be prefixed with 91)
  * @param {string} otp
  */
+/**
+ * Build the 12-digit Indian MSISDN (91XXXXXXXXXX).
+ * NOTE: a 10-digit mobile can itself start with "91" (e.g. 9123456789), so the
+ * country code must be decided by length, not by a "91" prefix check.
+ */
+const toIndianMsisdn = (phone) => {
+    let digits = String(phone || '').replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
+    if (digits.length === 10) return `91${digits}`;
+    if (digits.length === 12 && digits.startsWith('91')) return digits;
+    return digits.slice(-10).length === 10 ? `91${digits.slice(-10)}` : digits;
+};
+
+/** Returns true when SMS India Hub accepted the message. Never throws. */
 const sendSmsViaIndiaHub = async (phone, otp) => {
     try {
-        // Normalize phone: strip non-digits, ensure 91 country code prefix
-        const digits = String(phone || '').replace(/\D/g, '');
-        const msisdn = digits.startsWith('91') ? digits : `91${digits}`;
+        if (!config.smsApiKey || !config.smsSenderId) {
+            logger.error('[SMS] SMS India Hub is not configured (SMS_INDIA_HUB_API_KEY / SMS_INDIA_HUB_SENDER_ID missing)');
+            return false;
+        }
+        const msisdn = toIndianMsisdn(phone);
 
-        // EXACT DLT TEMPLATE provided by user:
-        // "Welcome to the ##var## powered by Appzeto.Your OTP for registration is ##var##.BGADEC"
-        const message = `Welcome to VIST Restaurant powered by Appzeto.Your OTP for registration is ${otp}.BGADEC`;
+        // EXACT approved DLT template (sender BGADPL) — text must match character-for-character:
+        // "Welcome to ##var##, powered by ##var##. Your OTP for registration ##var##. This OTP is valid for 10 minutes. Please do not share it with anyone.BGADPL"
+        // (DLT Template Id 1077104580057767222, template name "App Login")
+        const message = `Welcome to VIST Restaurant, powered by Appzeto. Your OTP for registration ${otp}. This OTP is valid for 10 minutes. Please do not share it with anyone.BGADPL`;
 
         // SMS India Hub HTTP GET API — query param names are case-sensitive per SOP
         const url = new URL('http://cloud.smsindiahub.in/vendorsms/pushsms.aspx');
@@ -41,7 +58,9 @@ const sendSmsViaIndiaHub = async (phone, otp) => {
         }
 
         logger.info(`[SMS] Sending OTP to ${msisdn} via SMS India Hub...`);
-        const response = await fetch(url.toString());
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        const response = await fetch(url.toString(), { signal: controller.signal }).finally(() => clearTimeout(timeout));
         const resultText = await response.text();
         logger.info(`[SMS] Raw response for ${msisdn}: ${resultText}`);
 
@@ -58,14 +77,16 @@ const sendSmsViaIndiaHub = async (phone, otp) => {
                 // eslint-disable-next-line no-console
                 console.error('❌ [SMS ERROR] ErrorCode 006 = DLT Template mismatch. The message text must EXACTLY match your registered TRAI DLT template. Login to https://cloud.smsindiahub.in and verify the approved template text.');
             }
+            return false;
         } else if (!response.ok) {
             logger.error(`SMS API HTTP error for ${phone}: ${response.status} – ${resultText}`);
-        } else {
-            logger.info(`✅ SMS sent successfully to ${msisdn}`);
+            return false;
         }
+        logger.info(`✅ SMS sent successfully to ${msisdn}`);
+        return true;
     } catch (error) {
         logger.error(`Error sending SMS to ${phone}: ${error.message}`);
-        // Do NOT throw — OTP is already stored in DB; SMS failure should not block the flow
+        return false;
     }
 };
 
@@ -127,7 +148,11 @@ export const createOrUpdateOtp = async (phone) => {
 
     // Only send SMS if not in default OTP mode
     if (!config.useDefaultOtp) {
-        await sendSmsViaIndiaHub(phone, otp);
+        const sent = await sendSmsViaIndiaHub(phone, otp);
+        if (!sent) {
+            // Tell the client instead of pretending the OTP was sent (it would never arrive).
+            throw new ValidationError('Could not send OTP SMS right now. Please try again in a minute.');
+        }
     }
 
     return otp;

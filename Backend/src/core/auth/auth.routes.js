@@ -9,7 +9,9 @@ import {
     updateAdminProfileController,
     changeAdminPasswordController,
     requestAdminForgotPasswordOtpController,
-    resetAdminPasswordWithOtpController
+    resetAdminPasswordWithOtpController,
+    requestDeliveryOtpController,
+    verifyDeliveryOtpController
 } from './auth.controller.js';
 import { authMiddleware, requireAdmin } from './auth.middleware.js';
 import { authRateLimiter } from '../../middleware/rateLimit.js';
@@ -22,6 +24,10 @@ const router = express.Router();
 // User OTP login
 router.post('/user/request-otp', authRateLimiter, requestUserOtpController);
 router.post('/user/verify-otp', authRateLimiter, verifyUserOtpController);
+
+// Delivery partner OTP login
+router.post('/delivery/request-otp', authRateLimiter, requestDeliveryOtpController);
+router.post('/delivery/verify-otp', authRateLimiter, verifyDeliveryOtpController);
 
 // Admin login
 router.post('/admin/login', authRateLimiter, adminLoginController);

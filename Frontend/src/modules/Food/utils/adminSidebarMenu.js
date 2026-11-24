@@ -194,6 +194,36 @@ export const adminSidebarMenu = [
 
   {
     type: "section",
+    label: "DELIVERYMAN MANAGEMENT",
+    items: [
+      {
+        type: "expandable",
+        label: "Deliveryman",
+        icon: "Truck",
+        subItems: [
+          { label: "Fleet Workload & Ops", path: "/admin/food/delivery-partners/workload" },
+          { label: "New Join Request", path: "/admin/food/delivery-partners/join-request" },
+          { label: "Deliveryman List", path: "/admin/food/delivery-partners" },
+          { label: "Add Deliveryman", path: "/admin/food/delivery-partners/add" },
+          { label: "Deliveryman Reviews", path: "/admin/food/delivery-partners/reviews" },
+          { label: "Bonus", path: "/admin/food/delivery-partners/bonus" },
+          { label: "Earning Addon", path: "/admin/food/delivery-partners/earning-addon" },
+          { label: "Earning Addon History", path: "/admin/food/delivery-partners/earning-addon-history" },
+          { label: "Delivery Earning", path: "/admin/food/delivery-partners/earnings" },
+        ],
+      },
+      { type: "link", label: "Delivery Boy Payout", path: "/admin/food/delivery-boy-commission", icon: "DollarSign" },
+      { type: "link", label: "Delivery Cash Limit", path: "/admin/food/delivery-cash-limit", icon: "IndianRupee" },
+      { type: "link", label: "Cash Confirmations", path: "/admin/food/cash-confirmations", icon: "CheckCircle2" },
+      { type: "link", label: "Cash limit settlement", path: "/admin/food/cash-limit-settlement", icon: "Receipt" },
+      { type: "link", label: "Delivery Withdrawal", path: "/admin/food/delivery-withdrawal", icon: "Wallet" },
+      { type: "link", label: "Delivery boy Wallet", path: "/admin/food/delivery-boy-wallet", icon: "PiggyBank" },
+      { type: "link", label: "Delivery Emergency Help", path: "/admin/food/delivery-emergency-help", icon: "Phone" },
+      { type: "link", label: "Delivery Support Tickets", path: "/admin/food/delivery-support-tickets", icon: "MessageSquare" },
+    ],
+  },
+  {
+    type: "section",
     label: "HELP & SUPPORT",
     items: [
       { type: "link", label: "Support Tickets", path: "/admin/food/support-tickets", icon: "MessageSquare" },

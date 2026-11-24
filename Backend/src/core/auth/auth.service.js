@@ -19,6 +19,11 @@ import { getRestaurantSubscriptionSettings } from "../../modules/food/admin/serv
 import { FEATURE_KEYS, isFeatureEnabled } from "../../modules/food/admin/services/featureSettings.service.js";
 import { ADMIN_FULL_PERMISSIONS, sanitizeAdminPermissions } from '../../constants/permissions.js';
 import { isMobilePlatform } from "../../utils/platform.js";
+import {
+  DELIVERY_PARTNER_ROLE,
+  getDeliveryPartnerProfile,
+  isDeliveryPartnerActive,
+} from "./deliveryAuth.service.js";
 
 const ROLES = {
   USER: "USER",
@@ -254,6 +259,9 @@ export const getProfile = async (userId, role) => {
           ? ADMIN_FULL_PERMISSIONS
           : sanitizeAdminPermissions(profile.permissions || {});
       }
+      break;
+    case DELIVERY_PARTNER_ROLE:
+      profile = await getDeliveryPartnerProfile(id);
       break;
 
     default:
@@ -502,6 +510,13 @@ export const refreshAccessToken = async (token) => {
     if (!u || u.isActive === false) {
       await FoodRefreshToken.deleteOne({ token }).catch(() => {});
       throw new AuthError("User account is deactivated");
+    }
+  }
+  // Blocked / rejected / deleted riders lose their session on the next refresh.
+  if (payload?.role === DELIVERY_PARTNER_ROLE) {
+    if (!(await isDeliveryPartnerActive(payload.userId))) {
+      await FoodRefreshToken.deleteOne({ token }).catch(() => {});
+      throw new AuthError("Delivery partner account is not active");
     }
   }
 

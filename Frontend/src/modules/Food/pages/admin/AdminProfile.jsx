@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Loader } from '@googlemaps/js-api-loader';
+import { getGoogleMapsLoader } from "@food/utils/googleMapsLoader"
 import { getGoogleMapsApiKey } from "@food/utils/googleMapsApiKey";
 import { adminAPI, uploadAPI } from "@food/api";
 import { Button } from "@food/components/ui/button";
@@ -1003,11 +1003,7 @@ const MapPicker = ({ form, setForm }) => {
 
     const initializeMap = async () => {
       try {
-        const loader = new Loader({
-          apiKey: apiKey,
-          version: "weekly",
-          libraries: ["places"],
-        })
+        const loader = getGoogleMapsLoader(apiKey)
         const google = await loader.load()
         if (!isMounted || !mapContainerRef.current) {
           return
@@ -1194,11 +1190,7 @@ const StaticMap = ({ form }) => {
     if (!apiKey || !mapContainerRef.current) return
     const initializeMap = async () => {
       try {
-        const loader = new Loader({
-          apiKey: apiKey,
-          version: "weekly",
-          libraries: ["places"],
-        })
+        const loader = getGoogleMapsLoader(apiKey)
         const google = await loader.load()
         const lat = parseFloat(form.latitude) || 28.6139
         const lng = parseFloat(form.longitude) || 77.2090

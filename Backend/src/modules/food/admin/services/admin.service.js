@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { ValidationError } from '../../../../core/auth/errors.js';
+import { ValidationError, NotFoundError } from '../../../../core/auth/errors.js';
 import { FoodRestaurant } from '../../restaurant/models/restaurant.model.js';
 const FoodRestaurantOutletTimings = mongoose.models.FoodRestaurantOutletTimings || mongoose.model('FoodRestaurantOutletTimings', new mongoose.Schema({}, { strict: false, collection: 'food_restaurant_outlet_timings' }));
-const FoodDeliveryPartner = mongoose.models.FoodDeliveryPartner || mongoose.model('FoodDeliveryPartner', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_partners' }));
-const DeliverySupportTicket = mongoose.models.DeliverySupportTicket || mongoose.model('DeliverySupportTicket', new mongoose.Schema({}, { strict: false, collection: 'delivery_support_tickets' }));
+import { FoodDeliveryPartner } from '../../delivery/models/deliveryPartner.model.js';
+import { DeliverySupportTicket } from '../../delivery/models/supportTicket.model.js';
 import { FoodNotification } from '../../../../core/notifications/models/notification.model.js';
 import { sendNotificationToOwner } from '../../../../core/notifications/firebase.service.js';
 const FoodRestaurantSubscriptionSettings = mongoose.models.FoodRestaurantSubscriptionSettings || mongoose.model('FoodRestaurantSubscriptionSettings', new mongoose.Schema({}, { strict: false, collection: 'food_restaurant_subscription_settings' }));
@@ -12,17 +12,17 @@ import { FoodCategory } from '../models/category.model.js';
 import { FoodItem } from '../models/food.model.js';
 import { FoodOffer } from '../models/offer.model.js';
 import { FoodOfferUsage } from '../models/offerUsage.model.js';
-const DeliveryBonusTransaction = mongoose.models.DeliveryBonusTransaction || mongoose.model('DeliveryBonusTransaction', new mongoose.Schema({}, { strict: false, collection: 'delivery_bonus_transactions' }));
-const FoodEarningAddon = mongoose.models.FoodEarningAddon || mongoose.model('FoodEarningAddon', new mongoose.Schema({}, { strict: false, collection: 'food_earning_addons' }));
-const FoodEarningAddonHistory = mongoose.models.FoodEarningAddonHistory || mongoose.model('FoodEarningAddonHistory', new mongoose.Schema({}, { strict: false, collection: 'food_earning_addon_history' }));
+import { DeliveryBonusTransaction } from '../models/deliveryBonusTransaction.model.js';
+import { FoodEarningAddon } from '../models/earningAddon.model.js';
+import { FoodEarningAddonHistory } from '../models/earningAddonHistory.model.js';
 const FoodRestaurantCommission = mongoose.models.FoodRestaurantCommission || mongoose.model('FoodRestaurantCommission', new mongoose.Schema({}, { strict: false, collection: 'food_restaurant_commissions' }));
-const FoodDeliveryCommissionRule = mongoose.models.FoodDeliveryCommissionRule || mongoose.model('FoodDeliveryCommissionRule', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_commission_rules' }));
+import { FoodDeliveryCommissionRule } from '../models/deliveryCommissionRule.model.js';
 import { FoodFeeSettings } from '../models/feeSettings.model.js';
 import { FeedbackExperience } from '../models/feedbackExperience.model.js';
 import { FoodUser } from '../../../../core/users/user.model.js';
 import { FoodRefreshToken } from '../../../../core/refreshTokens/refreshToken.model.js';
-const FoodDeliveryCashLimit = mongoose.models.FoodDeliveryCashLimit || mongoose.model('FoodDeliveryCashLimit', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_cash_limits' }));
-const FoodDeliveryEmergencyHelp = mongoose.models.FoodDeliveryEmergencyHelp || mongoose.model('FoodDeliveryEmergencyHelp', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_emergency_helps' }));
+import { FoodDeliveryCashLimit } from '../models/deliveryCashLimit.model.js';
+import { FoodDeliveryEmergencyHelp } from '../models/deliveryEmergencyHelp.model.js';
 import { FoodReferralSettings } from '../models/referralSettings.model.js';
 import { FoodReferralLog } from '../models/referralLog.model.js';
 import { FoodSafetyEmergencyReport } from '../models/safetyEmergencyReport.model.js';
@@ -32,9 +32,9 @@ import { FoodUserWallet } from '../../user/models/userWallet.model.js';
 import { FoodOrder } from '../../orders/models/order.model.js';
 import { FoodTransaction } from '../../orders/models/foodTransaction.model.js';
 const FoodRestaurantWithdrawal = mongoose.models.FoodRestaurantWithdrawal || mongoose.model('FoodRestaurantWithdrawal', new mongoose.Schema({}, { strict: false, collection: 'food_restaurant_withdrawals' }));
-const FoodDeliveryWithdrawal = mongoose.models.FoodDeliveryWithdrawal || mongoose.model('FoodDeliveryWithdrawal', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_withdrawals' }));
-const FoodDeliveryWallet = mongoose.models.FoodDeliveryWallet || mongoose.model('FoodDeliveryWallet', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_wallets' }));
-const FoodDeliveryCashDeposit = mongoose.models.FoodDeliveryCashDeposit || mongoose.model('FoodDeliveryCashDeposit', new mongoose.Schema({}, { strict: false, collection: 'food_delivery_cash_deposits' }));
+import { FoodDeliveryWithdrawal } from '../../delivery/models/foodDeliveryWithdrawal.model.js';
+import { FoodDeliveryWallet } from '../../delivery/models/deliveryWallet.model.js';
+import { FoodDeliveryCashDeposit } from '../../delivery/models/foodDeliveryCashDeposit.model.js';
 const FoodUnregisteredRestaurant = mongoose.models.FoodUnregisteredRestaurant || mongoose.model('FoodUnregisteredRestaurant', new mongoose.Schema({}, { strict: false, collection: 'food_unregistered_restaurants' }));
 import { FoodAdmin } from '../../../../core/admin/admin.model.js';
 import { GroceryOrder } from '../../orders/models/groceryOrder.model.js';
@@ -3127,7 +3127,7 @@ export async function updateCategory(id, body) {
         const oldImage = doc.image || '';
         if (oldImage && newImage !== oldImage) {
             try {
-                const { deleteLocalFile } = await import('../../../services/localUpload.service.js');
+                const { deleteLocalFile } = await import('../../../../services/localUpload.service.js');
                 await deleteLocalFile(oldImage);
             } catch (e) {
                 // Non-fatal: log but continue
@@ -3635,7 +3635,7 @@ export async function updateFood(id, body) {
         const oldImg = doc.image || '';
         if (oldImg && newImg !== oldImg) {
             try {
-                const { deleteLocalFile } = await import('../../../services/localUpload.service.js');
+                const { deleteLocalFile } = await import('../../../../services/localUpload.service.js');
                 await deleteLocalFile(oldImg);
             } catch (e) { console.warn('Could not delete old food image:', e.message); }
         }
@@ -5646,15 +5646,26 @@ export async function updateDeliveryBoyWallet(data) {
  * Deactivate a delivery partner (admin)
  */
 export async function deleteDeliveryPartner(id) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) throw new ValidationError('Invalid delivery partner id');
     const partner = await FoodDeliveryPartner.findById(id);
     if (!partner) throw new NotFoundError('Delivery partner not found');
 
-    partner.status = 'deactivated';
+    const hasActiveTrip = await FoodOrder.exists({
+        'dispatch.deliveryPartnerId': partner._id,
+        'dispatch.status': { $in: ['assigned', 'accepted'] },
+        orderStatus: { $nin: ['delivered', 'cancelled_by_user', 'cancelled_by_restaurant', 'cancelled_by_admin'] }
+    });
+    if (hasActiveTrip) {
+        throw new ValidationError('Partner has an active order. Reassign or complete it before deactivating.');
+    }
+
+    // 'deleted' is the soft-delete status understood by delivery login (partner can restore via OTP).
+    partner.status = 'deleted';
+    partner.availabilityStatus = 'offline';
     await partner.save();
 
-    // Optional: You could also clear FCM tokens to log them out
-    // partner.fcmTokens = [];
-    // await partner.save();
+    // End all sessions so the rider is logged out immediately.
+    await FoodRefreshToken.deleteMany({ userId: partner._id }).catch(() => {});
 
     return partner.toObject();
 }
@@ -6014,10 +6025,115 @@ export function getAdminPermissionCatalog() {
 
 // force restart update 6
 
+export async function getCashConfirmations(query = {}) {
+    const limit = parseInt(query.limit, 10) || 20;
+    const page = parseInt(query.page, 10) || 1;
+    const skip = (page - 1) * limit;
+    const search = String(query.search || '').trim();
+    const tab = String(query.tab || 'all').trim().toLowerCase();
 
+    const filter = getManualCashSubmissionFilter();
 
+    if (tab === 'pending') {
+        filter.status = 'Pending';
+    } else if (tab === 'confirmed') {
+        filter.confirmationAction = { $in: ['received', 'not_received'] };
+    }
 
+    if (search) {
+        const partnerIds = await FoodDeliveryPartner.find({
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { phone: { $regex: search, $options: 'i' } },
+            ],
+        })
+            .select('_id')
+            .lean();
+        filter.deliveryPartnerId = { $in: partnerIds.map((p) => p._id) };
+    }
 
+    const [deposits, total] = await Promise.all([
+        FoodDeliveryCashDeposit.find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('deliveryPartnerId', 'name phone')
+            .lean(),
+        FoodDeliveryCashDeposit.countDocuments(filter),
+    ]);
 
+    const transactions = deposits.map(mapCashConfirmationRow);
 
+    return {
+        transactions,
+        pagination: {
+            total,
+            page,
+            limit,
+            pages: Math.ceil(total / limit) || 1,
+        },
+    };
+}
 
+export async function updateCashLimitSettlementStatus(depositId, body = {}, adminUser = null) {
+    if (!depositId || !mongoose.Types.ObjectId.isValid(String(depositId))) {
+        throw new ValidationError('Invalid settlement id');
+    }
+
+    const action = String(body.action || '').trim().toLowerCase();
+    if (!['received', 'not_received'].includes(action)) {
+        throw new ValidationError('action must be received or not_received');
+    }
+
+    const deposit = await FoodDeliveryCashDeposit.findById(depositId);
+    if (!deposit) throw new NotFoundError('Settlement not found');
+
+    if (deposit.status !== 'Pending') {
+        throw new ValidationError(`Settlement is already ${deposit.status}`);
+    }
+
+    if (String(deposit.paymentMethod || '').toLowerCase() !== 'cash') {
+        throw new ValidationError('Only cash submissions can be confirmed manually');
+    }
+
+    const nextStatus = action === 'received' ? 'Completed' : 'Failed';
+    deposit.status = nextStatus;
+    deposit.confirmationAction = action;
+    deposit.adminId = adminUser?._id || null;
+    deposit.adminNote = action === 'received'
+        ? 'Cash received and confirmed by admin'
+        : 'Cash not received — marked by admin';
+    await deposit.save();
+
+    const { getDeliveryPartnerWalletEnhanced, notifyDeliveryPartnerCashDepositStatus } = await import('../../delivery/services/deliveryFinance.service.js');
+    const wallet = await getDeliveryPartnerWalletEnhanced(deposit.deliveryPartnerId);
+
+    await notifyDeliveryPartnerCashDepositStatus(deposit.deliveryPartnerId, {
+        amount: deposit.amount,
+        status: nextStatus,
+        wallet,
+    });
+
+    return {
+        deposit: deposit.toObject(),
+        wallet,
+    };
+}
+
+export async function countPendingCashConfirmations() {
+    return FoodDeliveryCashDeposit.countDocuments(
+        getManualCashSubmissionFilter({ status: 'Pending' }),
+    );
+}
+
+function getManualCashSubmissionFilter(extra = {}) {
+    return {
+        paymentMethod: 'cash',
+        $or: [
+            { razorpayPaymentId: { $exists: false } },
+            { razorpayPaymentId: null },
+            { razorpayPaymentId: '' },
+        ],
+        ...extra,
+    };
+}

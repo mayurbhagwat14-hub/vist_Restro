@@ -139,7 +139,14 @@ export default function OrdersTable({
   actionLoadingOrderId,
   deletingOrderId,
   showAssignedDeliveryPartner = false,
+  onAssignDeliveryPartner,
 }) {
+  // Rider can be (re)assigned until the order is delivered, cancelled or refunded.
+  const canAssignRider = (order) => {
+    if (!onAssignDeliveryPartner) return false
+    const s = String(order?.orderStatus || "").toLowerCase()
+    return !(s.includes("deliver") || s.includes("cancel") || s.includes("refund") || s.includes("fail"))
+  }
   const [currentPage, setCurrentPage] = useState(1)
   const [expandedItems, setExpandedItems] = useState({})
   const itemsPerPage = 10
@@ -621,6 +628,23 @@ export default function OrdersTable({
                       >
                         <Printer className="w-4 h-4" />
                       </button>
+                      {canAssignRider(order) && (
+                        <button
+                          onClick={() => onAssignDeliveryPartner(order)}
+                          className={`p-1.5 rounded transition-colors ${
+                            order.deliveryPartnerName
+                              ? "text-emerald-600 hover:bg-emerald-50"
+                              : "text-amber-600 hover:bg-amber-50"
+                          }`}
+                          title={
+                            order.deliveryPartnerName
+                              ? `Reassign Delivery Partner (Currently: ${order.deliveryPartnerName})`
+                              : "Assign Delivery Partner"
+                          }
+                        >
+                          <Truck className="w-4 h-4" />
+                        </button>
+                      )}
                       {onDeleteOrder && (
                         <button
                           onClick={() => onDeleteOrder(order)}
@@ -977,6 +1001,16 @@ export default function OrdersTable({
                     <Printer className="w-4 h-4 text-blue-500" />
                     <span>Print</span>
                   </button>
+
+                  {canAssignRider(order) && (
+                    <button
+                      onClick={() => onAssignDeliveryPartner(order)}
+                      className="flex-1 min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 shadow-2xs active:scale-[0.98] transition-all"
+                    >
+                      <Truck className={`w-4 h-4 ${order.deliveryPartnerName ? "text-emerald-500" : "text-amber-500"}`} />
+                      <span>{order.deliveryPartnerName ? "Reassign" : "Rider"}</span>
+                    </button>
+                  )}
 
                   {orderStatusLower !== "pending" && canShowCancelAction(order) && onCancelOrder && (
                     <button
