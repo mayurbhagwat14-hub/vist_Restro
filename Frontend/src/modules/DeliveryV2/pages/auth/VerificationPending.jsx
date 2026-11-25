@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { Clock3, ShieldCheck, AlertTriangle, X } from "lucide-react"
+import VistAuthHero from "@delivery/components/VistAuthHero"
 import { clearModuleAuth } from "@food/utils/auth"
 import {
   enablePendingVerificationPush,
@@ -16,7 +17,7 @@ const DELIVERY_PRIMARY_BTN =
   "h-12 w-full rounded-full text-base font-semibold bg-gradient-to-r from-[#6E3B13] to-[#522807] hover:from-[#6E3B13] hover:to-[#3D210F] text-white shadow-[0_8px_20px_rgba(110,59,19,0.25)] active:scale-[0.98] transition-all duration-300"
 
 const DELIVERY_OUTLINE_BTN =
-  "h-12 w-full rounded-full text-base font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.98] transition-all duration-300"
+  "h-12 w-full rounded-full text-base font-semibold border border-[#E5DDD0] bg-white text-[#522807] hover:bg-[#FBF5EA] active:scale-[0.98] transition-all duration-300"
 
 export default function VerificationPending() {
   const navigate = useNavigate()
@@ -148,14 +149,16 @@ export default function VerificationPending() {
 
   return (
     <div
-      className={`min-h-[100dvh] overflow-y-auto overscroll-contain px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-10 font-['Poppins'] transition-all duration-300 ${
+      className={`min-h-[100dvh] w-full overflow-y-auto overscroll-contain flex justify-center pb-[max(1.5rem,env(safe-area-inset-bottom))] font-['Outfit'] transition-all duration-300 ${
         isRejected
-          ? "bg-gradient-to-br from-[#FFF5F5] via-[#FFEBEB] to-[#FEF2F2]"
-          : "bg-gradient-to-br from-slate-50 via-blue-50/40 to-slate-100"
+          ? "bg-[#F6EBD7]"
+          : "bg-[#F6EBD7]"
       }`}
     >
-      <div className="mx-auto flex w-full max-w-md min-h-[calc(100dvh-2rem)] flex-col justify-center py-2 sm:py-0">
-        <div className="w-full rounded-[20px] sm:rounded-[28px] border border-slate-200 bg-white p-5 sm:p-8 shadow-[0_24px_70px_rgba(110,59,19,0.08)]">
+      <div className="mx-auto flex w-full max-w-[460px] flex-col">
+        <VistAuthHero compact title={isRejected ? "Application Update" : "Almost There!"} subtitle={isRejected ? "Please review the details below." : "Your documents are with our team for verification."} />
+        <div className="px-5 mt-5">
+        <div className="w-full rounded-[24px] border border-[#E8DEC8] bg-white p-5 sm:p-7 shadow-[0_18px_50px_rgba(110,59,19,0.10)]">
           <div className="mb-4 sm:mb-6 flex items-center justify-center">
             {isRejected ? (
               <div className="flex items-center justify-center my-2 select-none">
@@ -269,11 +272,11 @@ export default function VerificationPending() {
                 {pushPermission !== "granted" && pushPermission !== "unsupported" && !isNativeAppWebView() ? (
                   <button
                     type="button"
-                    className="h-12 w-full rounded-full text-base font-semibold bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.98] transition-all duration-300 disabled:opacity-70"
+                    className="h-12 w-full rounded-full text-base font-semibold bg-gradient-to-b from-[#6E3B13] to-[#522807] text-white shadow-[0_8px_22px_rgba(82,40,7,0.28)] active:scale-[0.98] transition-all duration-300 disabled:opacity-70"
                     disabled={enablingPush}
                     onClick={handleEnablePush}
                   >
-                    {enablingPush ? "Enabling..." : "Allow Mail Notifications"}
+                    {enablingPush ? "Enabling..." : "Allow Notifications"}
                   </button>
                 ) : null}
                 <button type="button" className={DELIVERY_PRIMARY_BTN} onClick={handleBackToLogin}>
@@ -282,6 +285,7 @@ export default function VerificationPending() {
               </>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>

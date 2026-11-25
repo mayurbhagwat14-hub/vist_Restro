@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Upload, X, Check, Camera, Image as ImageIcon } from "lucide-react"
+import VistAuthHero from "@delivery/components/VistAuthHero"
 import { deliveryAPI } from "@food/api"
 import { toast } from "sonner"
 import {
@@ -294,7 +295,7 @@ export default function SignupStep2() {
     const uploaded = hasUploadedDoc(docType)
 
     return (
-      <div className="bg-white rounded-lg p-4 border border-gray-200">
+      <div className="bg-white rounded-2xl p-4 border border-[#E8DEC8] shadow-[0_2px_8px_rgba(74,44,17,0.04)]">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
@@ -322,17 +323,17 @@ export default function SignupStep2() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 transition-colors px-4">
+          <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-[#E5DDD0] rounded-2xl bg-[#FBF5EA] hover:border-[#6E3B13] transition-colors px-4">
             <div className="flex flex-col items-center justify-center pt-5 pb-3">
               {isUploading ? (
                 <>
                   <div className="animate-spin rounded-full h-8 w-8 border-2 border-transparent mb-2" style={{ borderBottomColor: "#00B761" }}></div>
-                  <p className="text-sm text-gray-500">Uploading...</p>
+                  <p className="text-sm text-[#8E7B6B]">Uploading...</p>
                 </>
               ) : (
                 <>
                   <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500 mb-1">Upload document</p>
+                  <p className="text-sm text-[#8E7B6B] mb-1">Upload document</p>
                   <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
                 </>
               )}
@@ -387,22 +388,16 @@ export default function SignupStep2() {
   const allDocumentsUploaded = DELIVERY_SIGNUP_DOC_TYPES.every((docType) => hasUploadedDoc(docType))
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-white px-4 py-3 flex items-center gap-4 border-b border-gray-200">
-        <button
-          onClick={handleBack}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-lg font-medium">Upload Documents</h1>
-      </div>
+    <div className="min-h-screen w-full bg-[#F6EBD7] flex justify-center vist-onboarding" style={{ fontFamily: "'Outfit', sans-serif" }}>
+      <div className="w-full max-w-[460px] min-h-screen bg-[#F6EBD7] relative overflow-hidden pb-8">
+      <VistAuthHero
+        compact
+        onBack={handleBack}
+        title="Upload Documents"
+        subtitle="Step 2 of 2 · Upload clear photos of your documents for verification."
+      />
 
-      <div className="px-4 py-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Document Verification</h2>
-          <p className="text-sm text-gray-600">Please upload clear photos of your documents</p>
-        </div>
+      <div className="relative z-10 px-6 pt-5">
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <DocumentUpload docType="profilePhoto" label="Profile Photo" required={true} />
@@ -413,7 +408,7 @@ export default function SignupStep2() {
           <button
             type="submit"
             disabled={isSubmitting || !allDocumentsUploaded}
-            className={`w-full py-4 rounded-lg font-bold text-white text-base transition-all mt-6 active:scale-[0.98] ${isSubmitting || !allDocumentsUploaded
+            className={`w-full py-4 rounded-full font-semibold text-white text-base transition-all mt-6 active:scale-[0.98] ${isSubmitting || !allDocumentsUploaded
               ? "bg-gray-400 cursor-not-allowed shadow-none"
               : "bg-gradient-to-r from-[#6E3B13] to-[#522807] hover:from-[#6E3B13] hover:to-[#3D210F] shadow-[0_8px_20px_rgba(110,59,19,0.3)]"
               }`}
@@ -421,6 +416,7 @@ export default function SignupStep2() {
             {isSubmitting ? "Submitting..." : "Complete Signup"}
           </button>
         </form>
+      </div>
       </div>
     </div>
   )

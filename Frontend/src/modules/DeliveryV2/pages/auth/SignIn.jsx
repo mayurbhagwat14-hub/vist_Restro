@@ -716,7 +716,7 @@ export default function DeliverySignIn() {
         className="absolute opacity-0 w-px h-px -z-10 pointer-events-none"
       />
 
-      <main className="w-full max-w-[460px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative overflow-hidden">
+      <main className="dv-auth-main w-full max-w-[460px] min-h-[100dvh] bg-[#F6EBD7] flex flex-col relative overflow-hidden">
         {/* 1. Top restaurant photo (same as customer login) */}
         <div className="relative w-full shrink-0 overflow-hidden bg-[#F6EBD7]">
           {!showLoginStep && (
@@ -730,14 +730,14 @@ export default function DeliverySignIn() {
             </button>
           )}
           <img
-            src="/image%20copy.png"
-            alt="VISIT Restaurant"
+            src="/hotel-visit-login.jpg?v=2"
+            alt="Hotel VISIT"
             className="w-full h-auto block select-none pointer-events-none"
           />
         </div>
 
         {/* 2. Content */}
-        <div className="flex-1 flex flex-col px-7 relative z-20 -mt-6 sm:-mt-8 pb-8">
+        <div className="flex-1 flex flex-col px-7 relative z-20 mt-4 sm:mt-5 pb-8">
           <BotanicalLeavesLeft className="absolute -left-4 top-8 w-28 h-44 sm:w-32 sm:h-48 z-0 opacity-60" />
           <BotanicalLeavesRight className="absolute -right-4 top-2 w-28 h-44 sm:w-32 sm:h-48 z-0 opacity-60" />
           <BotanicalLeavesLeft className="absolute -left-6 bottom-4 w-24 h-38 sm:w-28 sm:h-42 z-0 opacity-40" />

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
+import VistAuthHero from "@delivery/components/VistAuthHero"
 import useDeliveryOnboardingExitGuard from "../../hooks/useDeliveryOnboardingExitGuard"
 import OnboardingExitModal from "@/shared/components/OnboardingExitModal"
 import { hasDeliveryStep1Progress, getAllSignupDocumentsFromDB } from "../../utils/deliveryOnboardingStorage"
@@ -234,29 +235,22 @@ export default function SignupStep1() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 flex items-center gap-4 border-b border-gray-200">
-        <button
-          onClick={handleBack}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-lg font-medium">Complete Your Profile</h1>
-      </div>
+    <div className="min-h-screen w-full bg-[#F6EBD7] flex justify-center vist-onboarding" style={{ fontFamily: "'Outfit', sans-serif" }}>
+      <div className="w-full max-w-[460px] min-h-screen bg-[#F6EBD7] relative overflow-hidden pb-8">
+      <VistAuthHero
+        compact
+        onBack={handleBack}
+        title="Complete Your Profile"
+        subtitle="Step 1 of 2 · Share your basic details to join as a VISIT delivery partner."
+      />
 
       {/* Content */}
-      <div className="px-4 py-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Basic Details</h2>
-          <p className="text-sm text-gray-600">Please provide your information to continue</p>
-        </div>
+      <div className="relative z-10 px-6 pt-5">
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Full Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -265,7 +259,7 @@ export default function SignupStep1() {
               value={formData.name}
               onChange={handleChange}
               inputMode="text"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.name ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] ${errors.name ? "border-red-500" : "border-[#E5DDD0]"
                 }`}
               placeholder="Enter your full name"
             />
@@ -274,7 +268,7 @@ export default function SignupStep1() {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Email <span className="text-red-500">*</span>
             </label>
             <input
@@ -286,7 +280,7 @@ export default function SignupStep1() {
               autoCorrect="off"
               autoComplete="email"
               inputMode="email"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.email ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] ${errors.email ? "border-red-500" : "border-[#E5DDD0]"
                 }`}
               placeholder="Enter your email"
             />
@@ -295,7 +289,7 @@ export default function SignupStep1() {
 
           {/* Address */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Address <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -303,7 +297,7 @@ export default function SignupStep1() {
               value={formData.address}
               onChange={handleChange}
               rows={3}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.address ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] ${errors.address ? "border-red-500" : "border-[#E5DDD0]"
                 }`}
               placeholder="Enter your address"
             />
@@ -313,7 +307,7 @@ export default function SignupStep1() {
           {/* City and State */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
                 City <span className="text-red-500">*</span>
               </label>
               <input
@@ -321,14 +315,14 @@ export default function SignupStep1() {
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.city ? "border-red-500" : "border-gray-300"
+                className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] ${errors.city ? "border-red-500" : "border-[#E5DDD0]"
                   }`}
                 placeholder="City"
               />
               {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
                 State <span className="text-red-500">*</span>
               </label>
               <input
@@ -336,7 +330,7 @@ export default function SignupStep1() {
                 name="state"
                 value={formData.state}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.state ? "border-red-500" : "border-gray-300"
+                className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] ${errors.state ? "border-red-500" : "border-[#E5DDD0]"
                   }`}
                 placeholder="State"
               />
@@ -346,14 +340,14 @@ export default function SignupStep1() {
 
           {/* Vehicle Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Vehicle Type <span className="text-red-500">*</span>
             </label>
             <select
               name="vehicleType"
               value={formData.vehicleType}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-[#E5DDD0] rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13]"
             >
               <option value="bike">Bike</option>
               <option value="scooter">Scooter</option>
@@ -364,7 +358,7 @@ export default function SignupStep1() {
 
           {/* Vehicle Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Vehicle Name/Model (Optional)
             </label>
             <input
@@ -372,14 +366,14 @@ export default function SignupStep1() {
               name="vehicleName"
               value={formData.vehicleName}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-[#E5DDD0] rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13]"
               placeholder="e.g., Honda Activa"
             />
           </div>
 
           {/* Vehicle Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Vehicle Number <span className="text-red-500">*</span>
             </label>
             <input
@@ -388,7 +382,7 @@ export default function SignupStep1() {
               value={formData.vehicleNumber}
               onChange={handleChange}
               maxLength={10}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.vehicleNumber ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] ${errors.vehicleNumber ? "border-red-500" : "border-[#E5DDD0]"
                 }`}
               placeholder="e.g., MH12AB1234"
             />
@@ -397,7 +391,7 @@ export default function SignupStep1() {
 
           {/* Driving License Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Driving License Number <span className="text-red-500">*</span>
             </label>
             <input
@@ -406,7 +400,7 @@ export default function SignupStep1() {
               value={formData.drivingLicenseNumber}
               onChange={handleChange}
               maxLength={15}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 uppercase ${errors.drivingLicenseNumber ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] uppercase ${errors.drivingLicenseNumber ? "border-red-500" : "border-[#E5DDD0]"
                 }`}
               placeholder="e.g., MH1220110012345"
             />
@@ -415,7 +409,7 @@ export default function SignupStep1() {
 
           {/* PAN Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               PAN Number <span className="text-red-500">*</span>
             </label>
             <input
@@ -424,7 +418,7 @@ export default function SignupStep1() {
               value={formData.panNumber}
               onChange={handleChange}
               maxLength={10}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 uppercase ${errors.panNumber ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] uppercase ${errors.panNumber ? "border-red-500" : "border-[#E5DDD0]"
                 }`}
               placeholder="ABCDE1234F"
             />
@@ -433,7 +427,7 @@ export default function SignupStep1() {
 
           {/* Aadhar Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#8E7B6B] mb-1.5 pl-1">
               Aadhar Number <span className="text-red-500">*</span>
             </label>
             <input
@@ -443,7 +437,7 @@ export default function SignupStep1() {
               onChange={handleChange}
               maxLength={12}
               inputMode="numeric"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.aadharNumber ? "border-red-500" : "border-gray-300"
+              className={`w-full px-4 py-3 border rounded-2xl bg-white focus:outline-none focus:ring-2 focus:ring-[#6E3B13]/25 focus:border-[#6E3B13] ${errors.aadharNumber ? "border-red-500" : "border-[#E5DDD0]"
                 }`}
               placeholder="123456789012"
             />
@@ -454,7 +448,7 @@ export default function SignupStep1() {
           <button
             type="submit"
             disabled={isSubmitting || !formData.email || !isValidEmailValue(formData.email) || Object.values(errors).some(error => error !== "")}
-            className={`w-full py-4 rounded-lg font-bold text-white text-base transition-all mt-6 active:scale-[0.98] ${isSubmitting || !formData.email || !isValidEmailValue(formData.email) || Object.values(errors).some(error => error !== "")
+            className={`w-full py-4 rounded-full font-semibold text-white text-base transition-all mt-6 active:scale-[0.98] ${isSubmitting || !formData.email || !isValidEmailValue(formData.email) || Object.values(errors).some(error => error !== "")
               ? "bg-gray-400 cursor-not-allowed shadow-none"
               : "bg-gradient-to-r from-[#6E3B13] to-[#522807] hover:from-[#6E3B13] hover:to-[#3D210F] shadow-[0_8px_20px_rgba(110,59,19,0.3)]"
               }`}
@@ -470,6 +464,7 @@ export default function SignupStep1() {
         onExit={handleExit}
         theme="delivery"
       />
+      </div>
     </div>
   )
 }

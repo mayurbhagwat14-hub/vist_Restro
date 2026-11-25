@@ -226,14 +226,14 @@ export default function SignIn() {
           </button>
 
           <img
-            src="/image%20copy.png"
-            alt="VISIT Restaurant"
+            src="/hotel-visit-login.jpg?v=2"
+            alt="Hotel VISIT"
             className="w-full h-auto block select-none pointer-events-none"
           />
         </div>
 
         {/* 2. Content Section — Shifted down into clean cream area */}
-        <div className="flex-1 flex flex-col px-7 relative z-20 -mt-6 sm:-mt-8 pb-8">
+        <div className="flex-1 flex flex-col px-7 relative z-20 mt-4 sm:mt-5 pb-8">
 
           {/* Botanical Leaf Decorations */}
           <BotanicalLeavesLeft className="absolute -left-4 top-8 w-28 h-44 sm:w-32 sm:h-48 z-0 opacity-60" />

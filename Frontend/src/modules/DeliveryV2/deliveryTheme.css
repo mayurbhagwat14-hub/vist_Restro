@@ -275,3 +275,12 @@ body:has(.delivery-v2-theme) {
   color: #fff !important;
   box-shadow: 0 8px 22px rgba(82, 40, 7, 0.28);
 }
+
+/* Auth screens (login/OTP) are full-bleed like the customer login: the dashboard
+   <main> width/gutter rules above must not shrink them. */
+.delivery-v2-theme main.dv-auth-main {
+  max-width: 460px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding-bottom: 0 !important;
+}
