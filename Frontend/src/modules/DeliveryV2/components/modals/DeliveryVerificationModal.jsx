@@ -68,6 +68,27 @@ const OtpModal = ({ order, onVerified, onClose }) => {
 
   const orderId = order.orderId || order._id || 'ORD';
 
+  // "Reached drop" is safe to repeat: the server keeps the same OTP and sends it to the customer again.
+  const [otpSendState, setOtpSendState] = useState('idle'); // idle | sending | sent | failed
+  const hasAutoSentRef = useRef(false);
+
+  const sendOtpToCustomer = async () => {
+    setOtpSendState('sending');
+    try {
+      await deliveryAPI.confirmReachedDrop(orderId);
+      setOtpSendState('sent');
+    } catch (err) {
+      setOtpSendState('failed');
+      showUserFacingApiError(err, 'Could not send OTP to the customer');
+    }
+  };
+
+  useEffect(() => {
+    if (hasAutoSentRef.current || order?.deliveryVerification?.dropOtp?.verified) return;
+    hasAutoSentRef.current = true;
+    void sendOtpToCustomer();
+  }, []); // once per opening
+
   const handleOtpChange = (index, value) => {
     if (value && !/^\d+$/.test(value)) return;
     const newOtp = [...otp];
@@ -102,14 +123,14 @@ const OtpModal = ({ order, onVerified, onClose }) => {
   const isAlreadyVerified = order?.deliveryVerification?.dropOtp?.verified;
 
   return (
-    <div className="fixed inset-0 z-120 p-0 sm:p-4 flex items-end justify-center pointer-events-none">
+    <div className="absolute inset-0 z-120 p-0 sm:p-4 flex items-end justify-center pointer-events-none">
       <Backdrop onClose={onClose} />
       <motion.div
         initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-        className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-6 sm:pb-12 pointer-events-auto max-h-[84vh] overflow-y-auto"
+        className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-5 sm:pb-12 pointer-events-auto max-h-full overflow-y-auto"
       >
-        <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
-        <div className="flex justify-between items-center mb-6">
+        <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4 sm:mb-6" />
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isOtpVerified ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
               <ShieldCheck className="w-7 h-7" />
@@ -124,12 +145,34 @@ const OtpModal = ({ order, onVerified, onClose }) => {
 
         <DeliveryInstructionsPanel note={order?.note} />
 
+        {!isAlreadyVerified && !isOtpVerified && (
+          <div className="flex items-center justify-between gap-3 mb-3 text-xs">
+            <p className={`font-semibold ${otpSendState === 'failed' ? 'text-red-600' : 'text-gray-500'}`}>
+              {otpSendState === 'sending' ? 'Sending OTP to customer…'
+                : otpSendState === 'failed' ? 'OTP was not sent'
+                  : 'Ask the customer for the 4-digit OTP'}
+            </p>
+            <button
+              type="button"
+              onClick={sendOtpToCustomer}
+              disabled={otpSendState === 'sending'}
+              className="shrink-0 flex items-center gap-1.5 font-bold text-orange-600 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${otpSendState === 'sending' ? 'animate-spin' : ''}`} />
+              Resend OTP
+            </button>
+          </div>
+        )}
+
         <div className="flex justify-center gap-2.5 sm:gap-3 mb-6 sm:mb-8">
           {otp.map((digit, i) => (
             <input
               key={i}
               ref={inputRefs[i]}
-              type="number"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              aria-label={`OTP digit ${i + 1}`}
               disabled={isOtpVerified}
               value={digit}
               onChange={(e) => handleOtpChange(i, e.target.value)}
@@ -232,11 +275,11 @@ const PaymentModal = ({ order, otpString, onComplete, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-120 p-0 sm:p-4 flex items-end justify-center pointer-events-none">
+      <div className="absolute inset-0 z-120 p-0 sm:p-4 flex items-end justify-center pointer-events-none">
         <Backdrop onClose={onClose} />
         <motion.div
           initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-          className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-6 sm:pb-12 pointer-events-auto max-h-[84vh] overflow-y-auto"
+          className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-5 sm:pb-12 pointer-events-auto max-h-full overflow-y-auto"
         >
           <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
           <div className="flex justify-between items-center mb-6">
@@ -317,18 +360,18 @@ const PaymentModal = ({ order, otpString, onComplete, onClose }) => {
         {showQrModal && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-200 bg-black/80 flex items-center justify-center p-4 sm:p-6 pointer-events-auto"
+            className="absolute inset-0 z-200 bg-black/80 flex overflow-y-auto p-4 sm:p-6 pointer-events-auto"
             onClick={() => setShowQrModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-              className="bg-white w-full max-w-sm rounded-3xl p-5 sm:p-8 flex flex-col items-center text-center shadow-2xl"
+              className="bg-white w-full max-w-sm m-auto rounded-3xl p-5 sm:p-8 flex flex-col items-center text-center shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
               <h3 className="text-gray-950 font-bold text-xl mb-2">Scan to Pay</h3>
               <p className="text-gray-500 text-sm mb-8 font-medium">Order Total: ₹{amountToCollect.toFixed(2)}</p>
               <div className="flex flex-col items-center gap-4 bg-gray-50 rounded-3xl border-2 border-gray-100 p-3 sm:p-4 mb-4 w-full">
-                <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-2xl border-2 border-gray-200 bg-white shadow-sm overflow-hidden flex items-center justify-center p-1.5">
+                <div className="relative w-full max-w-64 sm:max-w-72 aspect-square rounded-2xl border-2 border-gray-200 bg-white shadow-sm overflow-hidden flex items-center justify-center p-1.5">
                   <img
                     src={
                       collectQrLink?.startsWith('http') || collectQrLink?.startsWith('data:')
@@ -421,12 +464,12 @@ export const DeliveryVerificationModal = ({ order, onComplete, onClose }) => {
         />
       )}
       {step === 'complete' && (
-        <div className="fixed inset-0 z-120 p-0 sm:p-4 flex items-end justify-center pointer-events-none">
+        <div className="absolute inset-0 z-120 p-0 sm:p-4 flex items-end justify-center pointer-events-none">
           <Backdrop onClose={onClose || (() => { })} />
           <motion.div
             key="complete-modal"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-            className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-6 sm:pb-12 pointer-events-auto max-h-[84vh] overflow-y-auto"
+            className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-5 sm:pb-12 pointer-events-auto max-h-full overflow-y-auto"
           >
             <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6" />
             <div className="flex items-center gap-3 mb-8">

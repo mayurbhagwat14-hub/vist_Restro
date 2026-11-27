@@ -113,6 +113,9 @@ export async function createCollectQr(
   ) {
     throw new ForbiddenError('Not your order');
   }
+  if (String(order.orderStatus || '').startsWith('cancelled')) {
+    throw new ValidationError('Order was cancelled');
+  }
   const tx = await FoodTransaction.findOne({ orderId: order._id }).lean();
   const payment = tx?.payment || order.payment || {};
   if (payment.method !== 'cash' && payment.status === 'paid') {

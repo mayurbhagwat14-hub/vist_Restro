@@ -166,11 +166,14 @@ export default function OrdersV2() {
       await deliveryAPI.rejectOrder(orderId);
     } catch (error) {
       console.warn('[OrdersV2] reject failed:', error?.message || error);
-    } finally {
-      clearNewOrder(order);
-      if (expandedOrderId === orderId) {
-        setExpandedOrderId(null);
+      if (![403, 404].includes(error?.response?.status)) {
+        toast.error(error?.response?.data?.message || 'Could not reject order. Please try again.');
+        return;
       }
+    }
+    clearNewOrder(order);
+    if (expandedOrderId === orderId) {
+      setExpandedOrderId(null);
     }
   };
 
@@ -287,7 +290,10 @@ export default function OrdersV2() {
                     onToggle={() => toggleExpanded(orderId)}
                     onAccept={handleAccept}
                     onReject={handleReject}
-                    acceptDisabled={acceptDisabled}
+                    acceptDisabled={
+                      // The server lets a rider accept anything the admin assigned to them.
+                      acceptDisabled && order?.dispatch?.status !== 'assigned' && !order?.isDirectAssignment
+                    }
                     isMuted={isOrderAlertMuted(order)}
                     onToggleMute={() => toggleOrderAlertMuted(order)}
                     disabledMessage={`All ${capacity.max} slots in use — complete an active order to accept more`}

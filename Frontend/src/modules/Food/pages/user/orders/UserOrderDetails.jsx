@@ -747,32 +747,34 @@ export default function UserOrderDetails() {
             </div>
           </div>
 
-          {/* Delivery Partner (Fixed: Vishnu - 8225874798) */}
-          <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-zinc-800">
-            <div className="flex gap-3 items-center">
-              <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
-                <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-gray-800 dark:text-white text-sm">
-                    Vishnu
-                  </h4>
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
-                    Delivery Partner
-                  </span>
+          {/* Delivery partner assigned by the admin (shown once accepted) */}
+          {order?.dispatch?.status === 'accepted' && order.dispatch.deliveryPartnerId?.name && (
+            <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-zinc-800">
+              <div className="flex gap-3 items-center">
+                <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
+                  <User className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">+91 8225874798</p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-gray-800 dark:text-white text-sm">
+                      {order.dispatch.deliveryPartnerId.name}
+                    </h4>
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                      Delivery Partner
+                    </span>
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{order.dispatch.deliveryPartnerId.phone}</p>
+                </div>
               </div>
+              <a
+                href={`tel:${order.dispatch.deliveryPartnerId.phone}`}
+                className="p-2.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 transition-colors"
+                aria-label={`Call ${order.dispatch.deliveryPartnerId.name}`}
+              >
+                <Phone className="w-4 h-4" />
+              </a>
             </div>
-            <a
-              href="tel:8225874798"
-              className="p-2.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 transition-colors"
-              aria-label="Call Vishnu"
-            >
-              <Phone className="w-4 h-4" />
-            </a>
-          </div>
+          )}
         </div>
       </div>
 

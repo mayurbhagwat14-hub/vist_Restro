@@ -29,10 +29,12 @@ function maskToken(token) {
 }
 
 const roomNames = {
-    restaurant: (id) => `restaurant:${String(id)}`,
-    user: (id) => `user:${String(id)}`,
-    delivery: (id) => `delivery:${String(id)}`,
-    tracking: (orderId) => `tracking:${String(orderId)}`
+    // `id?._id` lets callers pass a populated document as well as a plain id.
+    restaurant: (id) => `restaurant:${String(id?._id || id)}`,
+    user: (id) => `user:${String(id?._id || id)}`,
+    delivery: (id) => `delivery:${String(id?._id || id)}`,
+    tracking: (orderId) => `tracking:${String(orderId)}`,
+    admin: () => 'admin-orders'
 };
 
 /**

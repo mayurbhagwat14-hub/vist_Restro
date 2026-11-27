@@ -1,16 +1,29 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@food/api/config";
 import { adminAPI } from "@food/api";
 import { adminAlertSound } from "@food/utils/adminAlertSound";
+import AssignDeliveryPartnerModal from "@food/components/admin/orders/AssignDeliveryPartnerModal";
+
+// Food order id behind an order alert, or null when a rider cannot be assigned to it.
+const getAssignableOrderId = (payload = {}) => {
+  const moduleType = String(payload.moduleType || payload.metaData?.moduleType || payload.category || "food").toLowerCase();
+  if (moduleType !== "food") return null;
+  if (payload.type && payload.type !== "order") return null;
+  const id = String(
+    payload.orderMongoId || payload.metaData?.orderMongoId || payload.metaData?.orderId || "",
+  );
+  return /^[a-f0-9]{24}$/i.test(id) ? id : null;
+};
 
 export default function AdminNotificationManager() {
   const navigate = useNavigate();
   const socketRef = useRef(null);
   const recentAlertsRef = useRef(new Map());
   const isFirstPollRef = useRef(true);
+  const [assignOrder, setAssignOrder] = useState(null);
 
   useEffect(() => {
     // Request notification permission on mount if supported and not denied
@@ -52,6 +65,17 @@ export default function AdminNotificationManager() {
     });
 
     socketRef.current = socket;
+
+    const openAssignModal = async (orderMongoId) => {
+      try {
+        const res = await adminAPI.getOrderById(orderMongoId);
+        const order = res?.data?.data?.order || res?.data?.data;
+        if (!order?._id) throw new Error("Order not found");
+        setAssignOrder(order);
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Could not open this order for assignment");
+      }
+    };
 
     const handleIncomingRealtimeOrder = (payload = {}) => {
       const orderId =
@@ -95,17 +119,28 @@ export default function AdminNotificationManager() {
       });
 
       // 2. Display actionable Sonner toast
+      const assignableOrderId = getAssignableOrderId(payload);
+      const viewOrder = {
+        label: "View Order",
+        onClick: () => {
+          adminAlertSound.stopAlert();
+          navigate(targetLink);
+        },
+      };
       toast.info(title, {
         id: `admin-order-${orderId}`,
         description,
         duration: 30000,
-        action: {
-          label: "View Order",
-          onClick: () => {
-            adminAlertSound.stopAlert();
-            navigate(targetLink);
-          },
-        },
+        action: assignableOrderId
+          ? {
+              label: "Assign Rider",
+              onClick: () => {
+                adminAlertSound.stopAlert();
+                openAssignModal(assignableOrderId);
+              },
+            }
+          : viewOrder,
+        cancel: assignableOrderId ? viewOrder : undefined,
         onDismiss: () => {
           adminAlertSound.stopAlert();
         },
@@ -156,6 +191,14 @@ export default function AdminNotificationManager() {
       console.warn("[AdminNotificationManager] Socket connect_error:", err.message);
     });
 
+    // Rider rejected / was assigned: let open order tables refresh.
+    const handleDispatchUpdate = (payload = {}) => {
+      if (!payload.orderMongoId) return;
+      window.dispatchEvent(new CustomEvent("adminDispatchUpdated", { detail: payload }));
+    };
+
+    socket.on("admin_dispatch_updated", handleDispatchUpdate);
+    socket.on("admin_order_status_update", handleDispatchUpdate);
     socket.on("admin_new_order", handleIncomingRealtimeOrder);
     socket.on("play_notification_sound", handleIncomingRealtimeOrder);
     socket.on("adminNotificationsUpdated", handleIncomingNotificationUpdate);
@@ -214,6 +257,8 @@ export default function AdminNotificationManager() {
         socket.off("connect");
         socket.off("admin-room-joined");
         socket.off("connect_error");
+        socket.off("admin_dispatch_updated");
+        socket.off("admin_order_status_update");
         socket.off("admin_new_order", handleIncomingRealtimeOrder);
         socket.off("play_notification_sound", handleIncomingRealtimeOrder);
         socket.off("adminNotificationsUpdated", handleIncomingNotificationUpdate);
@@ -223,5 +268,16 @@ export default function AdminNotificationManager() {
     };
   }, [navigate]);
 
-  return null;
+  return (
+    <AssignDeliveryPartnerModal
+      isOpen={Boolean(assignOrder)}
+      onOpenChange={(open) => {
+        if (!open) setAssignOrder(null);
+      }}
+      order={assignOrder}
+      onAssigned={(order) => {
+        window.dispatchEvent(new CustomEvent("adminDispatchUpdated", { detail: { orderMongoId: order?._id } }));
+      }}
+    />
+  );
 }

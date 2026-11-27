@@ -64,7 +64,7 @@ export default function AssignDeliveryPartnerModal({
     return order._id || order.id || order.orderId
   }, [order])
 
-  const currentAssignedPartner = useMemo(() => {
+  const orderAssignedPartner = useMemo(() => {
     if (!order) return null
     const dp = order.dispatch?.deliveryPartnerId || order.deliveryPartnerId
     if (dp && typeof dp === "object") {
@@ -114,7 +114,7 @@ export default function AssignDeliveryPartnerModal({
       const isCurrentAssigned = Boolean(
         p.isCurrentlyAssignedToThisOrder ||
         p.isAssignedToThisOrder ||
-        (currentAssignedPartner?.id && String(currentAssignedPartner.id) === id)
+        (orderAssignedPartner?.id && String(orderAssignedPartner.id) === id)
       )
 
       return {
@@ -185,7 +185,13 @@ export default function AssignDeliveryPartnerModal({
       busy: counts.busy ?? busyComputed,
       offline: counts.offline ?? offlineComputed,
     })
-  }, [currentAssignedPartner])
+  }, [orderAssignedPartner])
+
+  // The partner list is fresher than the order row (it may have been assigned elsewhere).
+  const currentAssignedPartner = useMemo(
+    () => partners.find((p) => p.isAssignedToThisOrder) || orderAssignedPartner,
+    [partners, orderAssignedPartner]
+  )
 
   const fetchPartners = useCallback(async (silent = false) => {
     if (!orderTargetId) return
@@ -213,6 +219,9 @@ export default function AssignDeliveryPartnerModal({
 
   useEffect(() => {
     if (isOpen && orderTargetId) {
+      setPartners([])
+      setRestaurantZonePartners([])
+      setOtherZones([])
       fetchPartners(false)
       setPendingPartner(null)
       setConfirmAllowOffline(false)
@@ -228,9 +237,11 @@ export default function AssignDeliveryPartnerModal({
     if (!isOpen) return
 
     const socketUrl = getSocketUrl()
+    const token = localStorage.getItem("admin_accessToken") || localStorage.getItem("accessToken") || ""
     const socket = io(socketUrl, {
       transports: ["websocket", "polling"],
       reconnection: true,
+      auth: { token },
     })
 
     socket.on("connect", () => {
@@ -815,7 +826,7 @@ export default function AssignDeliveryPartnerModal({
                       </>
                     ) : !pendingPartner.isOnline ? (
                       <>
-                        {pendingPartner.name} is currently offline. They will receive the order upon logging in.
+                        {pendingPartner.name} is currently offline. They will see the request after going online.
                       </>
                     ) : (
                       "Please confirm your delivery partner assignment."

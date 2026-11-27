@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo, useCallback, Fragment } from "react"
 import io from "socket.io-client"
 import {
   Truck,
@@ -44,6 +44,7 @@ export default function DeliveryPartnerWorkload() {
   const [sortBy, setSortBy] = useState("activeOrders") // 'activeOrders' | 'name' | 'completed'
   const [sortDirection, setSortDirection] = useState("desc")
   const [expandedPartnerId, setExpandedPartnerId] = useState(null)
+  const [zoneFilter, setZoneFilter] = useState("all")
 
   // Order viewing modal state
   const [selectedOrder, setSelectedOrder] = useState(null)
@@ -54,7 +55,6 @@ export default function DeliveryPartnerWorkload() {
     try {
       if (!silent) setLoading(true)
       const response = await adminAPI.getDeliveryPartnersWorkload({
-        status: statusFilter !== "all" ? statusFilter : undefined,
         search: searchQuery.trim() || undefined,
         limit: 200,
       })
@@ -128,7 +128,7 @@ export default function DeliveryPartnerWorkload() {
     } finally {
       if (!silent) setLoading(false)
     }
-  }, [statusFilter, searchQuery])
+  }, [searchQuery])
 
   useEffect(() => {
     fetchWorkload(false)
@@ -137,9 +137,11 @@ export default function DeliveryPartnerWorkload() {
   // Live updates via Socket.IO
   useEffect(() => {
     const socketUrl = getSocketUrl()
+    const token = localStorage.getItem("admin_accessToken") || localStorage.getItem("accessToken") || ""
     const socket = io(socketUrl, {
       transports: ["websocket", "polling"],
       reconnection: true,
+      auth: { token },
     })
 
     socket.on("connect", () => {
@@ -216,6 +218,25 @@ export default function DeliveryPartnerWorkload() {
     })
     return list
   }, [partners, sortBy, sortDirection])
+
+  const zoneNames = useMemo(
+    () => [...new Set(partners.map((p) => p.zoneName || "Other / Unassigned"))].sort((a, b) => a.localeCompare(b)),
+    [partners]
+  )
+
+  // Status + zone filters, grouped by zone (the chosen sort is kept inside each zone).
+  const visiblePartners = useMemo(() => {
+    const zoneOf = (p) => p.zoneName || "Other / Unassigned"
+    return sortedPartners
+      .filter((p) => {
+        if (zoneFilter !== "all" && zoneOf(p) !== zoneFilter) return false
+        if (statusFilter === "online") return p.isOnline
+        if (statusFilter === "offline") return !p.isOnline
+        if (statusFilter === "available" || statusFilter === "busy") return p.workloadStatus === statusFilter
+        return true
+      })
+      .sort((a, b) => zoneOf(a).localeCompare(zoneOf(b)))
+  }, [sortedPartners, statusFilter, zoneFilter])
 
   const toggleSort = (field) => {
     if (sortBy === field) {
@@ -353,6 +374,17 @@ export default function DeliveryPartnerWorkload() {
 
         {/* Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
+          <select
+            value={zoneFilter}
+            onChange={(e) => setZoneFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-lg font-medium bg-white border border-slate-200 text-slate-700"
+            aria-label="Filter by zone"
+          >
+            <option value="all">All Zones</option>
+            {zoneNames.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
           {[
             { key: "all", label: `All (${summary.total || 0})` },
             { key: "available", label: `Available (${summary.available || 0})` },
@@ -382,7 +414,7 @@ export default function DeliveryPartnerWorkload() {
             <Loader2 className="w-8 h-8 animate-spin text-orange-500 mb-3" />
             <p className="text-sm font-medium text-slate-600">Loading delivery fleet workload...</p>
           </div>
-        ) : sortedPartners.length === 0 ? (
+        ) : visiblePartners.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
               <Truck className="w-8 h-8" />
@@ -433,16 +465,33 @@ export default function DeliveryPartnerWorkload() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
-                {sortedPartners.map((partner) => {
+                {visiblePartners.map((partner, index) => {
                   const isExpanded = expandedPartnerId === partner.id
                   const isBusy = partner.workloadStatus === "busy"
                   const isOnline = partner.isOnline
                   const activeCount = partner.activeOrdersCount || 0
                   const activeOrders = partner.activeOrders || []
 
+                  const zoneName = partner.zoneName || "Other / Unassigned"
+                  const startsZone =
+                    index === 0 || (visiblePartners[index - 1].zoneName || "Other / Unassigned") !== zoneName
+
                   return (
+                    <Fragment key={partner.id}>
+                    {startsZone && (
+                      <tr className="bg-orange-50/70">
+                        <td colSpan={7} className="py-2.5 px-6 text-xs font-bold text-slate-800">
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-orange-600" />
+                            {zoneName}
+                            <span className="font-medium text-slate-500">
+                              ({visiblePartners.filter((p) => (p.zoneName || "Other / Unassigned") === zoneName).length})
+                            </span>
+                          </span>
+                        </td>
+                      </tr>
+                    )}
                     <tr
-                      key={partner.id}
                       className={`hover:bg-slate-50/70 transition-colors ${
                         isExpanded ? "bg-slate-50/50" : ""
                       }`}
@@ -627,6 +676,7 @@ export default function DeliveryPartnerWorkload() {
                         )}
                       </td>
                     </tr>
+                    </Fragment>
                   )
                 })}
               </tbody>

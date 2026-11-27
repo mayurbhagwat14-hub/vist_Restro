@@ -34,7 +34,8 @@ import * as userWalletService from '../../user/services/userWallet.service.js';
 import { calculateOrderPricing } from './order-pricing.service.js';
 import * as paymentService from './order-payment.service.js';
 import * as deliveryService from './order-delivery.service.js';
-import { detectZoneIdForPoint, isPointInZonePolygon } from '../../utils/zoneGeo.js';
+import { ensureRiderEarningOnOrder } from './riderEarning.service.js';
+import { detectZoneIdForPoint, resolvePartnerZone } from '../../utils/zoneGeo.js';
 import {
   enqueueOrderEvent,
   haversineKm,
@@ -45,6 +46,7 @@ import {
   toGeoPoint,
   pushStatusHistory,
   normalizeOrderForClient,
+  hidePartnerUntilAccepted,
   applyAggregateRating,
   buildDeliverySocketPayload,
   notifyRestaurantNewOrder,
@@ -1053,8 +1055,8 @@ export async function listOrdersUser(userId, query) {
   ]);
 
   const allDocs = [
-    ...foodDocs.map((doc) => ({ ...normalizeOrderForClient(doc), moduleType: doc.moduleType || 'food' })),
-    ...groceryDocs.map((doc) => ({ ...normalizeOrderForClient(doc), moduleType: doc.moduleType || 'grocery' }))
+    ...foodDocs.map((doc) => ({ ...hidePartnerUntilAccepted(normalizeOrderForClient(doc)), moduleType: doc.moduleType || 'food' })),
+    ...groceryDocs.map((doc) => ({ ...hidePartnerUntilAccepted(normalizeOrderForClient(doc)), moduleType: doc.moduleType || 'grocery' }))
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const total = allDocs.length;
@@ -1373,7 +1375,7 @@ export async function getOrderById(
   }
 
   if (userId) {
-    const out = normalizeOrderForClient(order);
+    const out = hidePartnerUntilAccepted(normalizeOrderForClient(order));
     
     // Fallback for older orders without platformGstNumber
     if (out.pricing && !out.pricing.platformGstNumber) {
@@ -1394,6 +1396,19 @@ export async function getOrderById(
         verified: false
       }
     };
+
+    // The customer sees the OTP only while the rider is waiting at the drop,
+    // so it survives a page reload or a missed socket event.
+    delete out.deliveryOtp;
+    if (
+      order.deliveryState?.currentPhase === 'at_drop' &&
+      order.orderStatus !== 'delivered' &&
+      !String(order.orderStatus || '').startsWith('cancelled') &&
+      !order.deliveryVerification?.dropOtp?.verified &&
+      order.deliveryOtp
+    ) {
+      out.handoverOtp = order.deliveryOtp;
+    }
 
     // Attach current coin settings min/max to allow frontend range display before delivery
     try {
@@ -1499,7 +1514,8 @@ export async function resyncState(userId, role) {
       .lean();
 
     if (order) {
-      const out = normalizeOrderForClient(order);
+      const out = hidePartnerUntilAccepted(normalizeOrderForClient(order));
+      delete out.deliveryOtp;
       // Re-add handover OTP if order is picked up
       if (
         (order.deliveryState?.currentPhase === "at_drop" || order.orderStatus === "picked_up") &&
@@ -2355,6 +2371,9 @@ export async function assignDeliveryPartnerAdmin(
   if (TERMINAL_STATUSES.includes(order.orderStatus)) {
     throw new ValidationError(`Cannot assign partner to order with terminal status '${order.orderStatus}'`);
   }
+  if (order.orderStatus === 'pending_payment') {
+    throw new ValidationError("Cannot assign a delivery partner until the payment is completed");
+  }
 
   if (!mongoose.Types.ObjectId.isValid(deliveryPartnerId)) {
     throw new ValidationError("Invalid delivery partner ID");
@@ -2426,6 +2445,21 @@ export async function assignDeliveryPartnerAdmin(
     ];
   }
 
+  // On reassignment, rewind states the new rider could not continue from.
+  // Before pickup they start the pickup leg again; after pickup they carry on to the drop.
+  const reassignReset = {};
+  if (isDifferentPartnerAssigned) {
+    if (order.orderStatus === 'reached_drop') {
+      reassignReset.orderStatus = 'picked_up';
+      reassignReset['deliveryState.currentPhase'] = 'en_route_to_delivery';
+      reassignReset['deliveryState.status'] = 'picked_up';
+      reassignReset['deliveryState.reachedDropAt'] = null;
+    } else if (order.orderStatus !== 'picked_up') {
+      if (order.orderStatus === 'reached_pickup') reassignReset.orderStatus = 'ready_for_pickup';
+      reassignReset.deliveryState = { currentPhase: 'en_route_to_pickup', status: '' };
+    }
+  }
+
   const updatedOrder = await FoodOrder.findOneAndUpdate(
     atomicFilter,
     {
@@ -2433,9 +2467,15 @@ export async function assignDeliveryPartnerAdmin(
         'dispatch.status': 'assigned',
         'dispatch.deliveryPartnerId': new mongoose.Types.ObjectId(deliveryPartnerId),
         'dispatch.assignedAt': new Date(),
-        'dispatch.acceptedAt': null
+        'dispatch.acceptedAt': null,
+        ...reassignReset
       },
       $push: {
+        'dispatch.offeredTo': {
+          partnerId: new mongoose.Types.ObjectId(deliveryPartnerId),
+          at: new Date(),
+          action: 'offered'
+        },
         statusHistory: {
           byRole: 'ADMIN',
           byId: adminId,
@@ -2453,6 +2493,17 @@ export async function assignDeliveryPartnerAdmin(
 
   if (!updatedOrder) {
     throw new ValidationError("Assignment conflict: order was updated concurrently or is no longer eligible.");
+  }
+
+  // Compute the payout now so the rider sees the earning on the request itself.
+  try {
+    const before = Number(updatedOrder.riderEarning || 0);
+    await ensureRiderEarningOnOrder(updatedOrder);
+    if (Number(updatedOrder.riderEarning || 0) > before) {
+      await updatedOrder.save();
+    }
+  } catch (err) {
+    logger.warn(`ensureRiderEarningOnOrder on assign failed: ${err?.message || err}`);
   }
 
   // Real-time direct updates: strictly direct, never broadcast
@@ -2619,6 +2670,13 @@ export async function updateOrderStatusAdmin(orderId, orderStatus, note = "", ad
   if (!order) throw new NotFoundError("Order not found");
 
   const from = order.orderStatus;
+  const isCancellation = String(orderStatus).includes("cancel");
+  // Any running order can be cancelled (also out for delivery), but a finished one cannot.
+  if (isCancellation && (from === "delivered" || String(from).startsWith("cancelled"))) {
+    throw new ValidationError(
+      from === "delivered" ? "A delivered order cannot be cancelled" : "Order is already cancelled",
+    );
+  }
   order.orderStatus = orderStatus;
   if (note && String(note).trim()) {
     order.note = String(note).trim();
@@ -2670,6 +2728,23 @@ export async function updateOrderStatusAdmin(orderId, orderStatus, note = "", ad
   }
 
   await order.save();
+
+  if (isCancellation) {
+    try {
+      const method = String(order.payment?.method || "cash").toLowerCase();
+      const paymentState = String(order.payment?.status || "").toLowerCase();
+      // A paid order whose refund failed keeps its transaction status, so it stays visible for follow up.
+      const refundPending = ["razorpay", "wallet"].includes(method) && paymentState === "paid";
+      await foodTransactionService.updateTransactionStatus(order._id, "cancelled_by_admin", {
+        status: paymentState === "refunded" ? "refunded" : refundPending ? undefined : "failed",
+        note: `Order cancelled by admin: ${note || "No reason"}`,
+        recordedByRole: "ADMIN",
+        recordedById: adminId,
+      });
+    } catch (err) {
+      logger.warn(`updateOrderStatusAdmin cancel transaction sync failed: ${err?.message || err}`);
+    }
+  }
 
   if (String(orderStatus) === "delivered") {
     try {
@@ -2749,6 +2824,10 @@ export async function updateOrderStatusAdmin(orderId, orderStatus, note = "", ad
       });
       if (order.dispatch?.deliveryPartnerId) {
         io.to(rooms.delivery(order.dispatch.deliveryPartnerId)).emit("order_status_update", payload);
+        // The rider app drops the trip (or pending request) on this event.
+        if (isCancellation) {
+          io.to(rooms.delivery(order.dispatch.deliveryPartnerId)).emit("order_cancelled", payload);
+        }
       }
       broadcastOrderUpdateToAdmin(order._id.toString());
 
@@ -2899,6 +2978,7 @@ export async function getDeliveryPartnersWorkload({
   limit = 300
 } = {}) {
   const ACTIVE_DELIVERY_STATUSES = [
+    'created',
     'confirmed',
     'preparing',
     'ready_for_pickup',
@@ -3031,11 +3111,14 @@ export async function getDeliveryPartnersWorkload({
           count: { $sum: 1 },
           orders: {
             $push: {
+              id: { $toString: '$_id' },
               orderMongoId: { $toString: '$_id' },
               orderId: { $ifNull: ['$order_id', { $toString: '$_id' }] },
               orderStatus: '$orderStatus',
+              status: '$orderStatus',
               dispatchStatus: '$dispatch.status',
-              restaurantName: '$restaurantName',
+              restaurantName: { $arrayElemAt: ['$items.restaurantName', 0] },
+              createdAt: '$createdAt',
               assignedAt: '$dispatch.assignedAt',
               acceptedAt: '$dispatch.acceptedAt'
             }
@@ -3098,45 +3181,11 @@ export async function getDeliveryPartnersWorkload({
       : false;
 
     // Resolve partner's zone
-    let partnerZoneId = null;
-    let partnerZoneName = null;
-
-    // A. Explicit zoneId on partner record
-    if (p.zoneId && zoneByIdMap.has(String(p.zoneId))) {
-      const z = zoneByIdMap.get(String(p.zoneId));
-      partnerZoneId = String(z._id);
-      partnerZoneName = z.name || z.zoneName;
-    }
-    // B. Point in polygon
-    else if (Number.isFinite(p.lastLat) && Number.isFinite(p.lastLng)) {
-      for (const z of allZones) {
-        if (isPointInZonePolygon(p.lastLat, p.lastLng, z.coordinates || [])) {
-          partnerZoneId = String(z._id);
-          partnerZoneName = z.name || z.zoneName;
-          break;
-        }
-      }
-    }
-
-    // C. City name match against configured zones
-    if (!partnerZoneId && p.city) {
-      const pCityNorm = String(p.city).toLowerCase().trim();
-      const matchedCityZone = allZones.find(
-        (z) => (z.name || z.zoneName || '').toLowerCase().trim() === pCityNorm
-      );
-      if (matchedCityZone) {
-        partnerZoneId = String(matchedCityZone._id);
-        partnerZoneName = matchedCityZone.name || matchedCityZone.zoneName;
-      } else {
-        partnerZoneId = 'city_' + pCityNorm.replace(/\s+/g, '_');
-        partnerZoneName = p.city;
-      }
-    }
-
-    if (!partnerZoneId) {
-      partnerZoneId = 'unassigned';
-      partnerZoneName = 'Other / Unassigned';
-    }
+    const {
+      zoneId: partnerZoneId,
+      zoneName: partnerZoneName,
+      source: zoneSource
+    } = resolvePartnerZone(p, allZones);
 
     // Determine if partner belongs to the restaurant's zone
     let isRestaurantZone = false;
@@ -3174,6 +3223,7 @@ export async function getDeliveryPartnersWorkload({
       lastLocationAt: p.lastLocationAt,
       zoneId: partnerZoneId,
       zoneName: partnerZoneName,
+      zoneSource,
       isRestaurantZone
     };
   });

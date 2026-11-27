@@ -48,6 +48,12 @@ const MANUAL_ASSIGNMENT_ONLY = true;
 /** Match dispatch hard cap — never list/accept cross-city absurd distances. */
 const HARD_MAX_OFFER_DISTANCE_KM = 40;
 
+function assertNotCancelled(order) {
+  if (String(order?.orderStatus || '').startsWith('cancelled')) {
+    throw new ValidationError('Order was cancelled');
+  }
+}
+
 function normalizeOtpValue(value) {
   return String(value ?? '').replace(/\D/g, '').trim();
 }
@@ -89,7 +95,8 @@ export async function countActiveTripsForPartner(deliveryPartnerId) {
   const partnerId = new mongoose.Types.ObjectId(deliveryPartnerId);
   return FoodOrder.countDocuments({
     'dispatch.deliveryPartnerId': partnerId,
-    'dispatch.status': { $in: ['assigned', 'accepted'] },
+    // A pending request ('assigned') must not use up capacity, or the rider cannot accept it.
+    'dispatch.status': 'accepted',
     orderStatus: { $in: ACTIVE_TRIP_ORDER_STATUSES },
   });
 }
@@ -482,7 +489,10 @@ export async function listOrdersAvailableDelivery(deliveryPartnerId, query) {
     return Number.isFinite(d) && d <= HARD_MAX_OFFER_DISTANCE_KM;
   };
 
-  const newOffers = enriched.filter((order) => {
+  const newOffers = enriched.map((order) => ({
+    ...order,
+    restaurantName: order.restaurantName || order.restaurantId?.restaurantName || '',
+  })).filter((order) => {
     const dispatchStatus = String(order?.dispatch?.status || '').toLowerCase();
     const orderStatus = String(order?.orderStatus || '').toLowerCase();
 
@@ -850,6 +860,12 @@ export async function rejectOrderDelivery(orderId, deliveryPartnerId) {
   if (order.dispatch.deliveryPartnerId?.toString() !== deliveryPartnerId.toString()) {
     throw new ForbiddenError('Not your order');
   }
+  if (['picked_up', 'reached_drop', 'delivered'].includes(order.orderStatus)) {
+    throw new ValidationError('Order cannot be rejected after pickup');
+  }
+  // The next rider starts the pickup leg from the beginning.
+  if (order.orderStatus === 'reached_pickup') order.orderStatus = 'ready_for_pickup';
+  order.deliveryState = { currentPhase: 'en_route_to_pickup', status: '' };
 
   const offer = order.dispatch.offeredTo.find(
     (item) =>
@@ -901,8 +917,12 @@ export async function rejectOrderDelivery(orderId, deliveryPartnerId) {
       message: `Order #${order.order_id || order._id} was rejected by the assigned delivery partner. Please assign another partner.`,
       type: 'order',
       category: 'food',
-      link: `/admin/food/orders/${order._id}`,
-      metaData: { orderId: order._id.toString(), rejectedByPartnerId: String(deliveryPartnerId) },
+      link: '/admin/food/orders/all',
+      metaData: {
+        orderId: order._id.toString(),
+        orderMongoId: order._id.toString(),
+        rejectedByPartnerId: String(deliveryPartnerId),
+      },
     });
   } catch (notifErr) {
     logger.warn(`Admin notification on rider reject failed: ${notifErr?.message || notifErr}`);
@@ -925,6 +945,7 @@ export async function confirmReachedPickupDelivery(orderId, deliveryPartnerId) {
   if (order.orderStatus === 'delivered') {
     throw new ValidationError('Order already delivered');
   }
+  assertNotCancelled(order);
 
   const currentPhase = order.deliveryState?.currentPhase || '';
   const currentStatus = order.deliveryState?.status || '';
@@ -1064,6 +1085,8 @@ export async function confirmReachedDropDelivery(orderId, deliveryPartnerId) {
     throw new ForbiddenError('Not your order');
   }
 
+  assertNotCancelled(order);
+
   if (order.deliveryVerification?.dropOtp?.verified) {
     emitOrderUpdate(order, deliveryPartnerId);
     return sanitizeOrderForExternal(order);
@@ -1078,12 +1101,14 @@ export async function confirmReachedDropDelivery(orderId, deliveryPartnerId) {
     order.orderStatus ||
     '';
 
-  const existingOtp = String(order.deliveryOtp || '').trim();
+  // The rider app accepts exactly 4 digits, so any other stored value is replaced.
+  const storedOtp = String(order.deliveryOtp || '').trim();
+  const existingOtp = /^\d{4}$/.test(storedOtp) ? storedOtp : '';
 
   // Idempotency: if already reached drop and OTP exists, avoid duplicate push notifications.
   if (alreadyAtDrop && existingOtp) {
-    const hasDropOtpMeta = Boolean(order.deliveryVerification?.dropOtp);
-    if (!hasDropOtpMeta) {
+    // Mongoose always creates the nested dropOtp object, so test the flag itself.
+    if (!order.deliveryVerification?.dropOtp?.required) {
       order.deliveryVerification = {
         ...(order.deliveryVerification?.toObject?.() ||
           order.deliveryVerification ||
@@ -1108,7 +1133,7 @@ export async function confirmReachedDropDelivery(orderId, deliveryPartnerId) {
       ...(order.deliveryVerification?.toObject?.() || order.deliveryVerification || {}),
       dropOtp: { required: false, verified: true },
     };
-  } else if (!order.deliveryVerification?.dropOtp) {
+  } else if (!order.deliveryVerification?.dropOtp?.required) {
     order.deliveryVerification = {
       ...(order.deliveryVerification?.toObject?.() ||
         order.deliveryVerification ||

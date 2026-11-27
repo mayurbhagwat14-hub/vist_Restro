@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import mongoose from 'mongoose';
 import { logger } from '../../../../utils/logger.js';
 import {
@@ -192,6 +193,8 @@ export function normalizeOrderForClient(orderDoc) {
       order?.deliveryState?.deliveredAt || order?.deliveredAt || null,
     deliveryPartnerId:
       order?.dispatch?.deliveryPartnerId || order?.deliveryPartnerId || null,
+    deliveryPartnerName: order?.dispatch?.deliveryPartnerId?.name || "",
+    deliveryPartnerPhone: order?.dispatch?.deliveryPartnerId?.phone || "",
     rating: order?.ratings?.restaurant?.rating ?? order?.rating ?? null,
     restaurant: restaurantNameText,
     restaurantName: restaurantNameText,
@@ -201,6 +204,26 @@ export function normalizeOrderForClient(orderDoc) {
     deliveryState: {
       status: order?.deliveryState?.status || ""
     }
+  };
+}
+
+/**
+ * What a customer may know about the rider: nothing until the assigned partner accepts,
+ * and never the list of partners who were offered the order.
+ */
+export function hidePartnerUntilAccepted(order) {
+  const accepted = order?.dispatch?.status === "accepted";
+  const dispatch = order?.dispatch ? { ...order.dispatch } : order?.dispatch;
+  if (dispatch) {
+    delete dispatch.offeredTo;
+    if (!accepted) dispatch.deliveryPartnerId = null;
+  }
+  return {
+    ...order,
+    dispatch,
+    deliveryPartnerId: accepted ? order.deliveryPartnerId : null,
+    deliveryPartnerName: accepted ? order.deliveryPartnerName || "" : "",
+    deliveryPartnerPhone: accepted ? order.deliveryPartnerPhone || "" : "",
   };
 }
 
@@ -265,8 +288,8 @@ export function buildDeliverySocketPayload(orderDoc, restaurantDoc = null) {
       "",
     restaurantPhone: restaurant?.phone || "",
     restaurantLocation: {
-      latitude: restaurantLocation?.latitude,
-      longitude: restaurantLocation?.longitude,
+      latitude: restaurantLocation?.latitude ?? restaurantLocation?.coordinates?.[1],
+      longitude: restaurantLocation?.longitude ?? restaurantLocation?.coordinates?.[0],
       address:
         restaurantLocation?.address ||
         restaurantLocation?.formattedAddress ||
@@ -478,15 +501,16 @@ export async function broadcastNewOrderToAdmin(order) {
 
 // ----- Delivery partner helpers (ported from DoorDish delivery module) -----
 
-/** Push the handover OTP to the customer in real time (never sent to the rider). */
+/** Send the handover OTP to the customer (never sent to the rider). */
 export function emitDeliveryDropOtpToUser(order, plainOtp) {
-  try {
-    const io = getIO();
-    if (!io || !plainOtp || !order?.userId) return;
+  if (!plainOtp || !order?.userId) return;
+  const orderMongoId = order._id?.toString?.() || "";
+  const orderId = order.order_id || orderMongoId;
 
-    io.to(rooms.user(order.userId)).emit("delivery_drop_otp", {
-      orderMongoId: order._id?.toString?.(),
-      orderId: order.order_id || order._id?.toString?.(),
+  try {
+    getIO()?.to(rooms.user(order.userId)).emit("delivery_drop_otp", {
+      orderMongoId,
+      orderId,
       otp: plainOtp,
       orderType: "delivery",
       message: "Share this OTP with your delivery partner to hand over the order.",
@@ -494,8 +518,23 @@ export function emitDeliveryDropOtpToUser(order, plainOtp) {
   } catch (e) {
     logger.warn(`emitDeliveryDropOtpToUser failed: ${e?.message || e}`);
   }
+
+  // The socket event only reaches an open app, so also send a push and save it to the inbox.
+  void notifyOwnerSafely(
+    { ownerType: "USER", ownerId: order.userId },
+    {
+      title: "Delivery OTP",
+      body: `OTP: ${plainOtp}. Share it with your delivery partner to receive order #${orderId}.`,
+      data: {
+        type: "delivery_drop_otp",
+        orderId: String(orderId),
+        orderMongoId,
+        link: `/food/user/orders/${orderMongoId}`,
+      },
+    },
+  );
 }
 
 export function generateFourDigitDeliveryOtp() {
-  return String(Math.floor(1000 + Math.random() * 9000));
+  return String(crypto.randomInt(1000, 10000));
 }

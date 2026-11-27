@@ -140,20 +140,31 @@ export default function DeliveryHomeV2({ tab = 'home' }) {
       stopSound?.();
       clearNewOrder?.(target);
       setIsNewOrderMinimized(false);
+      navigate('/food/delivery/feed');
     } catch (err) {
       console.error('Failed to accept order:', err);
     }
-  }, [currentNewOrder, acceptOrder, stopSound, clearNewOrder]);
+  }, [currentNewOrder, acceptOrder, stopSound, clearNewOrder, navigate]);
 
-  const handleRejectNewOrder = useCallback((orderToReject) => {
+  const handleRejectNewOrder = useCallback(async (orderToReject) => {
     const target = orderToReject || currentNewOrder;
     if (!target) return;
     const orderKey = resolveOrderKey(target);
+    stopSound?.();
+    try {
+      // Tell the backend, so the admin can assign another partner.
+      await deliveryAPI.rejectOrder(orderKey);
+      toast.info('Order rejected');
+    } catch (error) {
+      // 403/404: no longer assigned to this rider, so drop it. Anything else: keep it to retry.
+      if (![403, 404].includes(error?.response?.status)) {
+        toast.error(error?.response?.data?.message || 'Could not reject order. Please try again.');
+        return;
+      }
+    }
     removeNewOrder(orderKey || target);
     clearNewOrder?.(target);
-    stopSound?.();
     setIsNewOrderMinimized(false);
-    toast.info('Order skipped');
   }, [currentNewOrder, removeNewOrder, clearNewOrder, stopSound]);
 
   useEffect(() => {
@@ -626,7 +637,6 @@ export default function DeliveryHomeV2({ tab = 'home' }) {
 
   useEffect(() => {
     if (!isOnline) return;
-    if (currentTab !== 'feed' && currentTab !== 'orders') return;
 
     let cancelled = false;
 
@@ -707,7 +717,6 @@ export default function DeliveryHomeV2({ tab = 'home' }) {
   useEffect(() => {
     if (orderStatusUpdate) {
       if (orderStatusUpdate.status === 'cancelled') {
-        toast.error('Order cancelled');
         const cancelledId =
           orderStatusUpdate.orderId ||
           orderStatusUpdate.orderMongoId ||
@@ -1052,9 +1061,11 @@ export default function DeliveryHomeV2({ tab = 'home' }) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-x-0 top-0 bottom-[92px] z-[300] pointer-events-none flex items-end"
+              // Ends where the bottom nav starts (65px). The sheets inside are `absolute`,
+              // so they stay within this box and never slide under the nav.
+              className="fixed inset-x-0 top-0 bottom-[65px] z-[300] pointer-events-none flex items-end"
             >
-              <div className="w-full pointer-events-auto relative">
+              <div className="w-full pointer-events-auto">
                 {(tripStatus === 'PICKING_UP' || tripStatus === 'REACHED_PICKUP') && (
                   <PickupActionModal 
                     order={activeOrder} 
@@ -1070,14 +1081,14 @@ export default function DeliveryHomeV2({ tab = 'home' }) {
                 {(tripStatus === 'PICKED_UP' || tripStatus === 'REACHED_DROP') && (
                   <div className="absolute inset-x-0 z-[120] px-4" style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
                     {tripStatus === 'PICKED_UP' ? (
-                      <div className="bg-white rounded-[3rem] p-8 shadow-[0_-20px_80px_rgba(0,0,0,0.4)] border border-gray-100 flex flex-col items-center">
+                      <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 max-h-[calc(100dvh-65px-2rem)] overflow-y-auto shadow-[0_-20px_80px_rgba(0,0,0,0.4)] border border-gray-100 flex flex-col items-center">
                         {/* Handle / Minimize */}
                         <div className="w-full flex justify-center pb-4 pt-0 -mt-2">
                           <button onClick={() => setIsModalMinimized(true)} className="p-1 hover:bg-gray-100 active:scale-95 transition-all rounded-full flex flex-col items-center">
                              <ChevronDown className="w-6 h-6 text-gray-400 stroke-[3]" />
                           </button>
                         </div>
-                        <div className="flex justify-between w-full items-start mb-10 px-2 text-left gap-3">
+                        <div className="flex justify-between w-full items-start mb-5 sm:mb-10 sm:px-2 text-left gap-3">
                           <div className="flex items-start gap-4 min-w-0 flex-1">
                             <div className="w-16 h-16 rounded-2xl overflow-hidden border border-gray-100 shadow-sm shrink-0">
                                <img 
@@ -1341,7 +1352,7 @@ export default function DeliveryHomeV2({ tab = 'home' }) {
 
       {/* Incoming Order Offer Popup (NewOrderModal) - Only shown when delivery partner is free */}
       <AnimatePresence>
-        {currentTab === 'feed' && isDeliveryPartnerFree && currentNewOrder && !isNewOrderMinimized && (
+        {isDeliveryPartnerFree && currentNewOrder && !isNewOrderMinimized && (
           <NewOrderModal
             order={currentNewOrder}
             onAccept={handleAcceptNewOrder}
@@ -1354,7 +1365,7 @@ export default function DeliveryHomeV2({ tab = 'home' }) {
       </AnimatePresence>
 
       {/* Floating Incoming Order Offer Banner if Minimized - Only shown when delivery partner is free */}
-      {currentTab === 'feed' && isDeliveryPartnerFree && currentNewOrder && isNewOrderMinimized && (
+      {isDeliveryPartnerFree && currentNewOrder && isNewOrderMinimized && (
         <motion.div 
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

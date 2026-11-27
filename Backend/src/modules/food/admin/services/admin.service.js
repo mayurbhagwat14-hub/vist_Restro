@@ -8,6 +8,7 @@ import { FoodNotification } from '../../../../core/notifications/models/notifica
 import { sendNotificationToOwner } from '../../../../core/notifications/firebase.service.js';
 const FoodRestaurantSubscriptionSettings = mongoose.models.FoodRestaurantSubscriptionSettings || mongoose.model('FoodRestaurantSubscriptionSettings', new mongoose.Schema({}, { strict: false, collection: 'food_restaurant_subscription_settings' }));
 import { FoodZone } from '../models/zone.model.js';
+import { resolvePartnerZone } from '../../utils/zoneGeo.js';
 import { FoodCategory } from '../models/category.model.js';
 import { FoodItem } from '../models/food.model.js';
 import { FoodOffer } from '../models/offer.model.js';
@@ -4414,8 +4415,32 @@ async function getBulkDeliveryPartnerStats(partnerIds) {
 }
 
 // ----- Delivery partners (approved list) -----
+export async function updateDeliveryPartnerZone(id, zoneId) {
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new ValidationError('Invalid delivery partner ID');
+
+    let zone = null;
+    if (zoneId) {
+        if (!mongoose.Types.ObjectId.isValid(zoneId)) throw new ValidationError('Invalid zone ID');
+        zone = await FoodZone.findOne({ _id: zoneId, isActive: true }).select('name zoneName').lean();
+        if (!zone) throw new ValidationError('Zone not found or inactive');
+    }
+
+    const partner = await FoodDeliveryPartner.findByIdAndUpdate(
+        id,
+        { $set: { zoneId: zone ? zone._id : null } },
+        { new: true }
+    ).select('_id zoneId').lean();
+    if (!partner) return null;
+
+    return {
+        _id: partner._id,
+        zoneId: partner.zoneId,
+        zoneName: zone ? zone.name || zone.zoneName : ''
+    };
+}
+
 export async function getDeliveryPartners(query) {
-    const { page = 1, limit = 1000, search } = query;
+    const { page = 1, limit = 1000, search, zoneId } = query;
     const filter = { status: 'approved' };
     if (search && typeof search === 'string' && search.trim()) {
         const term = search.trim();
@@ -4431,14 +4456,26 @@ export async function getDeliveryPartners(query) {
     const skip = Math.max(0, (Number(page) || 1) - 1) * Math.max(1, Math.min(1000, Number(limit) || 100));
     const limitNum = Math.max(1, Math.min(1000, Number(limit) || 100));
 
-    const [list, total] = await Promise.all([
-        FoodDeliveryPartner.find(filter)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limitNum)
-            .lean(),
-        FoodDeliveryPartner.countDocuments(filter)
-    ]);
+    const zones = await FoodZone.find({ isActive: true }).select('_id name zoneName coordinates').lean();
+
+    let list;
+    let total;
+    if (zoneId) {
+        // A partner's zone can be derived from GPS/city, so filter after resolving it.
+        const all = await FoodDeliveryPartner.find(filter).sort({ createdAt: -1 }).lean();
+        const inZone = all.filter(p => resolvePartnerZone(p, zones).zoneId === String(zoneId));
+        total = inZone.length;
+        list = inZone.slice(skip, skip + limitNum);
+    } else {
+        [list, total] = await Promise.all([
+            FoodDeliveryPartner.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limitNum)
+                .lean(),
+            FoodDeliveryPartner.countDocuments(filter)
+        ]);
+    }
 
     const partnerIds = list.map(p => p._id);
     const statsMap = await getBulkDeliveryPartnerStats(partnerIds);
@@ -4463,7 +4500,9 @@ export async function getDeliveryPartners(query) {
             email: doc.email || '',
             phone: doc.phone || '',
             deliveryId: doc._id ? `DP-${doc._id.toString().slice(-8).toUpperCase()}` : null,
-            zone: doc.city || doc.state || doc.address || '',
+            zone: resolvePartnerZone(doc, zones).zoneName,
+            zoneSource: resolvePartnerZone(doc, zones).source,
+            assignedZoneId: doc.zoneId ? String(doc.zoneId) : '',
             vehicleType: doc.vehicleType || '',
             status: doc.status,
             availabilityStatus: doc.availabilityStatus || 'offline',

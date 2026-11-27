@@ -33,6 +33,13 @@ const deliveryPartnerSchema = new mongoose.Schema(
         state: {
             type: String
         },
+        /** Service zone assigned by admin. Takes priority over GPS/city based detection. */
+        zoneId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'FoodZone',
+            default: null,
+            index: true
+        },
         vehicleType: {
             type: String
         },

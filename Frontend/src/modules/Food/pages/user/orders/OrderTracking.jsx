@@ -287,6 +287,16 @@ const getCustomerCoordsFromApiOrder = (apiOrder, previousOrder = null) => {
   return null
 }
 
+// The partner the admin assigned, shown once that partner has accepted the request.
+const getAssignedPartner = (apiOrder, previousPartner = null) => {
+  const dispatch = apiOrder?.dispatch
+  if (!dispatch) return previousPartner
+  if (dispatch.status !== 'accepted') return null
+  const partner = dispatch.deliveryPartnerId
+  if (!partner?.name) return previousPartner
+  return { name: partner.name, phone: partner.phone || '' }
+}
+
 const transformOrderForTracking = (apiOrder, previousOrder = null, explicitRestaurantCoords = null, explicitRestaurantAddress = null) => {
   const restaurantCoords = explicitRestaurantCoords || getRestaurantCoordsFromOrder(apiOrder, previousOrder?.restaurantLocation?.coordinates)
   const restaurantAddress = getRestaurantAddressFromOrder(apiOrder, previousOrder, explicitRestaurantAddress)
@@ -344,11 +354,8 @@ const transformOrderForTracking = (apiOrder, previousOrder = null, explicitResta
     total: apiOrder?.pricing?.total || previousOrder?.total || 0,
     // Backend canonical field is orderStatus; keep legacy `status` for UI compatibility.
     status: apiOrder?.orderStatus || apiOrder?.status || previousOrder?.status || 'pending',
-    deliveryPartner: {
-      name: 'Vishnu',
-      phone: '8225874798',
-      avatar: apiOrder?.deliveryPartnerId?.avatar || apiOrder?.deliveryPartnerId?.profilePicture || null
-    },
+    deliveryPartner: getAssignedPartner(apiOrder, previousOrder?.deliveryPartner || null),
+    moduleType: apiOrder?.moduleType || previousOrder?.moduleType || 'food',
     deliveryPartnerId: apiOrder?.deliveryPartnerId?._id || apiOrder?.deliveryPartnerId || apiOrder?.dispatch?.deliveryPartnerId?._id || apiOrder?.dispatch?.deliveryPartnerId || apiOrder?.assignmentInfo?.deliveryPartnerId || null,
     dispatch: apiOrder?.dispatch || previousOrder?.dispatch || null,
     assignmentInfo: apiOrder?.assignmentInfo || previousOrder?.assignmentInfo || null,
@@ -850,7 +857,11 @@ export default function OrderTracking() {
   const handleCallRider = (e) => {
     if (e && e.stopPropagation) e.stopPropagation();
 
-    const cleanPhone = '8225874798';
+    const cleanPhone = String(order?.deliveryPartner?.phone || '').replace(/[^\d+]/g, '');
+    if (!cleanPhone) {
+      toast.error('Delivery partner number is not available');
+      return;
+    }
     debugLog('Attempting to call rider:', cleanPhone);
 
     try {
@@ -1532,8 +1543,8 @@ export default function OrderTracking() {
 
 
 
-        {/* Delivery Partner Card (Always fixed: Vishnu - 8225874798) */}
-        {!isCancelledOrder && (
+        {/* Delivery Partner Card: the assigned partner, plus the handover OTP */}
+        {!isCancelledOrder && (order?.deliveryPartner || customerDeliveryOtp || (order?.moduleType === 'food' && !isDeliveredOrder)) && (
           <div className="bg-white dark:bg-zinc-900 rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-zinc-800">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3.5 min-w-0">
@@ -1543,34 +1554,42 @@ export default function OrderTracking() {
                       <User className="w-6 h-6 text-[#5C381E]" />
                     </div>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-900 flex items-center justify-center">
-                    <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-                  </div>
+                  {order?.deliveryPartner && (
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-900 flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">Vishnu</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-base truncate">
+                      {order?.deliveryPartner?.name || 'Not assigned yet'}
+                    </h3>
                     <span className="text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
                       Delivery Partner
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
-                    +91 8225874798
+                    {order?.deliveryPartner
+                      ? order.deliveryPartner.phone
+                      : 'Details appear once a partner accepts your order'}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleCallRider}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs text-white shadow-md shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer"
-                  aria-label="Call delivery partner"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  <span>Call</span>
-                </button>
-              </div>
+              {order?.deliveryPartner?.phone && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleCallRider}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs text-white shadow-md shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer"
+                    aria-label="Call delivery partner"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Delivery OTP banner if code is available */}
@@ -1578,7 +1597,7 @@ export default function OrderTracking() {
               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between bg-orange-50/60 dark:bg-orange-950/20 p-3 rounded-2xl border border-orange-100 dark:border-orange-900/30">
                 <div>
                   <p className="text-[11px] font-medium text-orange-900 dark:text-orange-300">
-                    Share this delivery OTP with Vishnu
+                    Share this delivery OTP with {order?.deliveryPartner?.name || 'your delivery partner'}
                   </p>
                   <p className="text-lg font-black tracking-widest text-[#5C381E]">
                     {customerDeliveryOtp}

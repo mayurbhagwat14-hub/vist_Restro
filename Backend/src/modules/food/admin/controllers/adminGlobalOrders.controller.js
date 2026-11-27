@@ -27,8 +27,9 @@ export async function getGlobalOrders(req, res, next) {
 
         const [foodOrders, groceryOrders] = await Promise.all([
             FoodOrder.find(foodFilter)
-                .select('_id order_id orderId orderStatus customerName customerPhone pricing.total createdAt')
+                .select('_id order_id orderId orderStatus customerName customerPhone pricing.total createdAt dispatch')
                 .populate('userId', 'name phone email')
+                .populate('dispatch.deliveryPartnerId', 'name phone')
                 .sort({ createdAt: -1 })
                 .lean(),
             GroceryOrder.find(groceryFilter)
