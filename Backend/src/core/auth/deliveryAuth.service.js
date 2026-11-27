@@ -42,11 +42,24 @@ const sanitizeDeliveryForAuthResponse = (deliveryDoc = {}) => {
   };
 };
 
+/**
+ * Delivery-panel test number: always logs in with a fixed OTP and no SMS is sent.
+ * Applies ONLY to the delivery partner login and ONLY to this exact number.
+ */
+const DELIVERY_TEST_PHONE = "8766556836";
+const DELIVERY_TEST_OTP = "1234";
+
+const isDeliveryTestPhone = (phone) =>
+  String(phone || "").replace(/\D/g, "").slice(-10) === DELIVERY_TEST_PHONE;
+
 export const requestDeliveryOtp = async (phone) => {
   if (!phone) {
     throw new ValidationError("Phone is required");
   }
-  const otp = await createOrUpdateOtp(phone);
+  const otp = await createOrUpdateOtp(
+    phone,
+    isDeliveryTestPhone(phone) ? { staticOtp: DELIVERY_TEST_OTP } : {},
+  );
   // Same exposure rule as user login (OTP returned only outside production / default-OTP mode).
   const shouldExposeOtp = config.nodeEnv !== "production" || config.useDefaultOtp;
   return shouldExposeOtp ? { otp } : {};

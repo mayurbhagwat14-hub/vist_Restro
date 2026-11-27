@@ -90,7 +90,13 @@ const sendSmsViaIndiaHub = async (phone, otp) => {
     }
 };
 
-export const createOrUpdateOtp = async (phone) => {
+/**
+ * @param {string} phone
+ * @param {{ staticOtp?: string }} [options] staticOtp: use this fixed OTP and skip SMS + rate limit
+ *   (only for explicitly whitelisted test numbers, decided by the caller).
+ */
+export const createOrUpdateOtp = async (phone, options = {}) => {
+    const staticOtp = options.staticOtp ? String(options.staticOtp) : null;
     const existing = await FoodOtp.findOne({ phone });
     const now = new Date();
 
@@ -99,7 +105,7 @@ export const createOrUpdateOtp = async (phone) => {
         const windowMs = (config.otpRateWindow || 600) * 1000;
         const isInWindow = now - existing.lastRequestAt < windowMs;
 
-        if (isInWindow && !config.useDefaultOtp) {
+        if (isInWindow && !config.useDefaultOtp && !staticOtp) {
             if (existing.requestCount >= (config.otpRateLimit || 3)) {
                 logger.warn(`Rate limit exceeded for phone ${phone}`);
                 throw new ValidationError(`Too many OTP requests. Please try again after ${Math.ceil(windowMs / 60000)} minutes.`);
@@ -112,7 +118,10 @@ export const createOrUpdateOtp = async (phone) => {
     }
 
     let otp;
-    if (config.useDefaultOtp) {
+    if (staticOtp) {
+        otp = staticOtp;
+        logger.info(`Static test OTP used for whitelisted phone ${phone} (no SMS sent)`);
+    } else if (config.useDefaultOtp) {
         otp = '1234';
         logger.info(`Default OTP mode enabled – OTP is ${otp} for phone ${phone}`);
     } else {
@@ -146,8 +155,8 @@ export const createOrUpdateOtp = async (phone) => {
         });
     }
 
-    // Only send SMS if not in default OTP mode
-    if (!config.useDefaultOtp) {
+    // Only send SMS if not in default OTP mode / not a whitelisted test number
+    if (!config.useDefaultOtp && !staticOtp) {
         const sent = await sendSmsViaIndiaHub(phone, otp);
         if (!sent) {
             // Tell the client instead of pretending the OTP was sent (it would never arrive).
