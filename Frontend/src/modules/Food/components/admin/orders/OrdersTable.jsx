@@ -147,6 +147,22 @@ export default function OrdersTable({
     const s = String(order?.orderStatus || "").toLowerCase()
     return !(s.includes("deliver") || s.includes("cancel") || s.includes("refund") || s.includes("fail"))
   }
+  const renderRiderState = (order) => {
+    const dispatchStatus = order?.dispatch?.status
+    if (order.deliveryPartnerName && ["assigned", "accepted"].includes(dispatchStatus)) {
+      const accepted = dispatchStatus === "accepted"
+      return (
+        <span className={`text-[11px] font-medium ${accepted ? "text-emerald-600" : "text-amber-600"}`}>
+          Rider: {order.deliveryPartnerName} ({accepted ? "Accepted" : "Request sent"})
+        </span>
+      )
+    }
+    const offers = order?.dispatch?.offeredTo || []
+    if (offers[offers.length - 1]?.action === "rejected") {
+      return <span className="text-[11px] font-medium text-rose-600">Rider rejected, assign another</span>
+    }
+    return <span className="text-[11px] text-slate-400">Rider not assigned</span>
+  }
   const [currentPage, setCurrentPage] = useState(1)
   const [expandedItems, setExpandedItems] = useState({})
   const itemsPerPage = 10
@@ -177,6 +193,11 @@ export default function OrdersTable({
       "preparing",
       "ready_for_pickup",
       "ready",
+      "reached_pickup",
+      "picked_up",
+      "out for delivery",
+      "out_for_delivery",
+      "reached_drop",
     ].includes(currentStatus)
   }
 
@@ -508,6 +529,7 @@ export default function OrdersTable({
                           {order.orderStatus}
                         </span>
                       </div>
+                      {canAssignRider(order) && renderRiderState(order)}
                       {order.cancellationReason && (
                         <div className="text-xs text-red-600 mt-1">
                           <span className="font-medium">
@@ -631,10 +653,10 @@ export default function OrdersTable({
                       {canAssignRider(order) && (
                         <button
                           onClick={() => onAssignDeliveryPartner(order)}
-                          className={`p-1.5 rounded transition-colors ${
+                          className={`p-1.5 rounded border transition-colors flex items-center gap-1 ${
                             order.deliveryPartnerName
-                              ? "text-emerald-600 hover:bg-emerald-50"
-                              : "text-amber-600 hover:bg-amber-50"
+                              ? "text-emerald-700 border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50"
+                              : "text-amber-700 border-amber-200 bg-amber-50/50 hover:bg-amber-50"
                           }`}
                           title={
                             order.deliveryPartnerName
@@ -642,7 +664,10 @@ export default function OrdersTable({
                               : "Assign Delivery Partner"
                           }
                         >
-                          <Truck className="w-4 h-4" />
+                          <Truck className="w-3.5 h-3.5" />
+                          <span className="text-[10px] font-semibold">
+                            {order.deliveryPartnerName ? "Reassign" : "Assign Rider"}
+                          </span>
                         </button>
                       )}
                       {onDeleteOrder && (

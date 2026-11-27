@@ -82,6 +82,7 @@ export const useOrderManager = () => {
         error?.response?.status === 403 ||
         lower.includes('already accepted')
       ) {
+        removeNewOrder(orderId);
         toast.error('This order was just taken by another delivery partner.', {
           id: 'user-facing-api-error',
           duration: 4000,

@@ -696,8 +696,11 @@ export default function OrdersPage({ statusKey = "all" }) {
       return
     }
 
+    const isWithRider = ["out for delivery", "picked_up", "reached_drop"].includes(
+      String(order.orderStatus || "").trim().toLowerCase(),
+    )
     const reason = prompt(
-      `Enter cancellation reason for order ${order.orderId}:`,
+      `${isWithRider ? "This order is already out for delivery. Online or wallet payment will be refunded.\n\n" : ""}Enter cancellation reason for order ${order.orderId}:`,
       "Order cancelled by admin",
     )
 
@@ -707,7 +710,10 @@ export default function OrdersPage({ statusKey = "all" }) {
       setProcessingActionOrderId(order.id || order.orderId)
       const response = await adminAPI.rejectOrder(orderIdToUse, reason)
       if (response.data?.success) {
-        toast.success(response.data?.message || `Order ${order.orderId} cancelled`)
+        toast.success(`Order ${order.orderId} cancelled`)
+        if (response.data?.data?.order?.payment?.refund?.status === "failed") {
+          toast.warning("Automatic refund failed. Please process the refund manually.", { duration: 10000 })
+        }
         await fetchOrders({ silent: true, withRingCheck: false })
       } else {
         toast.error(response.data?.message || "Failed to cancel order")
@@ -955,6 +961,12 @@ export default function OrdersPage({ statusKey = "all" }) {
   const handleOrderAssigned = useCallback(() => {
     fetchOrders({ silent: true, withRingCheck: false })
   }, [fetchOrders])
+
+  // Refresh when a rider is assigned, accepts or rejects.
+  useEffect(() => {
+    window.addEventListener("adminDispatchUpdated", handleOrderAssigned)
+    return () => window.removeEventListener("adminDispatchUpdated", handleOrderAssigned)
+  }, [handleOrderAssigned])
 
   if (showLoadingSkeleton) {
     return (

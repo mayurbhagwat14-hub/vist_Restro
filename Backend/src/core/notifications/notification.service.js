@@ -51,7 +51,8 @@ export const createInboxNotifications = async ({ notifications = [] } = {}) => {
     const operations = rows.map((item) => {
         const payload = {
             ownerType: item.ownerType,
-            ownerId: ensureObjectId(item.ownerId, 'ownerId'),
+            // Callers sometimes pass a populated document instead of its id.
+            ownerId: ensureObjectId(item.ownerId?._id || item.ownerId, 'ownerId'),
             title: String(item.title).trim(),
             message: String(item.message).trim(),
             link: String(item.link || '').trim(),

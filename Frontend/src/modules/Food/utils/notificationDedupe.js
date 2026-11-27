@@ -45,6 +45,8 @@ export const cleanDuplicateLocalNotifications = () => {
     const cleanList = [];
 
     for (const item of list) {
+      // Old demo card ("order #12345") that was saved in the browser; it is not a real order.
+      if (item?.id === 'welcome-1') continue;
       const normTitle = normalizeContent(item?.title);
       const normMsg = normalizeContent(item?.message);
       const isDuplicate = cleanList.some((existing) => {

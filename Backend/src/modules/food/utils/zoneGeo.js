@@ -119,6 +119,54 @@ export async function getActiveZoneById(zoneId) {
     .lean();
 }
 
+/**
+ * Zone a delivery partner belongs to, for admin zone-wise listing.
+ * Priority: admin assigned zone > GPS inside polygon > nearest polygon within buffer > city name.
+ * @param {object} partner - lean partner doc
+ * @param {object[]} zones - active zone docs (_id, name, zoneName, coordinates)
+ */
+export function resolvePartnerZone(partner, zones = [], bufferKm = 10) {
+  const toResult = (zone, source) => ({
+    zoneId: String(zone._id),
+    zoneName: zone.name || zone.zoneName || 'Zone',
+    source,
+  });
+
+  if (partner?.zoneId) {
+    const assigned = zones.find((z) => String(z._id) === String(partner.zoneId));
+    if (assigned) return toResult(assigned, 'assigned');
+  }
+
+  const lat = toFinite(partner?.lastLat);
+  const lng = toFinite(partner?.lastLng);
+  if (lat !== null && lng !== null) {
+    const containing = zones.find((z) => isPointInZonePolygon(lat, lng, z.coordinates || [], 0));
+    if (containing) return toResult(containing, 'location');
+
+    let nearest = null;
+    let minDistance = Infinity;
+    for (const zone of zones) {
+      const distance = distToPolygonKm(lat, lng, zone.coordinates || []);
+      if (distance <= bufferKm && distance < minDistance) {
+        minDistance = distance;
+        nearest = zone;
+      }
+    }
+    if (nearest) return toResult(nearest, 'location');
+  }
+
+  const city = String(partner?.city || '').toLowerCase().trim();
+  if (city) {
+    const byCity = zones.find((z) =>
+      [z.name, z.zoneName].some((n) => String(n || '').toLowerCase().trim() === city),
+    );
+    if (byCity) return toResult(byCity, 'city');
+    return { zoneId: 'city_' + city.replace(/\s+/g, '_'), zoneName: partner.city, source: 'city' };
+  }
+
+  return { zoneId: 'unassigned', zoneName: 'Other / Unassigned', source: 'none' };
+}
+
 /** True if partner GPS is inside the given zone document polygon or buffer. */
 export function isPartnerInsideZone(partner, zoneDoc, bufferKm = 10) {
   if (!zoneDoc) return false;

@@ -395,6 +395,13 @@ export const adminAPI = {
       params,
       contextModule: "admin",
     }),
+  /** Assign a service zone to a delivery partner (empty zoneId = auto detect). */
+  updateDeliveryPartnerZone: (id, zoneId) =>
+    apiClient.patch(
+      `/food/admin/delivery/${String(id)}/zone`,
+      { zoneId: zoneId || null },
+      { contextModule: "admin" },
+    ),
   getDeliverymanReviews: (params = {}) =>
     apiClient.get("/food/admin/delivery/reviews", {
       params,

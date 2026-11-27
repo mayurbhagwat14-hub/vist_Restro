@@ -61,18 +61,6 @@ const extractCouponOrOrder = (item) => {
 // Default notifications shown if localStorage is empty
 const DEFAULT_NOTIFICATIONS = [
   {
-    id: "welcome-1",
-    type: "order",
-    title: "Order Confirmed",
-    message: "Your order #12345 has been confirmed and is being prepared with love by the kitchen.",
-    orderId: "12345",
-    time: "10 minutes ago",
-    timestamp: Date.now() - 600000,
-    read: false,
-    icon: "CheckCircle2",
-    iconColor: "text-emerald-600 dark:text-emerald-400"
-  },
-  {
     id: "promo-2",
     type: "offer",
     title: "Welcome to VIST Restro!",
@@ -537,7 +525,8 @@ export default function Notifications() {
               // Extract order ID if present in text
               const parsedOrderId = notification.orderId || notification.message?.match(/#([0-9a-zA-Z_-]+)/)?.[1]
               // Extract OTP if present in text
-              const parsedOtp = notification.otp || notification.message?.match(/\b(\d{4,6})\b/)?.[1]
+              // Only a 4-digit number written right after "OTP" counts; amounts and other numbers do not.
+              const parsedOtp = notification.otp || notification.message?.match(/\bOTP\b[^0-9#]{0,15}(\d{4})\b/i)?.[1]
 
               return (
                 <motion.div

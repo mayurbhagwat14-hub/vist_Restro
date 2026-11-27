@@ -72,6 +72,12 @@ const notificationSchema = new mongoose.Schema(
 
 notificationSchema.index({ ownerType: 1, ownerId: 1, createdAt: -1 });
 notificationSchema.index({ ownerType: 1, ownerId: 1, isRead: 1, dismissedAt: 1 });
-notificationSchema.index({ broadcastId: 1, ownerType: 1, ownerId: 1 }, { unique: true, sparse: true });
+// Unique only for real broadcast ids. A sparse index also covered the null value,
+// which allowed just one ordinary (non broadcast) notification per owner.
+// Existing databases: run scripts/fix-notification-index.js once.
+notificationSchema.index(
+    { broadcastId: 1, ownerType: 1, ownerId: 1 },
+    { unique: true, partialFilterExpression: { broadcastId: { $type: 'objectId' } } }
+);
 
 export const FoodNotification = mongoose.model('FoodNotification', notificationSchema);

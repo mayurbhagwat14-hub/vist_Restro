@@ -5,6 +5,7 @@ import { adminAPI } from "@food/api"
 import { toast } from "sonner"
 import { Card, CardContent } from "@food/components/ui/card"
 import { Button } from "@food/components/ui/button"
+import AssignDeliveryPartnerModal from "@food/components/admin/orders/AssignDeliveryPartnerModal"
 
 export default function GlobalOrdersPage() {
   const { status } = useParams() // 'pending' or 'completed'
@@ -12,10 +13,14 @@ export default function GlobalOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [selectedModule, setSelectedModule] = useState("All")
   const navigate = useNavigate()
+  const [assignOrder, setAssignOrder] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
+  const showAssign = status === 'pending'
+  const columnCount = showAssign ? 7 : 6
 
   useEffect(() => {
     const fetchOrders = async () => {
-      setLoading(true)
+      if (reloadKey === 0) setLoading(true)
       try {
         const res = await adminAPI.getGlobalOrders({ status })
         if (res?.data?.success) {
@@ -28,7 +33,13 @@ export default function GlobalOrdersPage() {
       }
     }
     fetchOrders()
-  }, [status])
+  }, [status, reloadKey])
+
+  useEffect(() => {
+    const refresh = () => setReloadKey((key) => key + 1)
+    window.addEventListener("adminDispatchUpdated", refresh)
+    return () => window.removeEventListener("adminDispatchUpdated", refresh)
+  }, [])
 
   const title = status === 'pending' ? 'Pending Orders (All)' : 'Completed Orders (All)'
   const Icon = status === 'pending' ? Clock : CheckCircle
@@ -84,16 +95,17 @@ export default function GlobalOrdersPage() {
                   <th className="px-6 py-4">Total Amount</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Date</th>
+                  {showAssign && <th className="px-6 py-4">Delivery Partner</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200 dark:divide-zinc-800">
                 {loading ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">Loading orders...</td>
+                    <td colSpan={columnCount} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">Loading orders...</td>
                   </tr>
                 ) : filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">No {status} orders found.</td>
+                    <td colSpan={columnCount} className="px-6 py-8 text-center text-neutral-500 dark:text-neutral-400">No {status} orders found.</td>
                   </tr>
                 ) : (
                   filteredOrders.map((order) => (
@@ -126,6 +138,24 @@ export default function GlobalOrdersPage() {
                       <td className="px-6 py-4 text-neutral-500 dark:text-neutral-400">
                         {new Date(order.createdAt).toLocaleString()}
                       </td>
+                      {showAssign && (
+                        <td className="px-6 py-4">
+                          {order.category === 'Food' ? (
+                            <div className="flex flex-col items-start gap-1">
+                              {order.dispatch?.deliveryPartnerId?.name && (
+                                <span className="text-xs text-neutral-600 dark:text-neutral-300">
+                                  {order.dispatch.deliveryPartnerId.name} ({order.dispatch.status === 'accepted' ? 'Accepted' : 'Request sent'})
+                                </span>
+                              )}
+                              <Button size="sm" variant="outline" onClick={() => setAssignOrder(order)}>
+                                {order.dispatch?.deliveryPartnerId ? 'Reassign' : 'Assign Rider'}
+                              </Button>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-neutral-400">Not available</span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -134,6 +164,13 @@ export default function GlobalOrdersPage() {
           </div>
         </CardContent>
       </Card>
+
+      <AssignDeliveryPartnerModal
+        isOpen={Boolean(assignOrder)}
+        onOpenChange={(open) => { if (!open) setAssignOrder(null) }}
+        order={assignOrder}
+        onAssigned={() => setReloadKey((key) => key + 1)}
+      />
     </div>
   )
 }

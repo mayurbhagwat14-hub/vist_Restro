@@ -1326,6 +1326,20 @@ export const useDeliveryNotifications = () => {
 
     socketRef.current.on('order_cancelled', (statusData) => {
       debugLog('?? Delivery order cancelled event received via socket:', statusData);
+      // Clear it here so it also disappears on screens other than the home/feed page.
+      const cancelledId = statusData?.orderMongoId || statusData?.orderId;
+      if (cancelledId) {
+        useDeliveryStore.getState().removeNewOrder(cancelledId);
+        useDeliveryStore.getState().removeAcceptedOrder(cancelledId);
+        stopAlertLoop();
+        activeOrderRef.current = null;
+        setNewOrder(null);
+        toast.error('Order cancelled', {
+          id: `order-cancelled-${cancelledId}`,
+          description: statusData?.note || undefined,
+          duration: 8000,
+        });
+      }
       setOrderStatusUpdate({
         ...(statusData || {}),
         status: 'cancelled'

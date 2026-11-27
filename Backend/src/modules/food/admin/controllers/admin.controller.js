@@ -1408,6 +1408,18 @@ export async function getDeliveryPartners(req, res, next) {
     }
 }
 
+export async function updateDeliveryPartnerZone(req, res, next) {
+    try {
+        const data = await adminService.updateDeliveryPartnerZone(req.params.id, req.body?.zoneId || null);
+        if (!data) {
+            return res.status(404).json({ success: false, message: 'Delivery partner not found' });
+        }
+        res.status(200).json({ success: true, message: 'Delivery partner zone updated', data });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function getDeliverymanReviews(req, res, next) {
     try {
         const data = await adminService.getDeliverymanReviews(req.query);

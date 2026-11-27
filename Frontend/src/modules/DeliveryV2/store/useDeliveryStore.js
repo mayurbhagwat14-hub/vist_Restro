@@ -96,8 +96,12 @@ export const useDeliveryStore = create(
         set((state) => {
           const next = { riderLocation: location };
           if (location && Array.isArray(state.newOrders) && state.newOrders.length) {
-            next.newOrders = state.newOrders.filter((order) =>
-              isOrderWithinOfferRange(order, location),
+            // Admin-assigned requests stay visible however far the pickup is.
+            next.newOrders = state.newOrders.filter(
+              (order) =>
+                order?.dispatch?.status === 'assigned' ||
+                order?.isDirectAssignment === true ||
+                isOrderWithinOfferRange(order, location),
             );
           }
           return next;

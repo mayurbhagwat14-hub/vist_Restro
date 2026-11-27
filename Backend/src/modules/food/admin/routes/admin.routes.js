@@ -375,6 +375,7 @@ router.patch('/delivery/support-tickets/:id', adminController.updateSupportTicke
 router.get('/delivery/partners', adminController.getDeliveryPartners);
 // NOTE: '/delivery/:id' routes must stay after all static '/delivery/*' routes.
 router.get('/delivery/:id', adminController.getDeliveryPartnerById);
+router.patch('/delivery/:id/zone', adminController.updateDeliveryPartnerZone);
 router.patch('/delivery/:id/approve', adminController.approveDeliveryPartner);
 router.patch('/delivery/:id/reject', adminController.rejectDeliveryPartner);
 router.delete('/delivery/:id', adminController.deleteDeliveryPartner);

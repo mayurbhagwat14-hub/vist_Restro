@@ -194,7 +194,7 @@ export const PickupActionModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-110 p-0 sm:p-4 flex items-end justify-center">
+    <div className="absolute inset-0 z-110 p-0 sm:p-4 flex items-end justify-center">
       {/* Background Dim */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -205,7 +205,7 @@ export const PickupActionModal = ({
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
-        className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-6 sm:pb-12 max-h-[84vh] overflow-y-auto"
+        className="w-full max-w-md sm:max-w-lg bg-white rounded-t-3xl sm:rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] p-4 sm:p-6 pb-5 sm:pb-12 max-h-full overflow-y-auto"
       >
         {/* Handle / Minimize */}
         <div className="w-full flex justify-center pb-2 sm:pb-4 pt-1">

@@ -30,6 +30,9 @@ export default function DeliverymanList() {
     }
   })
   const [totalDeliverymen, setTotalDeliverymen] = useState(0)
+  const [zones, setZones] = useState([])
+  const [zoneFilter, setZoneFilter] = useState("")
+  const [savingZoneId, setSavingZoneId] = useState(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [viewDetails, setViewDetails] = useState(null)
@@ -69,6 +72,26 @@ export default function DeliverymanList() {
     return []
   }
 
+  useEffect(() => {
+    adminAPI
+      .getZones({ limit: 1000 })
+      .then((res) => setZones((res?.data?.data?.zones || []).filter((z) => z.isActive !== false)))
+      .catch((err) => debugError("Error fetching zones:", err))
+  }, [])
+
+  const handleZoneChange = async (deliveryman, zoneId) => {
+    try {
+      setSavingZoneId(String(deliveryman._id))
+      await adminAPI.updateDeliveryPartnerZone(deliveryman._id, zoneId)
+      toast.success("Zone updated")
+      await fetchDeliverymenQuietly()
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to update zone")
+    } finally {
+      setSavingZoneId(null)
+    }
+  }
+
   // Fetch delivery partners from API
   const fetchDeliverymen = async () => {
     try {
@@ -84,10 +107,12 @@ export default function DeliverymanList() {
       if (debouncedSearch.trim()) {
         params.search = debouncedSearch.trim()
       }
+      if (zoneFilter) params.zoneId = zoneFilter
 
+      // Wallet pages do not line up with a zone-filtered list, so fetch them all then.
       const [partnersResponse, walletRowsResult] = await Promise.allSettled([
         adminAPI.getDeliveryPartners(params),
-        fetchAllWalletRows(debouncedSearch.trim(), currentPage, pageSize),
+        fetchAllWalletRows(debouncedSearch.trim(), zoneFilter ? 1 : currentPage, zoneFilter ? 1000 : pageSize),
       ])
 
       if (partnersResponse.status === "fulfilled" && partnersResponse.value?.data?.success) {
@@ -152,11 +177,16 @@ export default function DeliverymanList() {
       if (debouncedSearch.trim()) {
         params.search = debouncedSearch.trim()
       }
+      if (zoneFilter) params.zoneId = zoneFilter
 
       const [partnersResponse, walletRowsResult] = await Promise.allSettled([
         adminAPI.getDeliveryPartners(params),
-        fetchAllWalletRows(debouncedSearch.trim(), currentPage, pageSize),
+        fetchAllWalletRows(debouncedSearch.trim(), zoneFilter ? 1 : currentPage, zoneFilter ? 1000 : pageSize),
       ])
+      if (partnersResponse.status === "fulfilled") {
+        const total = partnersResponse.value?.data?.data?.pagination?.total
+        if (Number.isFinite(total)) setTotalDeliverymen(total)
+      }
 
       if (partnersResponse.status === "fulfilled" && partnersResponse.value?.data?.success) {
         const partners = partnersResponse.value.data.data.deliveryPartners || []
@@ -205,7 +235,7 @@ export default function DeliverymanList() {
     return () => {
       clearInterval(interval)
     }
-  }, [currentPage, pageSize, debouncedSearch])
+  }, [currentPage, pageSize, debouncedSearch, zoneFilter])
 
   const filteredDeliverymen = useMemo(() => {
     // Backend already handles search; apply client-side sorting on top.
@@ -513,6 +543,20 @@ availableCashLimit: deliveryman.availableCashLimit || 0,
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               </div>
 
+              <select
+                value={zoneFilter}
+                onChange={(e) => {
+                  setZoneFilter(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="px-3 py-2.5 text-sm rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                aria-label="Filter by zone"
+              >
+                <option value="">All Zones</option>
+                {zones.map((zone) => (
+                  <option key={zone._id} value={zone._id}>{zone.name || zone.zoneName}</option>
+                ))}
+              </select>
               <button
                 onClick={handleExportPDF}
                 className="px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-2 transition-all"
@@ -751,7 +795,18 @@ availableCashLimit: deliveryman.availableCashLimit || 0,
                         )}
                         {visibleColumns.zone && (
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm text-slate-700">{dm.zone}</span>
+                            <select
+                              value={dm.assignedZoneId || ""}
+                              disabled={savingZoneId === String(dm._id)}
+                              onChange={(e) => handleZoneChange(dm, e.target.value)}
+                              className="max-w-[200px] px-2 py-1.5 text-sm rounded-lg border border-slate-300 bg-white text-slate-700 disabled:opacity-50"
+                              aria-label={`Zone for ${dm.name}`}
+                            >
+                              <option value="">Auto: {dm.zone}</option>
+                              {zones.map((zone) => (
+                                <option key={zone._id} value={zone._id}>{zone.name || zone.zoneName}</option>
+                              ))}
+                            </select>
                           </td>
                         )}
                         {visibleColumns.totalOrders && (
