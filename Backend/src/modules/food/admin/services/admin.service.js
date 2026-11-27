@@ -3622,7 +3622,7 @@ export async function updateFood(id, body) {
     }
     if (body.description !== undefined) doc.description = String(body.description || '').trim();
     const targetFoodType = body.foodType !== undefined ? (body.foodType === 'Veg' ? 'Veg' : 'Non-Veg') : (doc.foodType === 'Veg' ? 'Veg' : 'Non-Veg');
-        if (restaurant.restaurantType === 'Veg' && targetFoodType === 'Non-Veg') {
+    if (restaurant.restaurantType === 'Veg' && targetFoodType === 'Non-Veg') {
         throw new ValidationError('Non-Veg items cannot be added to a Veg restaurant.');
     }
     if (restaurant.restaurantType === 'Non-Veg' && targetFoodType === 'Veg') {
